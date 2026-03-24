@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make *)",
+      "Bash(python -m pytest *)",
+      "Bash(python -m src.shared.env_validation)",
+      "Bash(ruff *)",
+      "Bash(docker compose *)",
+      "Bash(git *)"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(*> .env)"
+    ]
+  }
+}

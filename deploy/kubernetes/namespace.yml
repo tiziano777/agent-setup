@@ -1,0 +1,13 @@
+# ============================================
+# Namespace: isola tutte le risorse del progetto
+# ============================================
+# Un namespace Kubernetes e' come una "cartella" che raggruppa
+# tutti i servizi del progetto, separandoli da altri progetti
+# sullo stesso cluster.
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agent-setup
+  labels:
+    app.kubernetes.io/part-of: agent-setup

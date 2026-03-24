@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.egg-info/
+
+# Virtual environment
+.venv/
+
+# Environment secrets - catch ALL .env variants
+# Templates (.env*.template) are safe and tracked via negation
+.env
+.env.docker.template
+!.env*.template
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+
+# Pytest
+.pytest_cache/
+
+# Ruff
+.ruff_cache/
+
+# External repos (cloned via Makefile)
+external/docs/
+external/langchain-skills/

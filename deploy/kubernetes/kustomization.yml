@@ -1,0 +1,29 @@
+# ============================================
+# Kustomization: aggrega tutti i manifests
+# ============================================
+# Kustomize e' parte nativa di kubectl.
+# Applica tutto con un solo comando:
+#
+#   kubectl apply -k deploy/kubernetes/
+#
+# L'ordine conta: namespace prima, poi config/secrets, poi infra, poi app.
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: agent-setup
+
+resources:
+  - namespace.yml
+  - configmap.yml
+  # NOTA: secrets.yml contiene placeholder. Prima di applicarlo:
+  #   1. Copia secrets.yml -> secrets-prod.yml
+  #   2. Compila i valori base64
+  #   3. Rinomina il riferimento qui sotto
+  - secrets.yml
+  - infra.yml
+  - app.yml
+
+commonLabels:
+  app.kubernetes.io/managed-by: kustomize
+  app.kubernetes.io/part-of: agent-setup

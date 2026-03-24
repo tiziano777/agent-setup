@@ -1,0 +1,27 @@
+# ============================================
+# ConfigMap: variabili di configurazione NON sensibili
+# ============================================
+# Contiene URL interni al cluster Kubernetes e altre configurazioni.
+# I nomi dei servizi (litellm-proxy, qdrant, postgres-vector) diventano
+# automaticamente hostname DNS nel cluster grazie a Kubernetes.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-config
+  namespace: agent-setup
+  labels:
+    app.kubernetes.io/part-of: agent-setup
+data:
+  # URL del proxy LiteLLM (nome del Service Kubernetes)
+  LITELLM_BASE_URL: "http://litellm-proxy:4000/v1"
+  DEFAULT_MODEL: "llm"
+
+  # Qdrant vector database
+  QDRANT_URL: "http://qdrant:6333"
+
+  # PostgreSQL + pgvector (porta interna 5432, NON 5433 come in locale)
+  PGVECTOR_URI: "postgresql://postgres:postgres@postgres-vector:5432/vectors"
+
+  # Embeddings
+  OPENAI_EMBEDDING_MODEL: "text-embedding-3-small"

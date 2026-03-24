@@ -1,0 +1,164 @@
+# ==========================================================
+# LiteLLM Proxy - Configurazione Multi-Provider (Rotazione)
+# ==========================================================
+#
+# Tutti i modelli condividono model_name "llm" per abilitare
+# la rotazione automatica (simple-shuffle) tra i provider.
+# Il client chiama semplicemente: model="llm"
+#
+# 12 provider configurati (tutti da free-apikey-list.txt)
+# ==========================================================
+
+model_list:
+
+  #- model_name: llm
+  #  litellm_params:
+  #    model: anthropic/claude-opus-4-6
+  #    api_key: "os.environ/ANTHROPIC_API_KEY"
+  #  model_info:
+  #    id: anthropic/claude-opus-4-6
+  #    name: claude-opus-4-6
+  #    provider: anthropic
+
+  # --- Groq ---
+  - model_name: llm
+    litellm_params:
+      model: groq/llama-3.3-70b-versatile
+      api_key: "os.environ/GROQ_API_KEY"
+    model_info:
+      id: groq/llama-3.3-70b-versatile
+      name: llama-3.3-70b-versatile
+      provider: groq
+
+  # --- Cerebras ---
+  - model_name: llm
+    litellm_params:
+      model: cerebras/qwen-3-235b-a22b-instruct-2507
+      api_key: "os.environ/CEREBRAS_API_KEY"
+    model_info:
+      id: cerebras/qwen-3-235b-a22b-instruct-2507
+      name: qwen-3-235b-a22b-instruct-2507
+      provider: cerebras
+
+  # --- Google AI Studio ---
+  - model_name: llm
+    litellm_params:
+      model: gemini/gemini-2.0-flash
+      api_key: "os.environ/GOOGLE_API_KEY"
+    model_info:
+      id: gemini/gemini-2.0-flash
+      name: gemini-2.0-flash
+      provider: google
+
+  # --- NVIDIA NIM ---
+  - model_name: llm
+    litellm_params:
+      model: nvidia_nim/meta/llama-3.3-70b-instruct
+      api_key: "os.environ/NVIDIA_API_KEY"
+    model_info:
+      id: nvidia_nim/meta/llama-3.3-70b-instruct
+      name: llama-3.3-70b-instruct
+      provider: nvidia_nim
+
+  # --- Mistral (La Plateforme) ---
+  - model_name: llm
+    litellm_params:
+      model: mistral/mistral-small-latest
+      api_key: "os.environ/MISTRAL_API_KEY"
+    model_info:
+      id: mistral/mistral-small-latest
+      name: mistral-small-latest
+      provider: mistral
+
+  # --- Mistral (Codestral) ---
+  - model_name: llm
+    litellm_params:
+      model: mistral/codestral-latest
+      api_key: "os.environ/CODESTRAL_API_KEY"
+    model_info:
+      id: mistral/codestral-latest
+      name: codestral-latest
+      provider: mistral
+
+  # --- OpenRouter ---
+  - model_name: llm
+    litellm_params:
+      model: openrouter/deepseek/deepseek-v3.2
+      api_key: "os.environ/OPENROUTER_API_KEY"
+    model_info:
+      id: openrouter/deepseek/deepseek-v3.2
+      name: deepseek-v3.2
+      provider: openrouter
+
+  # --- Cohere ---
+  - model_name: llm
+    litellm_params:
+      model: cohere/command-r-v2
+      api_key: "os.environ/COHERE_API_KEY"
+    model_info:
+      id: cohere/command-r-v2
+      name: command-r-v2
+      provider: cohere
+
+  # --- GitHub Models ---
+  - model_name: llm
+    litellm_params:
+      model: openai/DeepSeek-V3-0324
+      api_key: "os.environ/GITHUB_TOKEN"
+      api_base: "https://models.inference.ai.azure.com"
+    model_info:
+      id: deepseek/DeepSeek-V3-0324
+      name: DeepSeek-V3-0324
+      provider: github
+
+  # --- Cloudflare Workers AI ---
+  - model_name: llm
+    litellm_params:
+      model: cloudflare/@cf/meta/llama-3.1-8b-instruct
+      api_key: "os.environ/CLOUDFLARE_API_KEY"
+    model_info:
+      id: cloudflare/@cf/meta/llama-3.1-8b-instruct
+      name: llama-3.1-8b-instruct
+      provider: cloudflare
+
+  # --- Vercel AI Gateway ---
+  # Supporto nativo LiteLLM (prefix: vercel_ai_gateway/)
+  # Il modello dietro il gateway dipende dalla configurazione del tuo account Vercel.
+  - model_name: llm
+    litellm_params:
+      model: openai/claude-opus-4.6
+      api_key: "os.environ/VERCEL_API_KEY"
+      api_base: "https://ai-gateway.vercel.sh/v1"
+    model_info:
+      id: anthropic/claude-opus-4.6
+      name: claude-opus-4.6
+      provider: vercel
+
+  # --- OpenCode Zen ---
+  # Endpoint OpenAI-compatible. Modelli con suffisso "-free" disponibili gratis.
+  # Lista completa: https://opencode.ai/zen/v1/models
+  - model_name: llm
+    litellm_params:
+      model: openai/nemotron-3-super-free
+      api_key: "os.environ/OPENCODEZEN_API_KEY"
+      api_base: "https://opencode.ai/zen/v1"
+    model_info:
+      id: openai/nemotron-3-super-free
+      name: nemotron-3-super-free
+      provider: opencode_zen
+
+
+# Strategia di Rotazione e Fallback
+router_settings:
+  routing_strategy: simple-shuffle
+  num_retries: 5                # Aumenta i tentativi visto l'alto tasso di 429/401
+  retry_after_detection: True    # Legge l'header Retry-After dei provider
+  enable_pre_call_checks: True   # Verifica se il provider è in cooldown prima di chiamare
+  timeout: 60                        # Timeout per singola richiesta (secondi)
+  allowed_fails: 5                  # Fallimenti prima di escludere temporaneamente un provider
+  cooldown_time: 60                  # Cooldown dopo i fallimenti (secondi)
+  set_verbose: True
+
+# Impostazioni generali del proxy
+general_settings:
+  drop_params: True                  # Rimuove parametri non supportati dal provider scelto

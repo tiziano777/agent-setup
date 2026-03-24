@@ -1,0 +1,275 @@
+# ============================================
+# Infrastruttura: LiteLLM Proxy + Qdrant + PostgreSQL
+# ============================================
+# Tutti i servizi di supporto che l'app ha bisogno.
+# Qdrant e PostgreSQL usano StatefulSet + PersistentVolumeClaim
+# per garantire che i dati sopravvivano ai riavvii dei pod.
+
+
+# ==================================================
+# LiteLLM Proxy - Gateway LLM multi-provider
+# ==================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: litellm-proxy
+  namespace: agent-setup
+  labels:
+    app: litellm-proxy
+    app.kubernetes.io/part-of: agent-setup
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: litellm-proxy
+  template:
+    metadata:
+      labels:
+        app: litellm-proxy
+    spec:
+      containers:
+        - name: litellm-proxy
+          image: ghcr.io/berriai/litellm:main-latest
+          args: ["--config", "/app/config.yaml", "--port", "4000"]
+          ports:
+            - containerPort: 4000
+              name: http
+          # Monta il file di configurazione del proxy
+          volumeMounts:
+            - name: proxy-config
+              mountPath: /app/config.yaml
+              subPath: proxy_config.yml
+              readOnly: true
+          # Inietta le API key dal Secret
+          envFrom:
+            - secretRef:
+                name: llm-api-keys
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4000
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: proxy-config
+          configMap:
+            name: proxy-config
+
+---
+# ConfigMap con il file proxy_config.yml
+# NOTA: In produzione, aggiorna questo ConfigMap con il tuo proxy_config.yml:
+#   kubectl create configmap proxy-config \
+#     --from-file=proxy_config.yml=./proxy_config.yml \
+#     -n agent-setup --dry-run=client -o yaml | kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: proxy-config
+  namespace: agent-setup
+data:
+  proxy_config.yml: |
+    # Copia qui il contenuto del tuo proxy_config.yml
+    # oppure usa il comando kubectl sopra per crearlo dal file.
+    model_list: []
+    router_settings:
+      routing_strategy: simple-shuffle
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: litellm-proxy
+  namespace: agent-setup
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4000
+      targetPort: 4000
+      name: http
+  selector:
+    app: litellm-proxy
+
+
+# ==================================================
+# Qdrant - Vector Database
+# ==================================================
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qdrant
+  namespace: agent-setup
+  labels:
+    app: qdrant
+    app.kubernetes.io/part-of: agent-setup
+spec:
+  serviceName: qdrant
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qdrant
+  template:
+    metadata:
+      labels:
+        app: qdrant
+    spec:
+      containers:
+        - name: qdrant
+          image: qdrant/qdrant:latest
+          ports:
+            - containerPort: 6333
+              name: rest
+            - containerPort: 6334
+              name: grpc
+          volumeMounts:
+            - name: qdrant-storage
+              mountPath: /qdrant/storage
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 6333
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 6333
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+  # PersistentVolumeClaim: disco persistente per i dati vettoriali
+  volumeClaimTemplates:
+    - metadata:
+        name: qdrant-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi    # Regola in base alla quantita' di dati
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qdrant
+  namespace: agent-setup
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6333
+      targetPort: 6333
+      name: rest
+    - port: 6334
+      targetPort: 6334
+      name: grpc
+  selector:
+    app: qdrant
+
+
+# ==================================================
+# PostgreSQL + pgvector
+# ==================================================
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-vector
+  namespace: agent-setup
+  labels:
+    app: postgres-vector
+    app.kubernetes.io/part-of: agent-setup
+spec:
+  serviceName: postgres-vector
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-vector
+  template:
+    metadata:
+      labels:
+        app: postgres-vector
+    spec:
+      containers:
+        - name: postgres
+          image: pgvector/pgvector:pg16
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_DB
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres"]
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-vector
+  namespace: agent-setup
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgres
+  selector:
+    app: postgres-vector

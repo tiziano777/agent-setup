@@ -1,0 +1,12 @@
+OpenRouter
+Google AI Studio
+NVIDIA NIM
+Mistral (La Plateforme)
+Mistral (Codestral)
+Vercel AI Gateway
+OpenCode Zen
+Cerebras
+Groq
+Cohere
+GitHub Models
+Cloudflare Workers AI

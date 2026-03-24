@@ -1,0 +1,72 @@
+[project]
+name = "agent-setup"
+version = "0.1.0"
+description = "Modular LangGraph multi-agent environment with LiteLLM proxy"
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=0.4,<1.0",
+    "langgraph-checkpoint>=2.0,<3.0",
+    "langchain-core>=0.3,<1.0",
+    "langchain-openai>=0.3,<1.0",
+    "pydantic>=2.0,<3.0",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+    "mypy>=1.13",
+]
+postgres = [
+    "langgraph-checkpoint-postgres>=2.0,<3.0",
+    "psycopg[binary]>=3.0",
+]
+retrieval = [
+    "sentence-transformers>=3.0",
+    "numpy>=1.26",
+]
+qdrant = [
+    "qdrant-client>=1.9",
+]
+pgvector = [
+    "psycopg[binary]>=3.0",
+    "psycopg-pool>=3.0",
+    "pgvector>=0.3",
+]
+openai-embeddings = [
+    "openai>=1.0",
+]
+rerankers = [
+    "sentence-transformers>=3.0",
+]
+retrieval-all = [
+    "agent-setup[retrieval,qdrant,pgvector,openai-embeddings,rerankers]",
+]
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.pytest.ini_options]
+testpaths = ["src"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true

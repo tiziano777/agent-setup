@@ -1,0 +1,120 @@
+# ============================================
+# App: Deployment + Service
+# ============================================
+# Deploya l'applicazione Python (grafo LangGraph + FastAPI)
+# e la espone come servizio interno al cluster.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-app
+  namespace: agent-setup
+  labels:
+    app: agent-app
+    app.kubernetes.io/part-of: agent-setup
+spec:
+  replicas: 1            # Scala in base al carico
+  selector:
+    matchLabels:
+      app: agent-app
+  template:
+    metadata:
+      labels:
+        app: agent-app
+    spec:
+      containers:
+        - name: agent-app
+          # Sostituisci con il tuo registry (Docker Hub, ECR, GCR, ecc.)
+          # Dopo "docker build -t agent-setup .", tagga e pusha:
+          #   docker tag agent-setup:latest il-tuo-registry/agent-setup:latest
+          #   docker push il-tuo-registry/agent-setup:latest
+          image: agent-setup:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: http
+          # Variabili dal ConfigMap (non sensibili)
+          envFrom:
+            - configMapRef:
+                name: agent-config
+            # API key dal Secret
+            - secretRef:
+                name: llm-api-keys
+          # Healthcheck: Kubernetes riavvia il pod se fallisce
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          # Readiness: Kubernetes smette di inviare traffico se non pronto
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 250m       # 0.25 CPU
+              memory: 512Mi
+            limits:
+              cpu: "1"        # 1 CPU max
+              memory: 2Gi
+
+---
+# Service: rende l'app raggiungibile via DNS "agent-app" nel cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-app
+  namespace: agent-setup
+  labels:
+    app: agent-app
+spec:
+  type: ClusterIP       # Solo interno al cluster
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+      name: http
+  selector:
+    app: agent-app
+
+---
+# ============================================
+# Ingress (OPZIONALE) - Espone l'app su internet
+# ============================================
+# Decommentalo e configura il dominio per esporre l'API esternamente.
+# Richiede un Ingress Controller installato (es. nginx-ingress, traefik).
+#
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: agent-app-ingress
+#   namespace: agent-setup
+#   annotations:
+#     # Per HTTPS automatico con cert-manager:
+#     # cert-manager.io/cluster-issuer: letsencrypt-prod
+#     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+# spec:
+#   ingressClassName: nginx
+#   rules:
+#     - host: agent-api.il-tuo-dominio.com
+#       http:
+#         paths:
+#           - path: /
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: agent-app
+#                 port:
+#                   number: 8000
+#   # Per HTTPS:
+#   # tls:
+#   #   - hosts:
+#   #       - agent-api.il-tuo-dominio.com
+#   #     secretName: agent-app-tls
