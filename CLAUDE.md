@@ -19,7 +19,7 @@ All agents use `get_llm()` from `src/shared/llm.py` which points at the LiteLLM 
 ## Key Commands
 
 ```bash
-make build              # Start LiteLLM proxy + Qdrant + PostgreSQL
+make build              # Start LiteLLM proxy + Qdrant + PostgreSQL + Phoenix
 make down               # Stop infrastructure
 make test               # Run all tests
 make new-agent name=X   # Create new agent from template
@@ -30,6 +30,11 @@ make external-update    # Update external repos to latest
 make external-status    # Show external repos commit info
 make lint               # Ruff lint
 make fmt                # Ruff auto-format
+make phoenix-logs       # Phoenix container logs
+make test-phoenix       # Phoenix healthcheck
+make k8s-apply-all      # Deploy everything to Kubernetes via Kustomize
+make k8s-logs-phoenix   # Phoenix logs in Kubernetes
+make k8s-port-forward-phoenix  # Access Phoenix UI on localhost:6006 via K8s
 ```
 
 ## Code Conventions
@@ -47,7 +52,7 @@ make fmt                # Ruff auto-format
 
 ```
 src/agents/<name>/
-  __init__.py      # Exports graph + workflow
+  __init__.py      # Exports graph + workflow; calls setup_tracing() for auto-instrumentation
   agent.py         # StateGraph: build_graph() -> compile()
   config/          # AgentSettings dataclass
   states/          # AgentState(TypedDict) with add_messages reducer
@@ -61,6 +66,23 @@ src/agents/<name>/
   tests/           # pytest tests
 ```
 
+## Observability - Arize Phoenix
+
+Phoenix provides full LLM observability via OpenTelemetry. Tracing is **automatic**:
+
+- Each agent's `__init__.py` calls `setup_tracing()` before graph compilation
+- `phoenix.otel.register(auto_instrument=True)` instruments all LangChain/LangGraph
+  operations at the framework level (LLM calls, node executions, tool invocations, chains)
+- No per-node or per-tool hooks are needed; the auto-instrumentor handles everything
+- `setup_tracing()` is idempotent — safe to call from multiple modules
+- Phoenix UI: http://localhost:6006 (dev) or via `make k8s-port-forward-phoenix` (K8s)
+- Backend: PostgreSQL (database `phoenix`), not SQLite
+
+Key files:
+- `src/shared/tracing.py` - `setup_tracing()` and `get_tracer()` utilities
+- `deploy/docker/init-phoenix-db.sql` - Creates `phoenix` database in PostgreSQL
+- `docs/arize-phoenix-llms.txt` - Arize AX documentation reference index
+
 ## Environment Variables
 
 All LLM API keys go in `.env` (never committed). Copy from `.env.template`.
@@ -71,6 +93,9 @@ Key infrastructure vars (all have defaults):
 - `DEFAULT_MODEL` (default: llm)
 - `QDRANT_URL` (default: http://localhost:6333)
 - `PGVECTOR_URI` (default: postgresql://postgres:postgres@localhost:5433/vectors)
+- `PHOENIX_COLLECTOR_ENDPOINT` (default: http://localhost:6006)
+- `PHOENIX_PROJECT_NAME` (default: agent-setup)
+- `PHOENIX_TRACING_ENABLED` (default: true, set false to disable)
 
 Run `make env-check` to validate configuration.
 
@@ -96,13 +121,17 @@ Most relevant skills for this project:
 - `proxy_config.yml` - LiteLLM config for all 12 LLM providers
 - `Makefile` - All project commands
 - `serve.py` - FastAPI server wrapping agent1's graph
-- `docker-compose.yml` - Dev infrastructure (proxy + Qdrant + PostgreSQL)
+- `docker-compose.yml` - Dev infrastructure (proxy + Qdrant + PostgreSQL + Phoenix)
 - `docker-compose.prod.yml` - Full production stack
 - `src/shared/llm.py` - Central LLM client factory
 - `src/shared/registry.py` - Agent auto-discovery
 - `src/shared/orchestration.py` - Multi-agent composition factories
 - `src/shared/retrieval/pipeline.py` - RAG pipeline with RRF fusion
 - `src/shared/env_validation.py` - Environment variable validation
+- `src/shared/tracing.py` - Phoenix OTEL tracing setup (call `setup_tracing()` at startup)
+- `deploy/docker/init-phoenix-db.sql` - Phoenix database init for PostgreSQL
+- `deploy/kubernetes/infra.yml` - K8s infrastructure (LiteLLM + Qdrant + PostgreSQL + Phoenix)
+- `deploy/kubernetes/configmap.yml` - K8s non-sensitive config (includes Phoenix endpoint)
 
 ## Do NOT
 

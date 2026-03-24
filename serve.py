@@ -13,12 +13,16 @@ from pydantic import BaseModel
 
 from src.agents.agent1.agent import graph
 from src.shared.env_validation import print_validation_report, validate_env
+from src.shared.tracing import setup_tracing
 
 _env_result = validate_env()
 print_validation_report(_env_result)
 if _env_result["errors"]:
     import sys
+
     sys.exit(1)
+
+setup_tracing()
 
 app = FastAPI(
     title="Agent Setup API",
@@ -29,8 +33,9 @@ app = FastAPI(
 
 # ---------- Schemas ----------
 
+
 class Message(BaseModel):
-    role: str       # "user", "assistant", "system"
+    role: str  # "user", "assistant", "system"
     content: str
 
 
@@ -43,6 +48,7 @@ class InvokeResponse(BaseModel):
 
 
 # ---------- Endpoints ----------
+
 
 @app.get("/health")
 def health():
@@ -62,10 +68,7 @@ async def invoke(req: InvokeRequest):
     try:
         input_messages = [{"role": m.role, "content": m.content} for m in req.messages]
         result = await graph.ainvoke({"messages": input_messages})
-        output = [
-            {"role": m.type, "content": m.content}
-            for m in result["messages"]
-        ]
+        output = [{"role": m.type, "content": m.content} for m in result["messages"]]
         return InvokeResponse(messages=output)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

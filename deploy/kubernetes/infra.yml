@@ -273,3 +273,123 @@ spec:
       name: postgres
   selector:
     app: postgres-vector
+
+
+# ==================================================
+# Arize Phoenix - LLM Observability
+# ==================================================
+# Phoenix usa PostgreSQL come backend (non SQLite) per persistenza
+# dei trace e delle valutazioni. Il database "phoenix" viene creato
+# tramite un initContainer che esegue lo script SQL.
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: phoenix
+  namespace: agent-setup
+  labels:
+    app: phoenix
+    app.kubernetes.io/part-of: agent-setup
+spec:
+  serviceName: phoenix
+  replicas: 1
+  selector:
+    matchLabels:
+      app: phoenix
+  template:
+    metadata:
+      labels:
+        app: phoenix
+    spec:
+      # Crea il database "phoenix" in PostgreSQL prima dell'avvio
+      initContainers:
+        - name: init-phoenix-db
+          image: pgvector/pgvector:pg16
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h postgres-vector -U "$PGUSER"; do
+                echo "Waiting for PostgreSQL..."
+                sleep 2
+              done
+              psql -h postgres-vector -U "$PGUSER" -d "$PGDB" -tc \
+                "SELECT 1 FROM pg_database WHERE datname = 'phoenix'" \
+                | grep -q 1 \
+                || psql -h postgres-vector -U "$PGUSER" -d "$PGDB" -c "CREATE DATABASE phoenix"
+          env:
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_USER
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_PASSWORD
+            - name: PGDB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_DB
+      containers:
+        - name: phoenix
+          image: arizephoenix/phoenix:latest
+          ports:
+            - containerPort: 6006
+              name: http
+            - containerPort: 4317
+              name: grpc
+          env:
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_USER
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_PASSWORD
+            - name: PHOENIX_SQL_DATABASE_URL
+              value: "postgresql://$(PGUSER):$(PGPASSWORD)@postgres-vector:5432/phoenix"
+            - name: PHOENIX_ENABLE_PROMETHEUS
+              value: "false"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 6006
+            initialDelaySeconds: 20
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 6006
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: phoenix
+  namespace: agent-setup
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6006
+      targetPort: 6006
+      name: http
+    - port: 4317
+      targetPort: 4317
+      name: grpc
+  selector:
+    app: phoenix

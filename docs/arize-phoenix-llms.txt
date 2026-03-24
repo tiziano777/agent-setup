@@ -1,0 +1,472 @@
+# Arize AX Documentation
+
+## Site Description
+
+Arize AX is an AI engineering platform focused on evaluation and observability. It helps AI engineers and AI product managers develop, evaluate, and observe AI applications and agents. The platform provides comprehensive tools for tracing, evaluation, experimentation, prompt engineering, and production monitoring across the entire AI application lifecycle.
+
+Base URL: https://arize.com/docs
+
+---
+
+## Get Started
+
+Get started with Arize AX by exploring quickstart guides that walk you through core features like tracing, evaluation, experiments, and prompt engineering. These guides provide step-by-step instructions to help you set up and begin using the platform effectively.
+
+### Overview & Quickstarts
+- https://arize.com/docs/ax - Arize AX main documentation page with platform overview and features
+- https://arize.com/docs/ax/quickstarts - Get Started guide with overview of development, testing, and production workflows. 
+- https://arize.com/docs/ax/quickstarts/quickstart-tracing - Quickstart guide for setting up tracing
+- https://arize.com/docs/ax/quickstarts/quickstart-write-first-eval - Quickstart guide for writing your first evaluation
+- https://arize.com/docs/ax/quickstarts/quickstart-run-first-experiment - Quickstart guide for running your first experiment
+- https://arize.com/docs/ax/quickstarts/quickstart-prompt-playground - Quickstart guide for using the prompt playground
+
+### Arize AI for Agents
+- https://arize.com/docs/ax/arize-ai-for-agents - Overview of Arize AI capabilities for agent development
+
+---
+
+## Alyx - AI Engineering Agent
+
+Alyx is a single AI-powered agent that uses subagents by surface; skills and context vary by where you use Alyx (trace slideover, Prompt Playground, Eval Builder, search bar, traces page, datasets page).
+
+### Overview
+- https://arize.com/docs/ax/alyx/our-vision-for-alyx - Vision and overview of Alyx
+- https://arize.com/docs/ax/alyx/arize-copilot - Alyx AI Engineering Agent overview with available skills
+- https://arize.com/docs/ax/agents/tracing-assistant - Tracing Assistant documentation
+
+### Alyx by surface
+Alyx adapts by surface; each surface has different context and exposes different skills.
+- https://arize.com/docs/ax/alyx/arize-copilot/trace-analysis-agent - Trace slideover: trace troubleshooting, span analysis, build evals
+- https://arize.com/docs/ax/alyx/arize-copilot/playground-agent - Prompt Playground: optimize prompts, build evals, run experiments
+- https://arize.com/docs/ax/alyx/arize-copilot/eval-agent - Eval Builder / Task Builder: build custom evals, configure tasks
+- https://arize.com/docs/ax/alyx/arize-copilot/search-bar-agent - Traces search bar: natural language to filter syntax
+- https://arize.com/docs/ax/alyx/arize-copilot/traces-page-agent - Traces page: multi-trace analysis, pattern discovery
+- https://arize.com/docs/ax/alyx/arize-copilot/dataset-page-agent - Datasets / Experiments: analyze experiments, manage datasets
+
+### Alyx Skills
+- https://arize.com/docs/ax/alyx/arize-copilot/arizeql-generator - Arize Query Language (ArizeQL) generator
+
+---
+
+## Develop
+
+The Develop section covers tools for building and testing AI applications, including datasets and experiments. Learn how to create test datasets, run experiments, evaluate results, and integrate with CI/CD pipelines for automated testing.
+
+### Datasets
+- https://arize.com/docs/ax/develop/datasets - Overview of datasets for testing and evaluation
+- https://arize.com/docs/ax/develop/datasets/how-to-datasets - How to create and manage datasets
+- https://arize.com/docs/ax/develop/datasets/update-a-dataset - How to update existing datasets
+- https://arize.com/docs/ax/develop/datasets/export-a-dataset - How to export datasets
+- https://arize.com/docs/ax/develop/datasets/automated-dataset-curation - Automated dataset curation
+
+### Experiments
+- https://arize.com/docs/ax/develop/datasets-and-experiments - Overview of experiments and datasets
+- https://arize.com/docs/ax/develop/datasets-and-experiments/run-experiment - How to run experiments
+- https://arize.com/docs/ax/develop/datasets-and-experiments/log-experiment - How to log experiment results
+- https://arize.com/docs/ax/develop/datasets-and-experiments/create-an-experiment-evaluator - How to create evaluators for experiments
+- https://arize.com/docs/ax/develop/datasets-and-experiments/compare-experiments - How to compare experiment results
+- https://arize.com/docs/ax/develop/datasets-and-experiments/download-experiment-results - How to download experiment results
+- https://arize.com/docs/ax/develop/datasets-and-experiments/ci-cd-for-automated-experiments - CI/CD integration for automated experiments
+- https://arize.com/docs/ax/develop/datasets-and-experiments/ci-cd-for-automated-experiments/github-action-basics - GitHub Actions integration
+- https://arize.com/docs/ax/develop/datasets-and-experiments/ci-cd-for-automated-experiments/gitlab-ci-cd-basics - GitLab CI/CD integration
+
+---
+
+## Prompts
+
+The Prompts section provides comprehensive tools for prompt engineering, including the Prompt Hub for version control, the Prompt Playground for interactive testing, and AI-powered optimization features. These tools help you iterate on prompts, compare variations, and systematically improve prompt performance.
+
+### Prompt Hub
+- https://arize.com/docs/ax/prompts/prompt-hub - Overview of Prompt Hub for managing and versioning prompts
+- https://arize.com/docs/ax/prompts/prompt-hub/create-a-prompt - How to create prompts in Prompt Hub
+- https://arize.com/docs/ax/prompts/prompt-hub/version-control - Version control for prompts
+
+### Prompt Playground
+- https://arize.com/docs/ax/prompts/prompt-playground - Overview of Prompt Playground for interactive prompt testing
+- https://arize.com/docs/ax/prompts/prompt-playground/save-playground-outputs-as-an-experiment - Save playground outputs as experiments
+- https://arize.com/docs/ax/prompts/prompt-playground/production-replay - Replay production data in playground
+- https://arize.com/docs/ax/prompts/prompt-playground/compare-prompts-side-by-side - Compare multiple prompts side by side
+- https://arize.com/docs/ax/prompts/prompt-playground/using-tools-in-playground - Using tools in the playground
+- https://arize.com/docs/ax/prompts/prompt-playground/image-inputs-in-playground - Working with image inputs
+- https://arize.com/docs/ax/prompts/prompt-playground/saving-and-managing-playground-views - Managing playground views
+
+### Prompt Optimization
+- https://arize.com/docs/ax/prompts/prompt-optimization - Overview of prompt optimization features
+- https://arize.com/docs/ax/prompts/prompt-optimization/prompt-learning - Prompt learning for optimization
+- https://arize.com/docs/ax/prompts/prompt-optimization/prompt-learning-sdk - Prompt learning SDK documentation
+- https://arize.com/docs/ax/prompts/prompt-optimization/ai-powered-prompt-builder - AI-powered prompt builder
+
+---
+
+## Evaluate
+
+The Evaluate section covers all aspects of evaluation, from creating custom evaluators to running online and offline evaluations. Learn about LLM-as-a-judge evaluations, code-based evaluations, trace and session-level evaluations, and human annotation workflows.
+
+### Evaluators Overview
+- https://arize.com/docs/ax/evaluate/evaluators - Overview of evaluators and evaluation framework
+- https://arize.com/docs/ax/evaluate/evaluators/llm-as-a-judge - LLM as a Judge evaluator
+- https://arize.com/docs/ax/evaluate/evaluators/code-evaluations - Code-based evaluations
+- https://arize.com/docs/ax/evaluate/evaluators/trace-and-session-evals/span-level-evals - Span-level evaluations
+- https://arize.com/docs/ax/evaluate/evaluators/trace-and-session-evals/trace-level-evaluations - Trace-level evaluations
+- https://arize.com/docs/ax/evaluate/evaluators/trace-and-session-evals/session-level-evaluations - Session-level evaluations
+- https://arize.com/docs/ax/evaluate/evaluators/retrieval-evaluation - Retrieval evaluation
+
+### Online Evals
+- https://arize.com/docs/ax/evaluate/online-evals - Overview of online evaluations for production monitoring 
+- https://arize.com/docs/ax/evaluate/online-evals/setting-up-online-evals - Setting up online evaluations and reusable evaluators with EvalHub
+- https://arize.com/docs/ax/evaluate/online-evals/log-evals-to-traces - Logging evaluations to traces
+
+### Offline Evals
+- https://arize.com/docs/ax/evaluate/offline-evals - Offline evaluations for testing and development
+
+### Human Annotations
+- https://arize.com/docs/ax/evaluate/human-annotations - Human annotation workflows
+- https://arize.com/docs/ax/evaluate/annotation-queues - Annotation queues for human evaluation
+
+---
+
+## Observe
+
+The Observe section provides comprehensive observability tools including tracing for complete visibility into application flows, projects for organizing work, dashboards for visualization, and production monitoring with alerts. These tools help you understand system behavior, track performance, and respond to issues in real-time.
+
+### Tracing
+- https://arize.com/docs/ax/observe/tracing - Complete visibility into how your agents and models work
+- https://arize.com/docs/ax/observe/tracing/setup - Setting up tracing
+- https://arize.com/docs/ax/observe/tracing/setup/integrations - Integration-based tracing setup
+- https://arize.com/docs/ax/observe/tracing/setup/manual-instrumentation - Manual instrumentation for tracing
+- https://arize.com/docs/ax/observe/tracing/configure - Configuring tracing
+- https://arize.com/docs/ax/observe/tracing/configure/input - Configuring input tracking
+- https://arize.com/docs/ax/observe/tracing/configure/evals-on-traces - Running evaluations on traces
+- https://arize.com/docs/ax/observe/tracing/configure/instrumenting-prompt-templates-and-prompt-variables - Instrumenting prompt templates and variables
+- https://arize.com/docs/ax/observe/tracing/configure/add-attributes-metadata-and-tags - Adding attributes, metadata, and tags
+- https://arize.com/docs/ax/observe/tracing/configure/add-events-exceptions-and-status-to-spans - Adding events, exceptions, and status to spans
+- https://arize.com/docs/ax/observe/tracing/configure/add-cost-tracking - Cost tracking configuration
+- https://arize.com/docs/ax/observe/tracing/configure/logging-latent-metadata - Logging latent metadata
+- https://arize.com/docs/ax/observe/tracing/configure/masking-span-attributes - Masking span attributes
+- https://arize.com/docs/ax/observe/tracing/configure/redact-sensitive-data-from-traces - Redacting sensitive data
+- https://arize.com/docs/ax/observe/tracing/configure/customize-auto-instrumentation - Customizing auto-instrumentation
+- https://arize.com/docs/ax/observe/tracing/configure/batch-vs-simple-span-processor - Batch vs simple span processor
+- https://arize.com/docs/ax/observe/tracing/configure/otel-collector-deployment-patterns - OpenTelemetry collector deployment patterns
+- https://arize.com/docs/ax/observe/tracing/configure/advanced-tracing-otel-examples - Advanced OpenTelemetry tracing examples
+- https://arize.com/docs/ax/observe/tracing/view-and-manage-traces - Viewing and managing traces
+- https://arize.com/docs/ax/observe/tracing/saved-views - Saved views for the Tracing table (filters, columns, sort, time range)
+- https://arize.com/docs/ax/observe/tracing/spans - Understanding span kinds and span data formats 
+- https://arize.com/docs/ax/observe/tracing/sessions-and-users - Sessions and user tracking
+- https://arize.com/docs/ax/observe/tracing/agents - Agent visualizations and analysis
+
+### Projects
+- https://arize.com/docs/ax/observe/projects - Projects overview
+- https://arize.com/docs/ax/observe/projects/custom-metrics-api - Custom metrics API
+- https://arize.com/docs/ax/observe/projects/custom-metrics-api/custom-metric-syntax - Custom metric syntax (ArizeQL)
+- https://arize.com/docs/ax/observe/projects/custom-metrics-api/custom-metric-syntax/conditionals-and-filters - Conditionals and filters in custom metrics
+- https://arize.com/docs/ax/observe/projects/custom-metrics-api/custom-metric-examples - Custom metric examples
+
+### Dashboards
+- https://arize.com/docs/ax/observe/dashboards - Dashboards overview
+- https://arize.com/docs/ax/observe/dashboards/widgets - Dashboard widgets
+- https://arize.com/docs/ax/observe/dashboards/token-counting - Token counting in dashboards
+- https://arize.com/docs/ax/observe/dashboards/dashboard-widget-creation - Creating dashboard widgets with AI
+
+### Production Monitoring
+- https://arize.com/docs/ax/observe/production-monitoring - Production monitoring overview
+- https://arize.com/docs/ax/observe/production-monitoring/configure-monitors - Configuring monitors (Slack altering, OpsGenie, and PagerDuty)
+
+---
+
+## Integrations
+
+Arize AX supports integrations with over 30+ LLM providers, agent frameworks, platforms, and tools for seamless instrumentation. These integrations enable automatic tracing, evaluation capabilities, and observability across your entire AI stack without manual instrumentation.
+
+### Overview
+- https://arize.com/docs/ax/integrations - Integrations overview and types
+
+### LLM Provider Integrations
+- https://arize.com/docs/ax/integrations/llm-providers/openai - OpenAI integration (tracing, evals, Agents SDK tracing, Node.js SDK)
+- https://arize.com/docs/ax/integrations/llm-providers/anthropic - Anthropic integration (tracing, evals)
+- https://arize.com/docs/ax/integrations/llm-providers/google-gen-ai - Google Generative AI integration (tracing, Gemini evals)
+- https://arize.com/docs/ax/integrations/llm-providers/amazon-bedrock - Amazon Bedrock integration (tracing, evals, agents tracing)
+- https://arize.com/docs/ax/integrations/llm-providers/vertexai - Vertex AI integration (tracing, evals)
+- https://arize.com/docs/ax/integrations/llm-providers/mistralai - Mistral AI integration (tracing, evals)
+- https://arize.com/docs/ax/integrations/llm-providers/groq - Groq integration (tracing)
+- https://arize.com/docs/ax/integrations/llm-providers/openrouter - OpenRouter integration (tracing)
+- https://arize.com/docs/ax/integrations/llm-providers/litellm - LiteLLM integration (tracing, evals)
+- https://arize.com/docs/ax/integrations/llm-providers/llama - Llama/Ollama integration (tracing)
+
+### Python Agent Framework Integrations
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/langchain - LangChain integration (tracing, JS support)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/langgraph - LangGraph integration (tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/llamaindex - LlamaIndex integration (tracing, workflows tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/autogen - AutoGen integration (tracing, AgentChat tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/crewai - CrewAI integration (tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/dspy - DSPy integration (tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/haystack - Haystack integration (tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/instructor - Instructor integration (tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/guardrails-ai - Guardrails AI integration (tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/pydantic - Pydantic AI integration (tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/semantic-kernel - Semantic Kernel integration (tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/together-ai - Together AI integration (tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/portkey - Portkey integration (tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/google-adk - Google ADK integration (tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/agno - Agno integration (tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/beeai - BeeAI integration (Python tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/hugging-face-smolagents - Hugging Face smolagents integration (tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/model-context-protocol - Model Context Protocol (MCP) integration (tracing)
+- https://arize.com/docs/ax/integrations/python-agent-frameworks/aws-strands - AWS Strands integration (tracing, Bedrock AgentCore)
+
+### TypeScript/JavaScript Agent Framework Integrations
+- https://arize.com/docs/ax/integrations/ts-js-agent-frameworks/langchain - LangChain JS/TS integration (tracing)
+- https://arize.com/docs/ax/integrations/ts-js-agent-frameworks/mastra - Mastra integration (tracing)
+- https://arize.com/docs/ax/integrations/ts-js-agent-frameworks/vercel - Vercel AI SDK integration (tracing)
+- https://arize.com/docs/ax/integrations/ts-js-agent-frameworks/beeai - BeeAI JS integration (tracing)
+
+### Java Integrations
+- https://arize.com/docs/ax/integrations/java/langchain4j - LangChain4j integration (tracing)
+- https://arize.com/docs/ax/integrations/java/spring-ai - Spring AI integration (tracing)
+- https://arize.com/docs/ax/integrations/java/arconia - Arconia integration (tracing)
+
+### Platform Integrations
+- https://arize.com/docs/ax/integrations/platforms/langflow - LangFlow integration (tracing)
+- https://arize.com/docs/ax/integrations/platforms/flowise - Flowise integration (tracing)
+- https://arize.com/docs/ax/integrations/platforms/dify - Dify integration (tracing)
+- https://arize.com/docs/ax/integrations/platforms/prompt-flow - Prompt Flow integration (tracing)
+
+### OpenTelemetry Integrations
+- https://arize.com/docs/ax/integrations/opentelemetry/overview - OpenTelemetry overview
+- https://arize.com/docs/ax/integrations/opentelemetry/opentelemetry-arize-otel - OpenTelemetry Arize OTel integration
+- https://arize.com/docs/ax/integrations/opentelemetry/openlit - OpenLIT integration
+- https://arize.com/docs/ax/integrations/opentelemetry/openllmetry - OpenLLMetry integration
+- https://arize.com/docs/ax/integrations/opentelemetry/traceloop-sdk - Traceloop SDK integration
+
+### Other Evaluation Integrations
+- https://arize.com/docs/ax/integrations/evaluation-integrations/ragas - RAGAS integration (NVIDIA RAG metrics)
+- https://arize.com/docs/ax/integrations/evaluation-integrations/microsoft - Microsoft evaluation integration
+
+### Vector Database Integrations
+- https://arize.com/docs/ax/integrations/vector-databases - Vector database integrations overview
+
+---
+
+## API Reference
+
+The API Reference section provides comprehensive documentation for all Arize AX APIs, including REST and GraphQL endpoints. It also includes SDK documentation for Python and TypeScript, with tutorials and migration guides to help you integrate programmatically.
+
+### REST API
+- https://arize.com/docs/ax/rest-reference - REST API reference overview
+- https://arize.com/docs/ax/rest-reference/download-openapi-spec - Download OpenAPI specification
+- https://api.arize.com/v2/spec.yaml - OpenAPI specification (YAML)
+
+### GraphQL API
+- https://arize.com/docs/ax/graphql-reference - GraphQL API reference overview
+- https://arize.com/docs/ax/graphql-reference/overview/getting-started-with-graphql - Getting started with GraphQL
+- https://arize.com/docs/ax/graphql-reference/overview/how-to-use-graphql - How to use GraphQL
+- https://arize.com/docs/ax/graphql-reference/overview/how-to-use-graphql/forming-calls - Forming GraphQL calls
+- https://arize.com/docs/ax/graphql-reference/overview/how-to-use-graphql/using-global-node-ids - Using global node IDs
+- https://arize.com/docs/ax/graphql-reference/overview/how-to-use-graphql/querying-nested-data - Querying nested data
+- https://arize.com/docs/ax/graphql-reference/overview/how-to-use-graphql/notebook-examples - Notebook examples
+- https://arize.com/docs/ax/graphql-reference/overview/how-to-use-graphql/mutations - GraphQL mutations
+- https://arize.com/docs/ax/graphql-reference/overview/resource-limitations - Resource limitations
+- https://arize.com/docs/ax/graphql-reference/apis/admin-api - Admin API
+- https://arize.com/docs/ax/graphql-reference/apis/annotations-api - Annotations API
+- https://arize.com/docs/ax/graphql-reference/apis/custom-metrics-api - Custom metrics API
+- https://arize.com/docs/ax/graphql-reference/apis/dashboards-api - Dashboards API
+- https://arize.com/docs/ax/graphql-reference/apis/file-importer-api - File importer API
+- https://arize.com/docs/ax/graphql-reference/apis/metrics-api - Metrics API
+- https://arize.com/docs/ax/graphql-reference/apis/models-api - Models API
+- https://arize.com/docs/ax/graphql-reference/apis/monitors-api - Monitors API
+- https://arize.com/docs/ax/graphql-reference/apis/online-tasks-api - Online tasks API
+- https://arize.com/docs/ax/graphql-reference/apis/table-importer-api - Table importer API
+
+### Python SDK (API Clients)
+- https://arize.com/docs/api-clients/python/overview - Python SDK overview
+- https://arize.com/docs/api-clients/python/version-8/overview - Python SDK v8 overview (pre-release)
+- https://arize.com/docs/api-clients/python/version-8/tracing - Tracing with Python SDK v8
+- https://arize.com/docs/api-clients/python/version-8/embeddings - Embeddings with Python SDK v8
+- https://arize.com/docs/api-clients/python/version-8/client-resources/annotation-configs - Annotation configs client [Beta]
+- https://arize.com/docs/api-clients/python/version-8/client-resources/datasets - Datasets client [Beta]
+- https://arize.com/docs/api-clients/python/version-8/client-resources/experiments - Experiments client [Beta]
+- https://arize.com/docs/api-clients/python/version-8/client-resources/projects - Projects client [Beta]
+- https://arize.com/docs/api-clients/python/version-8/client-resources/spans - Spans client [Alpha]
+- https://arize.com/docs/api-clients/python/version-8/client-resources/spaces - Spaces client [Alpha]
+- https://arize.com/docs/api-clients/python/version-8/client-resources/api-keys - API keys client [Alpha]
+- https://arize.com/docs/api-clients/python/version-8/client-resources/ai-integrations - AI integrations client [Alpha]
+- https://arize.com/docs/api-clients/python/version-8/client-resources/ml-models - ML models client
+- https://arize.com/docs/api-clients/python/version-8/migration/index - Migration guide from v7
+- https://arize.com/docs/api-clients/python/version-8/migration/datasets-client - Datasets client migration
+- https://arize.com/docs/api-clients/python/version-8/migration/experiments-client - Experiments client migration
+- https://arize.com/docs/api-clients/python/version-8/migration/exporter-client - Exporter client migration
+- https://arize.com/docs/api-clients/python/version-8/migration/pandas-client - Pandas client migration
+- https://arize.com/docs/api-clients/python/version-8/migration/stream-client - Stream client migration
+- https://arize.com/docs/api-clients/python/version-8/tutorial/get-started-tracing-with-arize-sdk - Get started with tracing tutorial
+- https://arize.com/docs/api-clients/python/version-8/tutorial/get-started-datasets-experiments-with-arize-sdk - Get started with datasets and experiments tutorial
+- https://arize.com/docs/api-clients/python/version-8/tutorial/get-started-evaluations-with-arize-sdk - Get started with evaluations tutorial
+- https://arize.com/docs/api-clients/python/version-7/overview - Python SDK v7 overview
+
+### TypeScript SDK (API Clients)
+- https://arize.com/docs/api-clients/typescript/version-1/overview - TypeScript SDK v1 overview [Beta]
+- https://arize.com/docs/api-clients/typescript/version-1/client-resources/annotation-configs - Annotation configs client [Beta]
+- https://arize.com/docs/api-clients/typescript/version-1/client-resources/datasets - Datasets client [Beta]
+- https://arize.com/docs/api-clients/typescript/version-1/client-resources/experiments - Experiments client [Beta]
+- https://arize.com/docs/api-clients/typescript/version-1/client-resources/projects - Projects client [Beta]
+
+---
+
+## Security & Settings
+
+The Security & Settings section covers all security, compliance, and configuration options for your Arize AX instance. This includes API key management, SSO and RBAC setup, compliance features, cost tracking, guardrails, and integration playgrounds for testing LLM connections.
+
+### API Keys & Authentication
+- https://arize.com/docs/ax/security-and-settings/api-keys - API keys management
+- https://arize.com/docs/ax/security-and-settings/service-keys - Service keys
+
+### Security Features
+- https://arize.com/docs/ax/security-and-settings/llm-security/guardrails - Guardrails for LLM security
+- https://arize.com/docs/ax/security-and-settings/llm-security/llm-red-teaming - LLM red teaming
+- https://arize.com/docs/ax/security-and-settings/whitelisting - Whitelisting configuration
+- https://arize.com/docs/ax/security-and-settings/arize-private-connect - Arize Private Connect
+
+### SSO & RBAC
+- https://arize.com/docs/ax/security-and-settings/sso-and-rbac - SSO and RBAC overview
+- https://arize.com/docs/ax/security-and-settings/sso-and-rbac/saml-configuration - SAML configuration
+- https://arize.com/docs/ax/security-and-settings/sso-and-rbac/setting-up-sso-with-okta - Setting up SSO with Okta
+
+### Compliance
+- https://arize.com/docs/ax/security-and-settings/compliance - Compliance overview
+- https://arize.com/docs/ax/security-and-settings/compliance/arize-audit-log - Audit log
+- https://arize.com/docs/ax/security-and-settings/compliance/delete-traces-with-sensitive-data - Deleting traces with sensitive data
+
+### Cost Tracking
+- https://arize.com/docs/ax/security-and-settings/cost-tracking - Cost tracking configuration
+
+### Data Fabric
+- https://arize.com/docs/ax/security-and-settings/data-fabric - Data fabric overview
+
+### Tags
+- https://arize.com/docs/ax/security-and-settings/tags - Tags management
+
+### Integrations Playground
+- https://arize.com/docs/ax/security-and-settings/integrations-playground/openai - OpenAI integration playground
+- https://arize.com/docs/ax/security-and-settings/integrations-playground/azure-openai - Azure OpenAI integration playground
+- https://arize.com/docs/ax/security-and-settings/integrations-playground/vertexai - Vertex AI integration playground
+- https://arize.com/docs/ax/security-and-settings/integrations-playground/aws-bedrock - AWS Bedrock integration playground
+- https://arize.com/docs/ax/security-and-settings/integrations-playground/custom-llm-models - Custom LLM models playground
+
+### Phoenix Migration
+- https://arize.com/docs/ax/security-and-settings/send-traces-from-phoenix-greater-than-arize - Sending traces from Phoenix to Arize
+
+---
+
+## Self-Hosting
+
+The Self-Hosting section provides complete documentation for deploying Arize AX on-premise or in your own cloud infrastructure. It includes installation guides for AWS, Azure, GCP, and OpenShift, along with configuration options for ingress, SAML, and SDK usage in self-hosted environments.
+
+### Overview
+- https://arize.com/docs/ax/selfhosting - Self-hosting overview
+- https://arize.com/docs/ax/selfhosting/info/on-premise-overview - On-premise overview
+- https://arize.com/docs/ax/selfhosting/info/on-premise-installation - On-premise installation
+- https://arize.com/docs/ax/selfhosting/info/on-premise-installation/installation-on-aws - Installation on AWS
+- https://arize.com/docs/ax/selfhosting/info/on-premise-installation/installation-on-azure - Installation on Azure
+- https://arize.com/docs/ax/selfhosting/info/on-premise-installation/installation-on-gcp - Installation on GCP
+- https://arize.com/docs/ax/selfhosting/info/on-premise-installation/installation-on-openshift - Installation on OpenShift
+- https://arize.com/docs/ax/selfhosting/info/on-premise-installation/configuring-ingress-endpoints - Configuring ingress endpoints
+- https://arize.com/docs/ax/selfhosting/info/on-premise-installation/configuring-saml - Configuring SAML
+- https://arize.com/docs/ax/selfhosting/on-premise-integrations - On-premise integrations
+- https://arize.com/docs/ax/selfhosting/on-premise-sdk-usage - On-premise SDK usage
+
+---
+
+## Machine Learning
+
+The Machine Learning section covers ML observability for traditional machine learning models, including data upload, monitoring, drift detection, explainability, and performance analysis. It also includes computer vision observability, use cases for different model types, integrations with ML platforms, and comprehensive API references.
+
+### Machine Learning Observability
+- https://arize.com/docs/ax/machine-learning/machine-learning - Machine learning observability overview
+- https://arize.com/docs/ax/machine-learning/machine-learning/quickstart - ML observability quickstart
+- https://arize.com/docs/ax/machine-learning/machine-learning/concepts-ml - ML concepts
+
+### How To: ML
+- https://arize.com/docs/ax/machine-learning/machine-learning/how-to-ml - How-to guides for ML observability
+- https://arize.com/docs/ax/machine-learning/machine-learning/how-to-ml/upload-data-to-arize - Uploading data to Arize
+- https://arize.com/docs/ax/machine-learning/machine-learning/how-to-ml/monitors - Setting up monitors
+- https://arize.com/docs/ax/machine-learning/machine-learning/how-to-ml/dashboards - Creating dashboards
+- https://arize.com/docs/ax/machine-learning/machine-learning/how-to-ml/drift-tracing - Drift tracing
+- https://arize.com/docs/ax/machine-learning/machine-learning/how-to-ml/performance-tracing - Performance tracing
+- https://arize.com/docs/ax/machine-learning/machine-learning/how-to-ml/explainability - Model explainability
+- https://arize.com/docs/ax/machine-learning/machine-learning/how-to-ml/custom-metrics-api - Custom metrics API for ML
+
+### ML Use Cases
+- https://arize.com/docs/ax/machine-learning/machine-learning/use-cases-ml - ML use cases overview
+
+### ML Integrations
+- https://arize.com/docs/ax/machine-learning/machine-learning/integrations-ml - ML integrations overview
+
+### ML API Reference
+- https://arize.com/docs/ax/machine-learning/machine-learning/api-reference-ml - ML API reference overview
+- https://arize.com/docs/ax/machine-learning/machine-learning/api-reference-ml/python-sdk - Python SDK reference
+- https://arize.com/docs/ax/machine-learning/machine-learning/api-reference-ml/java-sdk - Java SDK reference
+- https://arize.com/docs/ax/machine-learning/machine-learning/api-reference-ml/r-sdk - R SDK reference
+- https://arize.com/docs/ax/machine-learning/machine-learning/api-reference-ml/rest-api - REST API reference
+
+### Computer Vision
+- https://arize.com/docs/ax/machine-learning/computer-vision - Computer vision observability overview
+
+---
+
+## Cookbooks
+
+The Cookbooks section contains practical tutorials and examples for building AI applications with Arize AX, covering agents, evaluations, experiments, and prompt optimization. These step-by-step guides demonstrate real-world workflows and best practices for common AI engineering tasks.
+
+### Overview
+- https://arize.com/docs/ax/cookbooks - Cookbooks and tutorials overview
+
+### Agent Cookbooks
+- https://arize.com/docs/ax/cookbooks/agent-workflow-patterns - Agent workflow patterns
+- https://arize.com/docs/ax/cookbooks/agents/tracing-and-evaluating-agents - Tracing and evaluating agents
+- https://arize.com/docs/ax/cookbooks/agents/arize-+-mosaic-ai-agent-framework - Online evals and monitoring for agents in production
+- https://arize.com/docs/ax/cookbooks/agents/evaluating-agentic-rag-using-arize-and-couchbase - Evaluating agentic RAG with Couchbase
+- https://arize.com/docs/ax/cookbooks/agents/evaluating-and-improving-ai-agents-at-scale-with-microsoft-foundry - Evaluating and improving AI agents at scale with Microsoft Foundry
+- https://arize.com/docs/ax/cookbooks/agents/foundry-red-team - Foundry red team
+- https://arize.com/docs/ax/cookbooks/agents/openai-agents-cookbook - OpenAI agents cookbook
+- https://arize.com/docs/ax/cookbooks/agents/ragas-agents-cookbook - RAGAS agents cookbook
+- https://arize.com/docs/ax/cookbooks/agents/trace-evaluate-browser-use-agent-with-l-lama4 - Trace and evaluate browser use agent with Llama 4
+- https://arize.com/docs/ax/cookbooks/agents/tracing-a-langgraph-application-with-agent-engine-in-vertex-ai - Tracing a LangGraph application with Agent Engine in Vertex AI
+- https://arize.com/docs/ax/cookbooks/agents/tracing-a-routing-agent - Tracing a routing agent
+- https://arize.com/docs/ax/cookbooks/agents/tracing-a2a-agent - Tracing A2A agent
+
+### Evaluation Cookbooks
+- https://arize.com/docs/ax/cookbooks/evaluation/evaluation - Evaluation cookbooks overview
+- https://arize.com/docs/ax/cookbooks/evaluation/evaluating-rag - Evaluating RAG systems
+- https://arize.com/docs/ax/cookbooks/evaluation/gemini-audio-evals - Gemini audio evaluations
+- https://arize.com/docs/ax/cookbooks/evaluation/llamaindex-evals - LlamaIndex evaluations
+- https://arize.com/docs/ax/cookbooks/evaluation/session-level-evaluations-for-an-ai-tutor - Session-level evaluations for an AI tutor
+- https://arize.com/docs/ax/cookbooks/evaluation/trace-level-evaluations-for-a-recommendation-agent - Trace-level evaluations for a recommendation agent
+- https://arize.com/docs/ax/cookbooks/evaluation/tracing-and-evaluating-audio - Tracing and evaluating audio
+
+### Experiment Cookbooks
+- https://arize.com/docs/ax/cookbooks/experiments/model-comparison-for-an-email-text-extraction-service - Model comparison for email text extraction
+- https://arize.com/docs/ax/cookbooks/experiments/summarization - Summarization experiments
+- https://arize.com/docs/ax/cookbooks/experiments/text2sql - Text-to-SQL experiments
+
+### Prompt Learning Cookbooks
+- https://arize.com/docs/ax/cookbooks/prompt-learning/optimizing-your-eval-prompts - Optimizing your eval prompts
+- https://arize.com/docs/ax/cookbooks/prompt-learning/improving-structured-output-generation-with-prompt-learning - Improving structured output generation
+- https://arize.com/docs/ax/cookbooks/prompt-learning/optimizing-coding-agent-prompts-for-execution - Optimizing coding agent prompts for execution
+- https://arize.com/docs/ax/cookbooks/prompt-learning/optimizing-coding-agent-prompts-for-planning - Optimizing coding agent prompts for planning
+
+### AI Engineering Workflows
+- https://arize.com/docs/ax/cookbooks/ai-engineering-workflows/guardrails - Guardrails for realtime detection
+
+### Human-in-the-Loop Workflows
+- https://arize.com/docs/ax/cookbooks/human-in-the-loop-workflows-annotations/creating-a-custom-llm-evaluator-with-a-benchmark-dataset - Creating a custom LLM evaluator with a benchmark dataset
+
+### Tracing Integrations
+- https://arize.com/docs/ax/cookbooks/tracing-integrations - Tracing integrations cookbook
+
+---
+
+## Additional Resources
+
+Find community support, blog posts, and related documentation to help you get the most out of Arize AX. Connect with other developers, stay updated on new features, and explore our open-source Phoenix project for additional observability tools.
+
+- Community Slack: https://arize-ai.slack.com/ssb/redirect#/shared-invite/email
+- Blog: https://arize.com/blog/
+- Phoenix OSS Documentation: http://docs.arize.com/phoenix

@@ -31,7 +31,7 @@ COPY pyproject.toml .
 
 # Installa il progetto con TUTTE le optional dependencies
 # + fastapi/uvicorn per il server API (non sono in pyproject.toml)
-RUN pip install --no-cache-dir -e ".[retrieval-all,postgres,dev]" && \
+RUN pip install --no-cache-dir -e ".[retrieval-all,postgres,phoenix,dev]" && \
     pip install --no-cache-dir fastapi uvicorn
 
 # ---------- Codice sorgente ----------

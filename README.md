@@ -9,6 +9,7 @@ Ambiente modulare per lo sviluppo di agenti LangGraph con rotazione automatica t
 - **Multi-Agent** - Pattern predefiniti: supervisor, swarm/p2p, indipendente
 - **LLM Rotation** - 12 provider LLM configurati con fallback automatico e retry
 - **Retrieval (RAG)** - Pipeline ibrida con vector DB (Qdrant, pgvector), BM25, RRF fusion e reranking
+- **Observability** - Tracing automatico con Arize Phoenix via OpenTelemetry (PostgreSQL backend)
 - **Scaffolding** - Nuovo agente in un comando: `make new-agent name=my_agent`
 - **Registry** - Discovery automatica degli agenti a runtime
 
@@ -45,15 +46,17 @@ make test
 ```
 agent-setup/
 ├── .env.template              # Template API key per i provider
-├── docker-compose.yml         # LiteLLM proxy + Qdrant + PostgreSQL/pgvector
+├── docker-compose.yml         # LiteLLM proxy + Qdrant + PostgreSQL + Phoenix
+├── docker-compose.prod.yml    # Stack completo produzione (app + infra)
 ├── proxy_config.yml           # Configurazione 12 provider LLM
 ├── pyproject.toml             # Dipendenze e tool config
 ├── langgraph.json             # Entry point per deployment LangGraph
-├── Makefile                   # Comandi proxy + agenti + sviluppo
+├── Makefile                   # Comandi proxy + agenti + sviluppo + k8s
 │
 ├── src/
 │   ├── shared/                # Utilities condivise
 │   │   ├── llm.py             # Client LLM centralizzato (LiteLLM proxy)
+│   │   ├── tracing.py         # Phoenix OTEL tracing (auto-instrumentation)
 │   │   ├── types.py           # BaseAgentState, HandoffPayload
 │   │   ├── memory.py          # Factory checkpointer + store
 │   │   ├── registry.py        # Auto-discovery agenti
@@ -70,6 +73,7 @@ agent-setup/
 │   ├── agents/
 │   │   ├── _template/         # Skeleton per nuovi agenti
 │   │   └── agent1/            # Primo agente (generato da template)
+│   │       ├── __init__.py    # Exports + setup_tracing() automatico
 │   │       ├── agent.py       # Graph API entry point
 │   │       ├── config/        # Configurazione agente
 │   │       ├── nodes/         # Nodi del grafo
@@ -85,7 +89,13 @@ agent-setup/
 │   │
 │   └── app/                   # Applicazione (Streamlit/FastAPI)
 │
+├── deploy/
+│   ├── docker/
+│   │   └── init-phoenix-db.sql  # Creazione database phoenix in PostgreSQL
+│   └── kubernetes/              # Manifesti K8s (infra + app + configmap)
+│
 └── docs/                      # Documentazione
+    ├── arize-phoenix.md       # Guida completa integrazione Phoenix
     ├── architecture.md        # Architettura del sistema
     ├── getting-started.md     # Guida setup completa
     ├── agent-development.md   # Guida sviluppo agenti
@@ -124,6 +134,27 @@ agent-setup/
 | `make lint` | Lint con ruff |
 | `make fmt` | Auto-format con ruff |
 
+### Observability (Phoenix)
+
+| Comando | Descrizione |
+|---------|-------------|
+| `make phoenix-logs` | Log Phoenix in tempo reale |
+| `make test-phoenix` | Healthcheck Phoenix |
+| `make k8s-logs-phoenix` | Log Phoenix in Kubernetes |
+| `make k8s-port-forward-phoenix` | Phoenix UI su localhost:6006 via K8s |
+
+Per la guida completa sull'integrazione Phoenix vedi [docs/arize-phoenix.md](docs/arize-phoenix.md).
+
+### Kubernetes
+
+| Comando | Descrizione |
+|---------|-------------|
+| `make k8s-apply-all` | Deploy completo via Kustomize |
+| `make k8s-infra` | Deploy infrastruttura (LiteLLM + Qdrant + PostgreSQL + Phoenix) |
+| `make k8s-app` | Deploy solo app |
+| `make k8s-status` | Stato dei pod |
+| `make k8s-destroy` | Elimina tutto il namespace |
+
 ## Provider LLM Configurati
 
 | Provider | Modello | Note |
@@ -145,6 +176,7 @@ Tutti i provider ruotano automaticamente sotto il nome unificato `model="llm"` c
 
 ## Documentazione
 
+- [Integrazione Arize Phoenix](docs/arize-phoenix.md)
 - [Guida Setup Completa](docs/getting-started.md)
 - [Architettura del Sistema](docs/architecture.md)
 - [Sviluppo Agenti](docs/agent-development.md)
@@ -157,6 +189,7 @@ Tutti i provider ruotano automaticamente sotto il nome unificato `model="llm"` c
 - [LangGraph](https://langchain-ai.github.io/langgraph/) - Framework per grafi agentici
 - [LangChain](https://python.langchain.com/) - Interfacce model/tool
 - [LiteLLM](https://docs.litellm.ai/) - Proxy multi-provider con API OpenAI-compatible
+- [Arize Phoenix](https://docs.arize.com/phoenix) - LLM observability e tracing via OpenTelemetry
 - [Pydantic](https://docs.pydantic.dev/) - Validazione schema I/O
 - [Qdrant](https://qdrant.tech/) - Vector database ad alte prestazioni
 - [pgvector](https://github.com/pgvector/pgvector) - Estensione vector search per PostgreSQL

@@ -33,12 +33,17 @@ services:
       DEFAULT_MODEL: llm
       QDRANT_URL: http://qdrant:6333
       PGVECTOR_URI: postgresql://postgres:postgres@postgres-vector:5432/vectors
+      PHOENIX_COLLECTOR_ENDPOINT: http://phoenix:6006
+      PHOENIX_PROJECT_NAME: agent-setup
+      PHOENIX_TRACING_ENABLED: "true"
     depends_on:
       litellm-proxy:
         condition: service_healthy
       qdrant:
         condition: service_healthy
       postgres-vector:
+        condition: service_healthy
+      phoenix:
         condition: service_healthy
     networks:
       - agent-network
@@ -121,6 +126,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-vectors}
     volumes:
       - pgvector_data:/var/lib/postgresql/data
+      - ./deploy/docker/init-phoenix-db.sql:/docker-entrypoint-initdb.d/init-phoenix-db.sql:ro
     networks:
       - agent-network
     restart: unless-stopped
@@ -134,6 +140,35 @@ services:
       resources:
         limits:
           memory: 512M
+
+  # ==========================================
+  # Arize Phoenix - LLM Observability
+  # ==========================================
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    container_name: phoenix
+    ports:
+      - "6006:6006"    # UI + OTLP HTTP
+      - "4317:4317"    # OTLP gRPC
+    environment:
+      PHOENIX_SQL_DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres-vector:5432/phoenix
+      PHOENIX_ENABLE_PROMETHEUS: "false"
+    depends_on:
+      postgres-vector:
+        condition: service_healthy
+    networks:
+      - agent-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:6006/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
 # ==========================================
 # Rete condivisa tra tutti i servizi

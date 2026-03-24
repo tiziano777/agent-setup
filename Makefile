@@ -241,8 +241,8 @@ test-agents:
 		python -m pytest $$agent/tests/ -v || true; \
 	done
 
-# Test completo di tutti i moduli (db + llm + agents + app)
-test-modules: test-db llm-proxy-health test-all test-agents test-app
+# Test completo di tutti i moduli (db + llm + agents + app + phoenix)
+test-modules: test-db llm-proxy-health test-all test-agents test-app test-phoenix
 	@echo "\n--- Test di tutti i moduli completato ---"
 
 # ==========================================
@@ -325,6 +325,19 @@ external-status:
 	fi
 
 # ==========================================
+# Phoenix - LLM Observability
+# ==========================================
+
+# Log di Phoenix
+phoenix-logs:
+	docker compose logs -f phoenix
+
+# Healthcheck Phoenix
+test-phoenix:
+	@echo "--- Test Phoenix ---"
+	@curl -sf http://localhost:6006/healthz && echo " Phoenix OK" || echo "Phoenix non raggiungibile su :6006"
+
+# ==========================================
 # Kubernetes
 # ==========================================
 
@@ -349,7 +362,7 @@ k8s-proxy-config: k8s-namespace
 k8s-secrets: k8s-namespace
 	kubectl apply -f $(K8S_DIR)/secrets.yml
 
-# Applica l'infrastruttura (LiteLLM + Qdrant + PostgreSQL)
+# Applica l'infrastruttura (LiteLLM + Qdrant + PostgreSQL + Phoenix)
 k8s-infra: k8s-namespace k8s-configmap k8s-proxy-config
 	kubectl apply -f $(K8S_DIR)/infra.yml
 
@@ -381,6 +394,10 @@ k8s-logs-app:
 k8s-logs-proxy:
 	kubectl logs -f deployment/litellm-proxy -n $(K8S_NS)
 
+# Log di Phoenix
+k8s-logs-phoenix:
+	kubectl logs -f statefulset/phoenix -n $(K8S_NS)
+
 # Port-forward dell'app (accedi su localhost:8000)
 k8s-port-forward-app:
 	kubectl port-forward svc/agent-app 8000:8000 -n $(K8S_NS)
@@ -388,6 +405,10 @@ k8s-port-forward-app:
 # Port-forward del proxy LLM (accedi su localhost:4000)
 k8s-port-forward-proxy:
 	kubectl port-forward svc/litellm-proxy 4000:4000 -n $(K8S_NS)
+
+# Port-forward di Phoenix (accedi su localhost:6006)
+k8s-port-forward-phoenix:
+	kubectl port-forward svc/phoenix 6006:6006 -n $(K8S_NS)
 
 # Shell di debug per testare connettivita nel cluster
 k8s-debug:

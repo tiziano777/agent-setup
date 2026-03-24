@@ -44,6 +44,12 @@ rerankers = [
 retrieval-all = [
     "agent-setup[retrieval,qdrant,pgvector,openai-embeddings,rerankers]",
 ]
+phoenix = [
+    "arize-phoenix-otel>=0.8",
+    "openinference-instrumentation-langchain>=0.1",
+    "arize-phoenix-evals>=0.18",
+    "opentelemetry-exporter-otlp>=1.20",
+]
 
 [build-system]
 requires = ["setuptools>=75.0"]
