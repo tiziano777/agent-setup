@@ -1,7 +1,33 @@
 """Evaluation scorers for __AGENT_NAME__.
 
 Scoring functions to evaluate agent output quality.
-Can be used standalone or integrated with LangSmith evaluation.
+Can be used standalone or with the Phoenix evaluation toolkit.
+
+Phoenix toolkit usage (requires ``pip install -e '.[phoenix]'``)::
+
+    from src.shared.phoenix_eval import (
+        correctness_evaluator,
+        faithfulness_evaluator,
+        evaluate_batch,
+        create_llm_judge,
+    )
+
+    # Built-in evaluators
+    results = evaluate_batch(
+        data=[{"input": "...", "output": "...", "context": "..."}],
+        evaluators=[correctness_evaluator(), faithfulness_evaluator()],
+    )
+
+    # Custom LLM-as-Judge
+    tone_judge = create_llm_judge(
+        name="tone",
+        prompt_template=(
+            "Is the response professional?\\n"
+            "Input: {input}\\nOutput: {output}\\n"
+            "Answer PROFESSIONAL or CASUAL."
+        ),
+        choices={"PROFESSIONAL": 1.0, "CASUAL": 0.0},
+    )
 """
 
 

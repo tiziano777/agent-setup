@@ -32,6 +32,10 @@ make lint               # Ruff lint
 make fmt                # Ruff auto-format
 make phoenix-logs       # Phoenix container logs
 make test-phoenix       # Phoenix healthcheck
+make sandbox-pull       # Pre-pull sandbox Docker image
+make sandbox-ps         # List running sandbox containers
+make sandbox-clean      # Clean up orphaned sandbox containers
+make test-sandbox       # Run sandbox integration tests
 make k8s-apply-all      # Deploy everything to Kubernetes via Kustomize
 make k8s-logs-phoenix   # Phoenix logs in Kubernetes
 make k8s-port-forward-phoenix  # Access Phoenix UI on localhost:6006 via K8s
@@ -43,7 +47,7 @@ make k8s-port-forward-phoenix  # Access Phoenix UI on localhost:6006 via K8s
 - **Ruff** for linting and formatting (line-length 100)
 - **Pydantic v2** for I/O schemas
 - **TypedDict** with `Annotated[list[AnyMessage], add_messages]` for agent state
-- **Graph API** (`agent.py`) as primary, **Functional API** (`pipelines/pipeline.py`) as alternative
+- **Graph API** (`agent.py`) as primary (uses `create_react_agent` with `execute_cmd` tool by default), **Functional API** (`pipelines/pipeline.py`) as alternative
 - Tests in each agent's `tests/` directory, run via pytest
 - System prompts in `prompts/system.py`, not inline
 - One agent = one self-contained Python sub-package under `src/agents/`
@@ -53,11 +57,11 @@ make k8s-port-forward-phoenix  # Access Phoenix UI on localhost:6006 via K8s
 ```
 src/agents/<name>/
   __init__.py      # Exports graph + workflow; calls setup_tracing() for auto-instrumentation
-  agent.py         # StateGraph: build_graph() -> compile()
+  agent.py         # ReAct agent via create_react_agent() with execute_cmd tool
   config/          # AgentSettings dataclass
   states/          # AgentState(TypedDict) with add_messages reducer
-  nodes/           # Node functions: (state) -> partial update dict
-  tools/           # @tool decorated functions
+  nodes/           # Node functions: (state) -> partial update dict (for custom StateGraph flows)
+  tools/           # Imports execute_cmd from src/shared/sandbox; add agent-specific tools here
   prompts/         # SYSTEM_PROMPT constant
   schemas/         # Pydantic AgentInput/AgentOutput
   pipelines/       # @entrypoint/@task Functional API
@@ -80,8 +84,74 @@ Phoenix provides full LLM observability via OpenTelemetry. Tracing is **automati
 
 Key files:
 - `src/shared/tracing.py` - `setup_tracing()` and `get_tracer()` utilities
-- `deploy/docker/init-phoenix-db.sql` - Creates `phoenix` database in PostgreSQL
+- `src/shared/phoenix_eval/` - Evaluation toolkit (LLM-as-Judge, RAG evals, tool evals, batch runner)
+- `deploy/docker/init-db.sql` - Creates `phoenix` database in PostgreSQL
 - `docs/arize-phoenix-llms.txt` - Arize AX documentation reference index
+
+### Evaluation Toolkit (`src/shared/phoenix_eval/`)
+
+Modular evaluation toolkit built on `arize-phoenix-evals`. All evaluators use the LiteLLM proxy.
+
+Files:
+- `llm_bridge.py` - `get_eval_llm()` creates Phoenix LLM via proxy (foundation for all LLM evaluators)
+- `builtin.py` - Factory functions for built-in evaluators (conciseness, correctness, faithfulness, etc.)
+- `custom.py` - `create_llm_judge()` for custom LLM-as-Judge, `create_code_evaluator()` for deterministic evals
+- `runner.py` - `evaluate_batch()` / `async_evaluate_batch()` for running evaluators on data
+- `annotations.py` - `to_phoenix_annotations()` for logging results to Phoenix traces
+
+Usage: `from src.shared.phoenix_eval import correctness_evaluator, evaluate_batch`
+
+### DeepEval Toolkit (`src/shared/deep_eval/`)
+
+Extensible evaluation toolkit built on `deepeval`. All evaluators use the LiteLLM proxy via `LiteLLMModel`. Provides a `BaseDeepEvaluator` ABC for custom evaluators, factory functions for all built-in metrics, and specialized RAG evaluators for Cognee, Qdrant, and PGVector.
+
+Files:
+- `config.py` - `DeepEvalSettings` dataclass + `configure_deepeval()` with env var defaults
+- `llm_bridge.py` - `get_deepeval_model()` creates `LiteLLMModel` via proxy (foundation for all metrics)
+- `base.py` - `BaseDeepEvaluator` ABC: extend `_setup_metrics()` + `create_test_case()` for custom evaluators
+- `metrics.py` - Factory functions: `answer_relevancy_metric()`, `faithfulness_metric()`, `hallucination_metric()`, `contextual_recall_metric()`, `contextual_precision_metric()`, `contextual_relevancy_metric()`, `toxicity_metric()`, `bias_metric()`, `task_completion_metric()`, `geval_metric()`
+- `rag_evaluators.py` - `CogneeRAGEvaluator`, `QdrantRAGEvaluator`, `PGVectorRAGEvaluator` with `retrieve_context()` + RAG metrics
+- `agent_evaluators.py` - `AgentEvaluator` for end-to-end LangGraph evaluation (sync + async), `evaluate_langgraph_agent()` / `aevaluate_langgraph_agent()` convenience functions
+- `runner.py` - `evaluate()` / `evaluate_dataset()` batch runners wrapping `deepeval.evaluate()`
+- `test_cases.py` - `create_test_case()`, `create_rag_test_case()`, `create_test_cases_from_dicts()` helpers
+
+Usage: `from src.shared.deep_eval import get_deepeval_model, answer_relevancy_metric, evaluate`
+
+## Cognee Knowledge Graph Memory (`src/shared/cognee_toolkit/`)
+
+Knowledge graph memory toolkit powered by Cognee. Transforms text into structured knowledge graphs with entities, relationships, and semantic search. Routes all LLM calls through the LiteLLM proxy, uses existing Qdrant for vectors, and Neo4j for the graph database.
+
+Files:
+- `config.py` - `CogneeSettings` dataclass + `setup_cognee()` infrastructure wiring (LiteLLM proxy, Qdrant, Neo4j)
+- `memory.py` - `CogneeMemory` class wrapping add/cognify/search/memify with async + sync interfaces
+- `tools.py` - `get_cognee_tools()` and `get_cognee_memory_tools()` factories for LangGraph @tool functions
+- `nodes.py` - Node factories: `create_cognee_search_node()`, `create_cognee_add_node()`, `create_cognee_enriched_llm_node()` (RAG-over-KG)
+- `search.py` - `CogneeSearchType` enum (14 search types), `search_with_fallback()`, `multi_search()`
+
+Usage: `from src.shared.cognee_toolkit import get_cognee_memory, get_cognee_tools`
+
+Infrastructure: Neo4j Browser UI at http://localhost:7474, Bolt at localhost:7687
+
+## Sandbox Toolkit (`src/shared/sandbox/`)
+
+Docker-based sandboxed shell execution for LangGraph agents. Every agent created via `make new-agent` ships with `execute_cmd` as its default tool. Philosophy: one powerful shell tool instead of many specialized tools, reducing context length and covering 90%+ of use cases (code execution, file I/O, data processing).
+
+The sandbox container runs with: read-only root filesystem, writable `/workspace` tmpfs, no network access, memory/CPU/PID limits, all capabilities dropped, `no-new-privileges`, runs as `nobody`.
+
+Files:
+- `config.py` - `SandboxSettings` dataclass with env var defaults (image, timeout, memory, CPU, network, workspace size)
+- `engine.py` - `DockerSandbox` class managing container lifecycle (warm container strategy, thread-safe, auto-recovery)
+- `tools.py` - `get_sandbox_tools()` factory returning `[execute_cmd]` tool with `atexit` cleanup
+
+Usage: `from src.shared.sandbox import get_sandbox_tools`
+
+Env vars (all optional, have defaults):
+- `SANDBOX_IMAGE` (default: python:3.11-slim)
+- `SANDBOX_TIMEOUT` (default: 30)
+- `SANDBOX_MEM_LIMIT` (default: 256m)
+- `SANDBOX_CPU_LIMIT` (default: 0.5)
+- `SANDBOX_WORKSPACE_SIZE` (default: 128M)
+- `SANDBOX_NETWORK` (default: none)
 
 ## Environment Variables
 
@@ -96,6 +166,9 @@ Key infrastructure vars (all have defaults):
 - `PHOENIX_COLLECTOR_ENDPOINT` (default: http://localhost:6006)
 - `PHOENIX_PROJECT_NAME` (default: agent-setup)
 - `PHOENIX_TRACING_ENABLED` (default: true, set false to disable)
+- `NEO4J_URL` (default: bolt://localhost:7687)
+- `NEO4J_USERNAME` (default: neo4j)
+- `NEO4J_PASSWORD` (default: password)
 
 Run `make env-check` to validate configuration.
 
@@ -121,7 +194,7 @@ Most relevant skills for this project:
 - `proxy_config.yml` - LiteLLM config for all 12 LLM providers
 - `Makefile` - All project commands
 - `serve.py` - FastAPI server wrapping agent1's graph
-- `docker-compose.yml` - Dev infrastructure (proxy + Qdrant + PostgreSQL + Phoenix)
+- `docker-compose.yml` - Dev infrastructure (proxy + Qdrant + PostgreSQL + Phoenix + Neo4j)
 - `docker-compose.prod.yml` - Full production stack
 - `src/shared/llm.py` - Central LLM client factory
 - `src/shared/registry.py` - Agent auto-discovery
@@ -129,7 +202,11 @@ Most relevant skills for this project:
 - `src/shared/retrieval/pipeline.py` - RAG pipeline with RRF fusion
 - `src/shared/env_validation.py` - Environment variable validation
 - `src/shared/tracing.py` - Phoenix OTEL tracing setup (call `setup_tracing()` at startup)
-- `deploy/docker/init-phoenix-db.sql` - Phoenix database init for PostgreSQL
+- `src/shared/phoenix_eval/` - Phoenix evaluation toolkit (see Evaluation Toolkit section above)
+- `src/shared/deep_eval/` - DeepEval evaluation toolkit (see DeepEval Toolkit section above)
+- `src/shared/cognee_toolkit/` - Cognee knowledge graph memory (see Cognee section above)
+- `src/shared/sandbox/` - Docker sandboxed shell execution (see Sandbox Toolkit section above)
+- `deploy/docker/init-db.sql` - Phoenix database init for PostgreSQL
 - `deploy/kubernetes/infra.yml` - K8s infrastructure (LiteLLM + Qdrant + PostgreSQL + Phoenix)
 - `deploy/kubernetes/configmap.yml` - K8s non-sensitive config (includes Phoenix endpoint)
 

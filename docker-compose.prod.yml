@@ -36,6 +36,10 @@ services:
       PHOENIX_COLLECTOR_ENDPOINT: http://phoenix:6006
       PHOENIX_PROJECT_NAME: agent-setup
       PHOENIX_TRACING_ENABLED: "true"
+      # Neo4j (Cognee knowledge graph)
+      NEO4J_URL: bolt://neo4j:7687
+      NEO4J_USERNAME: neo4j
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-password}
     depends_on:
       litellm-proxy:
         condition: service_healthy
@@ -44,6 +48,8 @@ services:
       postgres-vector:
         condition: service_healthy
       phoenix:
+        condition: service_healthy
+      neo4j:
         condition: service_healthy
     networks:
       - agent-network
@@ -126,7 +132,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-vectors}
     volumes:
       - pgvector_data:/var/lib/postgresql/data
-      - ./deploy/docker/init-phoenix-db.sql:/docker-entrypoint-initdb.d/init-phoenix-db.sql:ro
+      - ./deploy/docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     networks:
       - agent-network
     restart: unless-stopped
@@ -170,6 +176,34 @@ services:
         limits:
           memory: 1G
 
+  # ==========================================
+  # Neo4j - Graph Database (Cognee Knowledge Graph)
+  # ==========================================
+  neo4j:
+    image: neo4j:5-community
+    container_name: neo4j
+    ports:
+      - "7474:7474"   # Browser UI
+      - "7687:7687"   # Bolt protocol
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-password}
+      NEO4J_PLUGINS: '["apoc"]'
+    volumes:
+      - neo4j_data:/data
+    networks:
+      - agent-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:7474"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
 # ==========================================
 # Rete condivisa tra tutti i servizi
 # ==========================================
@@ -183,3 +217,4 @@ networks:
 volumes:
   qdrant_data:
   pgvector_data:
+  neo4j_data:

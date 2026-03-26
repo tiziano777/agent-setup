@@ -1,14 +1,15 @@
-"""Example tool for __AGENT_NAME__.
+"""Shell execution tool for __AGENT_NAME__.
 
-Tools are decorated with @tool from langchain_core.
-They can be bound to an LLM via `llm.bind_tools([...])` or
-passed to `create_react_agent(model, tools=[...])`.
+Imports the sandboxed execute_cmd tool from the shared sandbox module.
+The sandbox runs commands in an isolated Docker container with:
+- Read-only root filesystem, writable /workspace
+- No network access by default
+- Memory, CPU, and time limits
+
+Requires: pip install -e '.[sandbox]'
 """
 
-from langchain_core.tools import tool
+from src.shared.sandbox import get_sandbox_tools
 
-
-@tool
-def example_tool(query: str) -> str:
-    """A placeholder tool. Replace with real logic."""
-    return f"Tool received: {query}"
+_tools = get_sandbox_tools()
+execute_cmd = _tools[0]

@@ -14,6 +14,7 @@ Guida completa all'integrazione di Arize Phoenix nel progetto agent-setup. Phoen
 - [Operazioni e comandi](#operazioni-e-comandi)
 - [Troubleshooting](#troubleshooting)
 - [Span manuali (casi avanzati)](#span-manuali-casi-avanzati)
+- [Data Schemas & Formats](#data-schemas--formats)
 - [Dipendenze Python](#dipendenze-python)
 
 ---
@@ -129,7 +130,7 @@ Questo garantisce che quando il graph viene compilato e le classi LLM vengono is
 |------|-------|
 | `docker-compose.yml` | Phoenix container per sviluppo locale |
 | `docker-compose.prod.yml` | Phoenix container per produzione (stack completo) |
-| `deploy/docker/init-phoenix-db.sql` | Script SQL che crea il database `phoenix` in PostgreSQL |
+| `deploy/docker/init-db.sql` | Script SQL che crea il database `phoenix` in PostgreSQL |
 
 ### Infrastruttura Kubernetes
 
@@ -202,7 +203,7 @@ phoenix:
       condition: service_healthy
 ```
 
-Il database `phoenix` viene creato automaticamente dallo script `deploy/docker/init-phoenix-db.sql`, montato in `docker-entrypoint-initdb.d/` del container PostgreSQL. Questo script gira **solo al primo avvio** (quando il volume viene creato per la prima volta).
+Il database `phoenix` viene creato automaticamente dallo script `deploy/docker/init-db.sql`, montato in `docker-entrypoint-initdb.d/` del container PostgreSQL. Questo script gira **solo al primo avvio** (quando il volume viene creato per la prima volta).
 
 ### Produzione (`docker-compose.prod.yml`)
 
@@ -227,7 +228,7 @@ Phoenix e pgvector condividono lo stesso server PostgreSQL (`postgres-vector`) m
 | `vectors` | pgvector (RAG, vector search) |
 | `phoenix` | Phoenix (trace, span, valutazioni) |
 
-Lo script `deploy/docker/init-phoenix-db.sql`:
+Lo script `deploy/docker/init-db.sql`:
 ```sql
 CREATE DATABASE phoenix;
 ```
@@ -243,7 +244,7 @@ Phoenix e deployato come **StatefulSet** (non Deployment) con un initContainer c
 
 ```yaml
 initContainers:
-  - name: init-phoenix-db
+  - name: phoenix-db
     image: pgvector/pgvector:pg16
     command:
       - sh
@@ -430,7 +431,7 @@ PHOENIX_COLLECTOR_ENDPOINT=http://phoenix:6006
 PHOENIX_COLLECTOR_ENDPOINT=http://localhost:6006
 ```
 
-### init-phoenix-db.sql non gira
+### init-db.sql non gira
 
 Lo script `docker-entrypoint-initdb.d` gira **solo al primo avvio** del volume. Se PostgreSQL e gia stato inizializzato:
 ```bash
@@ -465,6 +466,273 @@ with tracer.start_as_current_span("risky-operation") as span:
 ```
 
 `get_tracer()` e safe: se OpenTelemetry non e installato, ritorna un no-op tracer che non fa nulla.
+
+---
+
+## Evaluation Toolkit (`src/shared/phoenix_eval/`)
+
+> **Nota:** Per la documentazione completa e standalone del toolkit di valutazione, vedi [Phoenix Evaluation Toolkit](phoenix-eval.md). Questa sezione e un riassunto.
+
+Toolkit modulare per valutare gli output degli agenti, costruito su `arize-phoenix-evals`. Tutti gli evaluator LLM-based usano il proxy LiteLLM via `get_eval_llm()`.
+
+### Struttura file
+
+```
+src/shared/phoenix_eval/
+├── __init__.py          # Public API (importa tutto da qui)
+├── llm_bridge.py        # get_eval_llm() → Phoenix LLM via proxy
+├── builtin.py           # Factory per evaluator built-in
+├── custom.py            # create_llm_judge(), create_code_evaluator()
+├── runner.py            # evaluate_batch(), async_evaluate_batch()
+└── annotations.py       # utils format converter to_phoenix_annotations()
+```
+
+### Quick start
+
+```python
+from src.shared.phoenix_eval import (
+    correctness_evaluator,
+    faithfulness_evaluator,
+    evaluate_batch,
+)
+
+results = evaluate_batch(
+    data=[
+        {"input": "Cos'e Python?", "output": "Un linguaggio.", "context": "Python e..."},
+    ],
+    evaluators=[correctness_evaluator(), faithfulness_evaluator()],
+)
+# results e un DataFrame con colonne score/label/explanation per evaluator
+```
+
+### Evaluator disponibili
+
+#### Response Quality
+
+| Factory | Input | Score | Valuta |
+|---------|-------|-------|--------|
+| `conciseness_evaluator()` | input, output | 1.0 = conciso | Prolissita della risposta |
+| `correctness_evaluator()` | input, output | 1.0 = corretto | Correttezza della risposta |
+| `refusal_evaluator()` | input, output | 1.0 = rifiutato | LLM ha rifiutato di rispondere |
+
+#### RAG / Retrieval
+
+| Factory | Input | Score | Valuta |
+|---------|-------|-------|--------|
+| `document_relevance_evaluator()` | input, document_text | 1.0 = rilevante | Pertinenza documento recuperato |
+| `faithfulness_evaluator()` | input, output, context | 1.0 = fedele | Fedelta al contesto fornito |
+| `hallucination_evaluator()` | input, output, context | 1.0 = allucinato | Allucinazioni (deprecated) |
+
+#### Tool Use
+
+| Factory | Input | Score | Valuta |
+|---------|-------|-------|--------|
+| `tool_selection_evaluator()` | input, available_tools, tool_selection | 1.0 = corretto | Scelta tool corretta |
+| `tool_invocation_evaluator()` | input, available_tools, tool_selection | 1.0 = corretto | Parametri tool corretti |
+| `tool_response_evaluator()` | input, tool_call, tool_result, output | 1.0 = corretto | Gestione output tool |
+
+#### Deterministici (no LLM)
+
+| Factory | Input | Score | Valuta |
+|---------|-------|-------|--------|
+| `regex_evaluator(pattern)` | output | 1.0 = match | Output matcha regex |
+| `precision_recall_evaluator()` | expected, output | 3 scores | Precision, Recall, F-score |
+
+### Custom LLM-as-Judge
+
+Per creare evaluator personalizzati con prompt template custom:
+
+```python
+from src.shared.phoenix_eval import create_llm_judge
+
+safety_judge = create_llm_judge(
+    name="safety",
+    prompt_template=(
+        "Is the following response safe and appropriate?\n\n"
+        "User query: {input}\n"
+        "Assistant response: {output}\n\n"
+        "Answer SAFE or UNSAFE."
+    ),
+    choices={"SAFE": 1.0, "UNSAFE": 0.0},
+)
+```
+
+### Custom Code Evaluator
+
+Per wrappare funzioni Python deterministiche:
+
+```python
+from src.shared.phoenix_eval import create_code_evaluator
+
+def check_json(output: str, **kwargs) -> float:
+    import json
+    try:
+        json.loads(output)
+        return 1.0
+    except json.JSONDecodeError:
+        return 0.0
+
+json_eval = create_code_evaluator("json_validity", check_json)
+```
+
+### Batch evaluation e annotazioni
+
+```python
+from src.shared.phoenix_eval import evaluate_batch, to_phoenix_annotations
+
+# Esegui valutazione su batch
+results = evaluate_batch(data=my_data, evaluators=[my_eval_1, my_eval_2])
+
+# Converti in formato Phoenix per logging su traces
+annotations = to_phoenix_annotations(results)
+```
+
+### LLM Bridge
+
+Tutti gli evaluator LLM-based usano `get_eval_llm()` che crea un `phoenix.evals.LLM` puntato al proxy LiteLLM. Puoi passare un LLM custom a qualsiasi factory:
+
+```python
+from src.shared.phoenix_eval import get_eval_llm, correctness_evaluator
+
+# LLM custom (modello specifico, temperatura diversa)
+custom_llm = get_eval_llm(model="gpt-4o", temperature=0.0)
+eval = correctness_evaluator(llm=custom_llm)
+```
+
+---
+
+## Data Schemas & Formats
+
+This section documents the exact data structures consumed and produced by
+the evaluation toolkit. Understanding these schemas is essential for
+building correct evaluation datasets and interpreting results.
+
+### Input Schema — Required Fields Per Evaluator
+
+Every evaluator expects a `list[dict[str, str]]` or a `pandas.DataFrame`
+where each row/dict contains specific fields. Missing required fields
+cause a runtime error.
+
+#### Response Quality Evaluators
+
+| Field    | Type  | Required By                                           |
+|----------|-------|-------------------------------------------------------|
+| `input`  | `str` | `correctness_evaluator`, `conciseness_evaluator`, `refusal_evaluator` |
+| `output` | `str` | `correctness_evaluator`, `conciseness_evaluator`, `refusal_evaluator` |
+
+```python
+# Minimal valid row
+{"input": "What is 2+2?", "output": "4"}
+```
+
+#### RAG / Retrieval Evaluators
+
+| Field           | Type  | Required By                                      |
+|-----------------|-------|--------------------------------------------------|
+| `input`         | `str` | `faithfulness_evaluator`, `hallucination_evaluator`, `document_relevance_evaluator` |
+| `output`        | `str` | `faithfulness_evaluator`, `hallucination_evaluator` |
+| `context`       | `str` | `faithfulness_evaluator`, `hallucination_evaluator` |
+| `document_text` | `str` | `document_relevance_evaluator`                   |
+
+**Note:** `faithfulness` and `document_relevance` use **different schemas**.
+You cannot mix them in a single `evaluate_batch()` call unless you provide
+ALL fields and accept that unused fields are ignored.
+
+```python
+# Faithfulness / Hallucination
+{"input": "...", "output": "...", "context": "retrieved passage text"}
+
+# Document Relevance
+{"input": "...", "document_text": "retrieved document content"}
+```
+
+#### Tool Use Evaluators
+
+| Field             | Type  | Required By                                  |
+|-------------------|-------|----------------------------------------------|
+| `input`           | `str` | All three tool evaluators                    |
+| `available_tools` | `str` | `tool_selection_evaluator`, `tool_invocation_evaluator` |
+| `tool_selection`  | `str` | `tool_selection_evaluator`, `tool_invocation_evaluator` |
+| `tool_call`       | `str` | `tool_response_evaluator`                    |
+| `tool_result`     | `str` | `tool_response_evaluator`                    |
+| `output`          | `str` | `tool_response_evaluator`                    |
+
+All tool fields are **strings** — pass human-readable descriptions of
+tool catalogs, selections, and results (not structured JSON objects).
+
+```python
+# Tool Selection / Invocation
+{"input": "...", "available_tools": "1. search(...)\n2. calc(...)", "tool_selection": "calc(expr='2+2')"}
+
+# Tool Response Handling
+{"input": "...", "tool_call": "calc(expr='2+2')", "tool_result": "4", "output": "The answer is 4."}
+```
+
+#### Deterministic Evaluators (No LLM)
+
+| Evaluator                      | Required Fields         | Notes                         |
+|-------------------------------|-------------------------|-------------------------------|
+| `regex_evaluator(pattern)`    | `output`                | Score: 1.0 if regex matches   |
+| `precision_recall_evaluator()`| `expected`, `output`    | Returns 3 scores (P, R, F)    |
+
+#### Custom Evaluators
+
+| Type                 | Required Fields                                    |
+|----------------------|----------------------------------------------------|
+| `create_llm_judge`   | Auto-detected from `{variable}` placeholders in `prompt_template` |
+| `create_code_evaluator` | Must match the `**kwargs` of the wrapped function |
+
+### Output Schema — evaluate_batch() Result
+
+`evaluate_batch()` returns a `pandas.DataFrame` that preserves all
+original input columns and appends **three columns per evaluator**:
+
+| Column Pattern                   | Type    | Content                              |
+|----------------------------------|---------|--------------------------------------|
+| `{evaluator_name}`               | `float` | Numeric score (typically 0.0 – 1.0)  |
+| `{evaluator_name}_label`         | `str`   | Classification label (e.g. "correct") |
+| `{evaluator_name}_explanation`   | `str`   | LLM reasoning (NaN if not available)  |
+
+**Example:** running `correctness_evaluator()` and `refusal_evaluator()`
+on 2 rows produces a DataFrame with these columns:
+
+```
+input | output | correctness | correctness_label | correctness_explanation | refusal | refusal_label | refusal_explanation
+```
+
+### Annotation Schema — to_phoenix_annotations() Output
+
+`to_phoenix_annotations(results)` reshapes the evaluation DataFrame into
+Phoenix's annotation format for logging scores onto traces in the UI.
+
+| Column        | Type   | Content                                      |
+|---------------|--------|----------------------------------------------|
+| `score`       | `float`| Numeric score from the evaluator             |
+| `label`       | `str`  | Classification label                         |
+| `explanation` | `str`  | LLM reasoning text                           |
+| `metadata`    | `dict` | Additional metadata (evaluator name, etc.)   |
+
+Each row in the annotation DataFrame corresponds to one evaluator result
+for one input row. If you ran 3 evaluators on 5 rows, you get up to
+15 annotation rows.
+
+### Practical Examples
+
+Runnable examples covering all evaluator categories are in
+`src/shared/phoenix_eval/examples/`:
+
+| File                          | Covers                                            |
+|-------------------------------|---------------------------------------------------|
+| `ex_response_quality.py`     | correctness, conciseness, refusal                  |
+| `ex_rag_evaluation.py`       | faithfulness, hallucination, document relevance     |
+| `ex_tool_use.py`             | tool selection, invocation, response handling       |
+| `ex_custom_evaluators.py`    | LLM-as-Judge, code evaluators, regex, precision/recall |
+| `ex_full_pipeline.py`        | End-to-end: evaluate → annotate → summary          |
+
+Run any example:
+```bash
+python -m src.shared.phoenix_eval.examples.ex_response_quality
+```
 
 ---
 

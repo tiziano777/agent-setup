@@ -9,7 +9,12 @@ Ambiente modulare per lo sviluppo di agenti LangGraph con rotazione automatica t
 - **Multi-Agent** - Pattern predefiniti: supervisor, swarm/p2p, indipendente
 - **LLM Rotation** - 12 provider LLM configurati con fallback automatico e retry
 - **Retrieval (RAG)** - Pipeline ibrida con vector DB (Qdrant, pgvector), BM25, RRF fusion e reranking
+- **Multimodal RAG** - Pipeline RAG-Anything per PDF, immagini, tabelle, equazioni con GLM-OCR
+- **Knowledge Graph** - Cognee per grafi di conoscenza con 14 tipi di ricerca (Qdrant + Neo4j)
 - **Observability** - Tracing automatico con Arize Phoenix via OpenTelemetry (PostgreSQL backend)
+- **Evaluation (Phoenix)** - LLM-as-Judge, evaluator built-in, batch runner con annotazioni Phoenix
+- **Evaluation (DeepEval)** - Metriche RAG, safety, agent con BaseDeepEvaluator estensibile
+- **Vulnerability Scanning** - Giskard per 9 categorie di vulnerabilita LLM
 - **Scaffolding** - Nuovo agente in un comando: `make new-agent name=my_agent`
 - **Registry** - Discovery automatica degli agenti a runtime
 
@@ -46,8 +51,8 @@ make test
 ```
 agent-setup/
 ├── .env.template              # Template API key per i provider
-├── docker-compose.yml         # LiteLLM proxy + Qdrant + PostgreSQL + Phoenix
-├── docker-compose.prod.yml    # Stack completo produzione (app + infra)
+├── docker-compose.yml         # LiteLLM proxy + Qdrant + PostgreSQL + Phoenix + Neo4j
+├── docker-compose.prod.yml    # Stack completo produzione (app + infra + Neo4j)
 ├── proxy_config.yml           # Configurazione 12 provider LLM
 ├── pyproject.toml             # Dipendenze e tool config
 ├── langgraph.json             # Entry point per deployment LangGraph
@@ -61,14 +66,19 @@ agent-setup/
 │   │   ├── memory.py          # Factory checkpointer + store
 │   │   ├── registry.py        # Auto-discovery agenti
 │   │   ├── orchestration.py   # Factory multi-agent
-│   │   └── retrieval/         # Pipeline RAG modulare
-│   │       ├── embeddings/    # BaseEmbedding, SentenceTransformer, OpenAI
-│   │       ├── vectorstores/  # BaseVectorStore, Qdrant, pgvector
-│   │       ├── chunking/      # BaseChunker, size/sentence/structure
-│   │       ├── indexes/       # BM25Index, VectorIndex (in-memory)
-│   │       ├── rerankers/     # BaseReranker, LLM, CrossEncoder
-│   │       ├── pipeline.py    # RetrieverPipeline (multi-index + RRF)
-│   │       └── contextual.py  # Arricchimento chunk con LLM
+│   │   ├── retrieval/         # Pipeline RAG modulare
+│   │   │   ├── embeddings/    # BaseEmbedding, SentenceTransformer, OpenAI
+│   │   │   ├── vectorstores/  # BaseVectorStore, Qdrant, pgvector
+│   │   │   ├── chunking/      # BaseChunker, size/sentence/structure
+│   │   │   ├── indexes/       # BM25Index, VectorIndex (in-memory)
+│   │   │   ├── rerankers/     # BaseReranker, LLM, CrossEncoder
+│   │   │   ├── multimodal/    # RAG multimodale (RAGAnything + GLM-OCR)
+│   │   │   ├── pipeline.py    # RetrieverPipeline (multi-index + RRF)
+│   │   │   └── contextual.py  # Arricchimento chunk con LLM
+│   │   ├── cognee_toolkit/    # Knowledge graph memory (Cognee + Neo4j)
+│   │   ├── phoenix_eval/      # Evaluation toolkit (arize-phoenix-evals)
+│   │   ├── deep_eval/         # Evaluation toolkit (deepeval)
+│   │   └── giskard_vulnerability_eval/  # Vulnerability scanning (Giskard)
 │   │
 │   ├── agents/
 │   │   ├── _template/         # Skeleton per nuovi agenti
@@ -91,16 +101,25 @@ agent-setup/
 │
 ├── deploy/
 │   ├── docker/
-│   │   └── init-phoenix-db.sql  # Creazione database phoenix in PostgreSQL
+│   │   └── init-db.sql  # Init database phoenix + schema isolation
 │   └── kubernetes/              # Manifesti K8s (infra + app + configmap)
 │
 └── docs/                      # Documentazione
-    ├── arize-phoenix.md       # Guida completa integrazione Phoenix
-    ├── architecture.md        # Architettura del sistema
     ├── getting-started.md     # Guida setup completa
+    ├── architecture.md        # Architettura del sistema
     ├── agent-development.md   # Guida sviluppo agenti
     ├── multi-agent.md         # Pattern multi-agente
-    └── api-reference.md       # Reference modulo shared
+    ├── vector-storage.md      # RAG: vector DB, embedding, chunking, RRF
+    ├── multimodal-rag.md      # RAG multimodale (PDF, immagini, tabelle)
+    ├── cognee.md              # Knowledge graph memory (Cognee)
+    ├── arize-phoenix.md       # Integrazione Phoenix (tracing + observability)
+    ├── phoenix-eval.md        # Evaluation toolkit Phoenix
+    ├── deep-eval.md           # Valutazione con DeepEval
+    ├── giskard.md             # Vulnerability scanning (Giskard)
+    ├── api-reference.md       # Reference modulo shared
+    ├── deployment.md          # Guida deployment (Docker, K8s, Cloud)
+    ├── makefile.md            # Reference comandi Makefile
+    └── update-external-repos.md  # Gestione repo esterni
 ```
 
 ## Comandi Makefile
@@ -176,12 +195,31 @@ Tutti i provider ruotano automaticamente sotto il nome unificato `model="llm"` c
 
 ## Documentazione
 
-- [Integrazione Arize Phoenix](docs/arize-phoenix.md)
+### Guide
+
 - [Guida Setup Completa](docs/getting-started.md)
 - [Architettura del Sistema](docs/architecture.md)
 - [Sviluppo Agenti](docs/agent-development.md)
 - [Pattern Multi-Agent](docs/multi-agent.md)
+- [Guida Deployment](docs/deployment.md)
+- [Comandi Makefile](docs/makefile.md)
+- [Gestione Repository Esterni](docs/update-external-repos.md)
+
+### Retrieval e Knowledge Graph
+
 - [Vector Storage e Retrieval (RAG)](docs/vector-storage.md)
+- [Multimodal RAG](docs/multimodal-rag.md)
+- [Knowledge Graph Memory (Cognee)](docs/cognee.md)
+
+### Observability e Valutazione
+
+- [Integrazione Arize Phoenix](docs/arize-phoenix.md)
+- [Phoenix Evaluation Toolkit](docs/phoenix-eval.md)
+- [DeepEval Toolkit](docs/deep-eval.md)
+- [Giskard Vulnerability Scanning](docs/giskard.md)
+
+### Reference
+
 - [API Reference](docs/api-reference.md)
 
 ## Dipendenze Principali
@@ -194,3 +232,8 @@ Tutti i provider ruotano automaticamente sotto il nome unificato `model="llm"` c
 - [Qdrant](https://qdrant.tech/) - Vector database ad alte prestazioni
 - [pgvector](https://github.com/pgvector/pgvector) - Estensione vector search per PostgreSQL
 - [sentence-transformers](https://www.sbert.net/) - Embedding locali e cross-encoder reranking
+- [Cognee](https://github.com/topoteretes/cognee) - Knowledge graph memory e RAG
+- [Neo4j](https://neo4j.com/) - Graph database per knowledge graph
+- [DeepEval](https://docs.confident-ai.com/docs/) - Framework valutazione LLM
+- [Giskard](https://docs.giskard.ai/) - Vulnerability scanning per LLM
+- [RAGAnything](https://github.com/HKUDS/RAGAnything) - RAG multimodale

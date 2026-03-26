@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from typing import Any
 
 from src.shared.retrieval.vectorstores.base import BaseVectorStore, Document, SearchResult
@@ -18,15 +19,19 @@ class PgVectorStore(BaseVectorStore):
         connection_uri: PostgreSQL connection string.
         index_type: Index type to create (``"hnsw"`` or ``"ivfflat"``).
             Set to ``None`` to skip index creation (flat scan).
+        schema: PostgreSQL schema to create tables in.  Defaults to
+            ``PGVECTOR_SCHEMA`` env var, or ``"public"`` if unset.
     """
 
     def __init__(
         self,
         connection_uri: str = "postgresql://postgres:postgres@localhost:5433/vectors",
         index_type: str | None = "hnsw",
+        schema: str | None = None,
     ) -> None:
         self._uri = connection_uri
         self._index_type = index_type
+        self._schema = schema or os.getenv("PGVECTOR_SCHEMA", "public")
         self._pool = None  # lazy
         self._table: str = "documents"
 
@@ -58,14 +63,17 @@ class PgVectorStore(BaseVectorStore):
     # -- BaseVectorStore interface -----------------------------------------
 
     def ensure_collection(self, name: str, dims: int) -> None:
-        self._table = name
+        qualified = f"{self._schema}.{name}" if self._schema != "public" else name
+        self._table = qualified
         pool = self._get_pool()
         with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
+                if self._schema != "public":
+                    cur.execute(f"CREATE SCHEMA IF NOT EXISTS {self._schema}")
                 cur.execute(
                     f"""
-                    CREATE TABLE IF NOT EXISTS {name} (
+                    CREATE TABLE IF NOT EXISTS {qualified} (
                         id TEXT PRIMARY KEY,
                         content TEXT NOT NULL,
                         embedding vector({dims}),
@@ -77,7 +85,7 @@ class PgVectorStore(BaseVectorStore):
                     cur.execute(
                         f"""
                         CREATE INDEX IF NOT EXISTS idx_{name}_hnsw
-                        ON {name}
+                        ON {qualified}
                         USING hnsw (embedding vector_cosine_ops)
                         """
                     )
@@ -85,7 +93,7 @@ class PgVectorStore(BaseVectorStore):
                     cur.execute(
                         f"""
                         CREATE INDEX IF NOT EXISTS idx_{name}_ivfflat
-                        ON {name}
+                        ON {qualified}
                         USING ivfflat (embedding vector_cosine_ops)
                         WITH (lists = 100)
                         """

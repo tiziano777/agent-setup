@@ -58,7 +58,7 @@ services:
       POSTGRES_DB: vectors
     volumes:
       - pgvector_data:/var/lib/postgresql/data
-      - ./deploy/docker/init-phoenix-db.sql:/docker-entrypoint-initdb.d/init-phoenix-db.sql:ro
+      - ./deploy/docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -107,6 +107,29 @@ services:
   #     - .env
   #   restart: unless-stopped
 
+  # ==========================================
+  # Neo4j Graph Database (Cognee)
+  # ==========================================
+  neo4j:
+    image: neo4j:5-community
+    container_name: neo4j
+    ports:
+      - "7474:7474"   # Browser UI
+      - "7687:7687"   # Bolt protocol
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-password}
+      NEO4J_PLUGINS: '["apoc"]'
+    volumes:
+      - neo4j_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
 volumes:
   qdrant_data:
   pgvector_data:
+  neo4j_data:

@@ -1,0 +1,198 @@
+# Cognee Documentation
+
+## Docs
+
+- [Add](https://docs.cognee.ai/api-reference/add/add.md): Add data to a dataset for processing and knowledge graph construction.
+- [Auth:Cookie.Login](https://docs.cognee.ai/api-reference/auth/auth:cookielogin.md)
+- [Auth:Cookie.Logout](https://docs.cognee.ai/api-reference/auth/auth:cookielogout.md)
+- [Get Me](https://docs.cognee.ai/api-reference/auth/get-me.md)
+- [Register:Register](https://docs.cognee.ai/api-reference/auth/register:register.md)
+- [Reset:Forgot Password](https://docs.cognee.ai/api-reference/auth/reset:forgot-password.md)
+- [Reset:Reset Password](https://docs.cognee.ai/api-reference/auth/reset:reset-password.md)
+- [Verify:Request-Token](https://docs.cognee.ai/api-reference/auth/verify:request-token.md)
+- [Verify:Verify](https://docs.cognee.ai/api-reference/auth/verify:verify.md)
+- [Get Connection Check Endpoint](https://docs.cognee.ai/api-reference/checks/get-connection-check-endpoint.md)
+- [Cognify](https://docs.cognee.ai/api-reference/cognify/cognify.md): Transform datasets into structured knowledge graphs through cognitive processing.
+- [Get User All Configuration](https://docs.cognee.ai/api-reference/configuration/get-user-all-configuration.md)
+- [Get User Configuration](https://docs.cognee.ai/api-reference/configuration/get-user-configuration.md)
+- [Store User Configuration](https://docs.cognee.ai/api-reference/configuration/store-user-configuration.md)
+- [Create New Dataset](https://docs.cognee.ai/api-reference/datasets/create-new-dataset.md): Create a new dataset or return existing dataset with the same name.
+- [Delete All](https://docs.cognee.ai/api-reference/datasets/delete-all.md): Delete all user's data.
+- [Delete Data](https://docs.cognee.ai/api-reference/datasets/delete-data.md): Delete a specific data item from a dataset.
+- [Delete Dataset](https://docs.cognee.ai/api-reference/datasets/delete-dataset.md): Delete a dataset by its ID.
+- [Get Dataset Data](https://docs.cognee.ai/api-reference/datasets/get-dataset-data.md): Get all data items in a dataset.
+- [Get Dataset Graph](https://docs.cognee.ai/api-reference/datasets/get-dataset-graph.md): Get the knowledge graph visualization for a dataset.
+- [Get Dataset Status](https://docs.cognee.ai/api-reference/datasets/get-dataset-status.md): Get the processing status of datasets.
+- [Get Datasets](https://docs.cognee.ai/api-reference/datasets/get-datasets.md): Get all datasets accessible to the authenticated user.
+- [Get Raw Data](https://docs.cognee.ai/api-reference/datasets/get-raw-data.md): Download the raw data file for a specific data item.
+- [Delete](https://docs.cognee.ai/api-reference/delete/delete.md): Delete data by its ID from the specified dataset.
+- [Detailed Health Check](https://docs.cognee.ai/api-reference/health/detailed-health-check.md): Comprehensive health status with component details.
+- [Health Check](https://docs.cognee.ai/api-reference/health/health-check.md): Health check endpoint for liveness/readiness probes.
+- [Root](https://docs.cognee.ai/api-reference/health/root.md): Root endpoint that returns a welcome message.
+- [API Reference](https://docs.cognee.ai/api-reference/introduction.md): Complete API documentation for Cognee's knowledge graph platform
+- [Memify](https://docs.cognee.ai/api-reference/memify/memify.md): Enrichment pipeline in Cognee, can work with already built graphs. If no data is provided existing knowledge graph will be used as data, custom data can also be provided instead which can be processed with provided extraction and enrichment tasks.
+- [Create Notebook Endpoint](https://docs.cognee.ai/api-reference/notebooks/create-notebook-endpoint.md)
+- [Delete Notebook Endpoint](https://docs.cognee.ai/api-reference/notebooks/delete-notebook-endpoint.md)
+- [Get Notebooks Endpoint](https://docs.cognee.ai/api-reference/notebooks/get-notebooks-endpoint.md)
+- [Run Notebook Cell Endpoint](https://docs.cognee.ai/api-reference/notebooks/run-notebook-cell-endpoint.md)
+- [Update Notebook Endpoint](https://docs.cognee.ai/api-reference/notebooks/update-notebook-endpoint.md)
+- [List Ontologies](https://docs.cognee.ai/api-reference/ontologies/list-ontologies.md): List all uploaded ontologies for the authenticated user.
+- [Upload Ontology](https://docs.cognee.ai/api-reference/ontologies/upload-ontology.md): Upload a single ontology file for later use in cognify operations.
+- [Add User To Role](https://docs.cognee.ai/api-reference/permissions/add-user-to-role.md): Add a user to a role.
+- [Add User To Tenant](https://docs.cognee.ai/api-reference/permissions/add-user-to-tenant.md): Add a user to a tenant.
+- [Create Role](https://docs.cognee.ai/api-reference/permissions/create-role.md): Create a new role.
+- [Create Tenant](https://docs.cognee.ai/api-reference/permissions/create-tenant.md): Create a new tenant.
+- [Get My Tenants](https://docs.cognee.ai/api-reference/permissions/get-my-tenants.md)
+- [Get Tenant Roles](https://docs.cognee.ai/api-reference/permissions/get-tenant-roles.md)
+- [Get User Roles](https://docs.cognee.ai/api-reference/permissions/get-user-roles.md)
+- [Get Users In Role](https://docs.cognee.ai/api-reference/permissions/get-users-in-role.md)
+- [Get Users In Tenant](https://docs.cognee.ai/api-reference/permissions/get-users-in-tenant.md)
+- [Give Datasets Permission To Principal](https://docs.cognee.ai/api-reference/permissions/give-datasets-permission-to-principal.md): Grant permission on datasets to a principal (user or role).
+- [Remove User From Tenant Endpoint](https://docs.cognee.ai/api-reference/permissions/remove-user-from-tenant-endpoint.md): Remove a user from a tenant.
+- [Select Tenant](https://docs.cognee.ai/api-reference/permissions/select-tenant.md): Select current tenant.
+- [Create Response](https://docs.cognee.ai/api-reference/responses/create-response.md): OpenAI-compatible responses endpoint with function calling support.
+- [Get Search History](https://docs.cognee.ai/api-reference/search/get-search-history.md): Get search history for the authenticated user.
+- [Search](https://docs.cognee.ai/api-reference/search/search.md): Search for nodes in the graph database.
+- [Get Settings](https://docs.cognee.ai/api-reference/settings/get-settings.md): Get the current system settings.
+- [Save Settings](https://docs.cognee.ai/api-reference/settings/save-settings.md): Save or update system settings.
+- [Get Sync Status Overview](https://docs.cognee.ai/api-reference/sync/get-sync-status-overview.md): Check if there are any running sync operations for the current user.
+- [Sync To Cloud](https://docs.cognee.ai/api-reference/sync/sync-to-cloud.md): Sync local data to Cognee Cloud.
+- [Update](https://docs.cognee.ai/api-reference/update/update.md): Update data in a dataset.
+- [Users:Current User](https://docs.cognee.ai/api-reference/users/users:current-user.md)
+- [Users:Delete User](https://docs.cognee.ai/api-reference/users/users:delete-user.md)
+- [Users:Patch Current User](https://docs.cognee.ai/api-reference/users/users:patch-current-user.md)
+- [Users:Patch User](https://docs.cognee.ai/api-reference/users/users:patch-user.md)
+- [Users:User](https://docs.cognee.ai/api-reference/users/users:user.md)
+- [Visualize](https://docs.cognee.ai/api-reference/visualize/visualize.md): Generate an HTML visualization of the dataset's knowledge graph.
+- [Visualize Multi](https://docs.cognee.ai/api-reference/visualize/visualize-multi.md): Generate a combined HTML visualization of graph data from multiple users' datasets.
+- [Changelog](https://docs.cognee.ai/changelog.md): Recent Cognee releases
+- [Cognee CLI Overview](https://docs.cognee.ai/cognee-cli/overview.md): Command line interface for Cognee AI memory operations
+- [Cognee Cloud Architecture](https://docs.cognee.ai/cognee-cloud/cognee-cloud-architecture.md): Understanding Cognee's managed infrastructure and how components work together
+- [Cognee Cloud SDK](https://docs.cognee.ai/cognee-cloud/cognee-cloud-sdk.md): Use the Cognee Cloud SDK to upload data, cognify it, and search your knowledge graph
+- [Cognee Cloud UI](https://docs.cognee.ai/cognee-cloud/cognee-cloud-ui.md): Work with datasets and data ingestion through the Cognee Cloud UI
+- [Local Mode & Sync](https://docs.cognee.ai/cognee-cloud/local-mode-and-sync.md): Connect to local Cognee instances and sync data between local and cloud environments
+- [Cognee Cloud Overview](https://docs.cognee.ai/cognee-cloud/overview.md): Our hosted environment for running Cognee’s pipelines without installing or managing any infrastructure.
+- [Permissions & Security](https://docs.cognee.ai/cognee-cloud/permissions-security.md): Dataset isolation and security features in Cognee Cloud
+- [Sign Up & Prerequisites](https://docs.cognee.ai/cognee-cloud/sign-up.md): Create your Cognee Cloud account, subscription, and API key
+- [Claude Code](https://docs.cognee.ai/cognee-mcp/integrations/claude-code.md)
+- [Cline](https://docs.cognee.ai/cognee-mcp/integrations/cline.md)
+- [Continue](https://docs.cognee.ai/cognee-mcp/integrations/continue.md)
+- [Cursor](https://docs.cognee.ai/cognee-mcp/integrations/cursor.md)
+- [Roo Code](https://docs.cognee.ai/cognee-mcp/integrations/roo-code.md)
+- [Local Setup](https://docs.cognee.ai/cognee-mcp/mcp-local-setup.md): Deploy Cognee MCP server from source for development and customization
+- [Overview](https://docs.cognee.ai/cognee-mcp/mcp-overview.md): Connect Cognee's knowledge graph platform with MCP-compatible AI tools
+- [Quickstart](https://docs.cognee.ai/cognee-mcp/mcp-quickstart.md): Get Cognee MCP running in minutes with Docker
+- [Tools Reference](https://docs.cognee.ai/cognee-mcp/mcp-tools.md): Complete reference for all Cognee MCP tools and operations
+- [Contributing](https://docs.cognee.ai/contributing/contributing-overview.md): Contribute to the cognee project
+- [Architecture](https://docs.cognee.ai/core-concepts/architecture.md): Understanding Cognee's storage architecture and system components
+- [DataPoints](https://docs.cognee.ai/core-concepts/building-blocks/datapoints.md): Atomic units of knowledge in Cognee
+- [Pipelines](https://docs.cognee.ai/core-concepts/building-blocks/pipelines.md): Orchestrating tasks into coordinated workflows for data processing
+- [Tasks](https://docs.cognee.ai/core-concepts/building-blocks/tasks.md): Building blocks of processing that transform data in Cognee pipelines
+- [Chunkers](https://docs.cognee.ai/core-concepts/further-concepts/chunkers.md): How Cognee splits documents into smaller pieces
+- [Datasets](https://docs.cognee.ai/core-concepts/further-concepts/datasets.md): Project-level containers for organization, permissions, and processing
+- [Loaders](https://docs.cognee.ai/core-concepts/further-concepts/loaders.md): How Cognee handles different file formats
+- [NodeSets](https://docs.cognee.ai/core-concepts/further-concepts/node-sets.md): Tagging and grouping data in Cognee
+- [Ontologies](https://docs.cognee.ai/core-concepts/further-concepts/ontologies.md): Enrich your knowledge graph with external vocabularies
+- [Add](https://docs.cognee.ai/core-concepts/main-operations/add.md): Ingesting and preparing data for processing in Cognee
+- [Cognify](https://docs.cognee.ai/core-concepts/main-operations/cognify.md): Transforming ingested data into a knowledge graph with embeddings, chunks, and summaries
+- [Delete](https://docs.cognee.ai/core-concepts/main-operations/delete.md): Remove data from your knowledge graph
+- [Memify](https://docs.cognee.ai/core-concepts/main-operations/memify.md): Enrich an existing knowledge graph with derived knowledge via configurable pipelines
+- [Search](https://docs.cognee.ai/core-concepts/main-operations/search.md): Query your AI memory with vectors, graphs, and LLMs
+- [Dataset Database Handlers: How to use them?](https://docs.cognee.ai/core-concepts/multi-user-mode/dataset-database-handlers/dataset-database-handlers-how-to-use-them.md): How to use Dataset Database Handlers in Cognee for multi-user mode
+- [Dataset Database Handlers: What are they?](https://docs.cognee.ai/core-concepts/multi-user-mode/dataset-database-handlers/dataset-database-handlers-what-are-they.md): How Cognee maps datasets to graph and vector storage backends
+- [FalkorDB Dataset Database Handler](https://docs.cognee.ai/core-concepts/multi-user-mode/dataset-database-handlers/existing-dataset-database-handlers/falkor.md): Handler for connecting to a FalkorDB database, enabling multi-user mode on the FalkorDB database instance.
+- [Kuzu Dataset Database Handler](https://docs.cognee.ai/core-concepts/multi-user-mode/dataset-database-handlers/existing-dataset-database-handlers/kuzu.md): Handler for connecting to a Kuzu database, enabling multi-user mode.
+- [LanceDB Dataset Database Handler](https://docs.cognee.ai/core-concepts/multi-user-mode/dataset-database-handlers/existing-dataset-database-handlers/lancedb.md): Handler for connecting to a LanceDB database, enabling multi-user mode.
+- [Neo4j Aura Dataset Database Handler](https://docs.cognee.ai/core-concepts/multi-user-mode/dataset-database-handlers/existing-dataset-database-handlers/neo4j-aura-dev.md): Handler for connecting to a Neo4j database, enabling multi-user mode on a Neo4j database instance hosted on their cloud, Neo4j Aura.
+- [PGVector Dataset Database Handler](https://docs.cognee.ai/core-concepts/multi-user-mode/dataset-database-handlers/existing-dataset-database-handlers/pgvector.md): Handler for connecting to a Postgres database with the PGVector extension, enabling multi-user mode on the Postgres database instance.
+- [Qdrant Dataset Database Handler](https://docs.cognee.ai/core-concepts/multi-user-mode/dataset-database-handlers/existing-dataset-database-handlers/qdrant.md): Handler for connecting to a Qdrant database, enabling multi-user mode on the Qdrant database instance.
+- [Multi-User Mode Overview](https://docs.cognee.ai/core-concepts/multi-user-mode/multi-user-mode-overview.md): How Cognee handles multiple users and data isolation between users.
+- [ACL](https://docs.cognee.ai/core-concepts/multi-user-mode/permissions-system/acl.md): Access Control List system for permission storage and inheritance in Cognee
+- [Datasets](https://docs.cognee.ai/core-concepts/multi-user-mode/permissions-system/datasets.md): The core unit of data in Cognee's permission system
+- [Overview](https://docs.cognee.ai/core-concepts/multi-user-mode/permissions-system/overview.md): Introduction to Cognee's permission system and access control architecture
+- [Principals](https://docs.cognee.ai/core-concepts/multi-user-mode/permissions-system/principals.md): The unified abstraction for entities that can hold permissions in Cognee
+- [Roles](https://docs.cognee.ai/core-concepts/multi-user-mode/permissions-system/roles.md): Role-based permissions within tenants for granular access control
+- [Tenants](https://docs.cognee.ai/core-concepts/multi-user-mode/permissions-system/tenants.md): Organization-level access control and permission inheritance in Cognee
+- [Users](https://docs.cognee.ai/core-concepts/multi-user-mode/permissions-system/users.md): Individual users and authentication in Cognee's permission system
+- [Overview](https://docs.cognee.ai/core-concepts/overview.md): Learn about Cognee's core concepts, architecture, and how to get started
+- [Sessions and Caching](https://docs.cognee.ai/core-concepts/sessions-and-caching.md): Understanding how Cognee maintains conversational memory through sessions and cache adapters
+- [Data Silos](https://docs.cognee.ai/examples/data-silos.md)
+- [Edge AI](https://docs.cognee.ai/examples/edge-ai.md)
+- [Cognee Walkthrough](https://docs.cognee.ai/examples/getting-started-with-cognee.md): From Data to Interactive Memory: End-to-end tutorial with nodesets, ontologies, memify, graph visualization, and feedback system using a coding assistant example
+- [Migrate from Mem0](https://docs.cognee.ai/examples/migrate-from-mem0.md): Move from Mem0 to Cognee
+- [Overview](https://docs.cognee.ai/examples/overview.md)
+- [Vertical AI Agents](https://docs.cognee.ai/examples/vertical-ai-agents.md)
+- [Installation](https://docs.cognee.ai/getting-started/installation.md): Set up your environment and install Cognee
+- [Introduction](https://docs.cognee.ai/getting-started/introduction.md): Cognee organizes your data into AI memory.
+- [Quickstart](https://docs.cognee.ai/getting-started/quickstart.md): Get started with Cognee quickly and efficiently
+- [Code Graph](https://docs.cognee.ai/guides/code-graph.md): Step-by-step guide to building code-level graphs from repositories
+- [Custom Data Models](https://docs.cognee.ai/guides/custom-data-models.md): Step-by-step guide to creating custom data models and using add_data_points
+- [Custom Graph Model](https://docs.cognee.ai/guides/custom-graph-model.md): Step-by-step guide to creating custom graph models and calling cognify with them
+- [Custom Prompts](https://docs.cognee.ai/guides/custom-prompts.md): Step-by-step guide to using custom prompts to control graph extraction
+- [Custom Tasks and Pipelines](https://docs.cognee.ai/guides/custom-tasks-pipelines.md): Step-by-step guide to creating custom tasks and pipelines
+- [Deploy REST API Server](https://docs.cognee.ai/guides/deploy-rest-api-server.md): Deploy Cognee as a REST API server using Docker or Python
+- [Distributed Execution](https://docs.cognee.ai/guides/distributed-execution.md): Step-by-step guide to running Cognee pipelines across Modal containers
+- [Feedback System](https://docs.cognee.ai/guides/feedback-system.md): Step-by-step guide to using feedback with Cognee sessions
+- [Graph Visualization](https://docs.cognee.ai/guides/graph-visualization.md): Step-by-step guide to rendering interactive knowledge graphs
+- [Low-Level LLM](https://docs.cognee.ai/guides/low-level-llm.md): Step-by-step guide to using acreate_structured_output for direct LLM interaction
+- [Entity Consolidation](https://docs.cognee.ai/guides/memify-entity-consolidation.md): Rewrite fragmented entity descriptions using LLM analysis of graph neighborhoods
+- [Memify Quickstart](https://docs.cognee.ai/guides/memify-quickstart.md): Step-by-step guide to enriching existing knowledge graphs with derived facts
+- [Session Persistence](https://docs.cognee.ai/guides/memify-session-persistence.md): Persist cached conversation sessions into the knowledge graph
+- [Triplet Embeddings](https://docs.cognee.ai/guides/memify-triplet-embeddings.md): Index graph triplets as embeddings to enable TRIPLET_COMPLETION search
+- [Ontology Quickstart](https://docs.cognee.ai/guides/ontology-support.md): Step-by-step guide to using OWL ontologies to ground Cognee knowledge graphs
+- [Permission Snippets](https://docs.cognee.ai/guides/permission-snippets.md): Practical code snippets and scenarios for Cognee's permission system
+- [S3 Storage](https://docs.cognee.ai/guides/s3-storage.md): Step-by-step guide to using S3 for data ingestion and storage
+- [Search Basics](https://docs.cognee.ai/guides/search-basics.md): Step-by-step guide to running your first Cognee search and understanding core parameters
+- [Sessions](https://docs.cognee.ai/guides/sessions.md): Step-by-step guide to using sessions for conversational memory in Cognee
+- [Temporal Cognify](https://docs.cognee.ai/guides/time-awareness.md): Step-by-step guide to using temporal mode for time-aware queries
+- [EC2 Deployment](https://docs.cognee.ai/how-to-guides/cognee-sdk/deployment/ec2.md): Deploy Cognee on Amazon EC2 for traditional cloud server deployments with custom configurations
+- [Kubernetes (Helm)](https://docs.cognee.ai/how-to-guides/cognee-sdk/deployment/helm.md): Deploy Cognee on Kubernetes with Helm charts for enterprise-grade, production-ready deployments
+- [Deployment Overview](https://docs.cognee.ai/how-to-guides/cognee-sdk/deployment/index.md): Deploy Cognee with flexible data storage options for any scale
+- [Modal Deployment](https://docs.cognee.ai/how-to-guides/cognee-sdk/deployment/modal.md): Deploy Cognee on Modal for serverless, auto-scaling knowledge graph processing
+- [AWS Bedrock Integration](https://docs.cognee.ai/integrations/aws-bedrock-integration.md): Use AWS Bedrock LLMs with Cognee through LiteLLM proxy
+- [Claude Agent SDK](https://docs.cognee.ai/integrations/claude-agent-sdk-integration.md)
+- [Evaluation with DeepEval](https://docs.cognee.ai/integrations/deepeval-integration.md)
+- [Google ADK](https://docs.cognee.ai/integrations/google-adk-integration.md)
+- [Integrations](https://docs.cognee.ai/integrations/index.md): Connect Cognee with your favorite Agent frameworks and for observability, evaluation, and development tools
+- [Observability with Keywords AI](https://docs.cognee.ai/integrations/keywordsai-integration.md)
+- [Observability with Langfuse](https://docs.cognee.ai/integrations/langfuse-integration.md)
+- [LangGraph](https://docs.cognee.ai/integrations/langgraph-integration.md)
+- [n8n](https://docs.cognee.ai/integrations/n8n-integration.md)
+- [OpenAI Agents SDK](https://docs.cognee.ai/integrations/openai-agents-sdk-integration.md)
+- [OpenClaw](https://docs.cognee.ai/integrations/openclaw-integration.md)
+- [ScrapeGraphAI](https://docs.cognee.ai/integrations/scrapegraphai-integration.md)
+- [add()](https://docs.cognee.ai/python-api/add.md): Ingest data into the Cognee knowledge base
+- [cognify()](https://docs.cognee.ai/python-api/cognify.md): Transform raw data into a structured knowledge graph
+- [config](https://docs.cognee.ai/python-api/config.md): Configure LLM providers, databases, chunking, and more
+- [run_custom_pipeline()](https://docs.cognee.ai/python-api/custom-pipeline.md): Execute a custom task pipeline
+- [Data Models](https://docs.cognee.ai/python-api/data-models.md): Key types used across the cognee API
+- [datasets](https://docs.cognee.ai/python-api/datasets.md): Dataset management: list, create, and delete datasets
+- [delete()](https://docs.cognee.ai/python-api/delete.md): Delete data from the knowledge base (deprecated)
+- [Python API Reference](https://docs.cognee.ai/python-api/index.md): Complete Python API reference for the cognee package
+- [memify()](https://docs.cognee.ai/python-api/memify.md): Enrich an existing knowledge graph with custom tasks
+- [prune](https://docs.cognee.ai/python-api/prune.md): Clean up data and system resources
+- [search()](https://docs.cognee.ai/python-api/search.md): Query the knowledge graph
+- [SearchType](https://docs.cognee.ai/python-api/search-type.md): All available search modes
+- [update()](https://docs.cognee.ai/python-api/update.md): Update existing data in the knowledge base
+- [FalkorDB](https://docs.cognee.ai/setup-configuration/community-maintained/falkordb.md): Use FalkorDB as both a graph and vector store (hybrid store) through a community-maintained adapter
+- [Memgraph](https://docs.cognee.ai/setup-configuration/community-maintained/memgraph.md): Use Memgraph as a graph store through a community-maintained adapter
+- [Adapters Overview](https://docs.cognee.ai/setup-configuration/community-maintained/overview.md): Adapters and extensions built by the Cognee community
+- [Qdrant](https://docs.cognee.ai/setup-configuration/community-maintained/qdrant.md): Use Qdrant as a vector store through a community-maintained adapter
+- [Redis](https://docs.cognee.ai/setup-configuration/community-maintained/redis.md): Use Redis as a vector store through a community-maintained adapter
+- [Embedding Providers](https://docs.cognee.ai/setup-configuration/embedding-providers.md): Configure embedding providers for semantic search in Cognee
+- [Graph Stores](https://docs.cognee.ai/setup-configuration/graph-stores.md): Configure graph databases for knowledge graph storage and relationship reasoning in Cognee
+- [LLM Providers](https://docs.cognee.ai/setup-configuration/llm-providers.md): Configure LLM providers for text generation and reasoning in Cognee
+- [Logging](https://docs.cognee.ai/setup-configuration/logging.md): Understand how Cognee logs work, where log files are stored, and how to control log output
+- [Setup Configuration](https://docs.cognee.ai/setup-configuration/overview.md): Configure Cognee to use your preferred LLM, embedding engine, and storage backends
+- [Permissions Setup](https://docs.cognee.ai/setup-configuration/permissions.md): Configure Cognee's permission system and access control
+- [Relational Databases](https://docs.cognee.ai/setup-configuration/relational-databases.md): Configure relational databases for metadata and state storage in Cognee
+- [Structured Output Backends](https://docs.cognee.ai/setup-configuration/structured-output-backends.md): Configure structured output frameworks for reliable data extraction in Cognee
+- [Vector Stores](https://docs.cognee.ai/setup-configuration/vector-stores.md): Configure vector databases for embedding storage and semantic search in Cognee
+
+## OpenAPI Specs
+
+- [cognee_openapi_spec](https://docs.cognee.ai/cognee_openapi_spec.json)
+- [openapi](https://docs.cognee.ai/api-reference/openapi.json)
+
+
+Built with [Mintlify](https://mintlify.com).

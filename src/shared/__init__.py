@@ -13,3 +13,15 @@ __all__ = ["get_llm", "AgentRegistry"]
 # Retrieval utilities are imported lazily to avoid pulling in heavy
 # dependencies (sentence-transformers, qdrant-client, etc.) when they
 # are not installed.  Use ``from src.shared.retrieval import ...`` directly.
+
+# Evaluation toolkit (phoenix evals) is also lazy-imported.
+# Use ``from src.shared.phoenix_eval import ...`` directly.
+# Requires: pip install -e '.[phoenix]'
+
+# DeepEval evaluation toolkit is lazy-imported.
+# Use ``from src.shared.deep_eval import ...`` directly.
+# Requires: pip install -e '.[deepeval]'
+
+# Sandbox toolkit (Docker-based shell execution) is lazy-imported.
+# Use ``from src.shared.sandbox import ...`` directly.
+# Requires: pip install -e '.[sandbox]'

@@ -66,20 +66,52 @@ Container Docker che espone un endpoint OpenAI-compatible su `localhost:4000`. T
 
 Il proxy gestisce autenticazione, retry e fallback. Gli agenti non hanno bisogno di conoscere i dettagli dei singoli provider.
 
-### 1b. Vector Database (`docker-compose.yml`)
+### 1b. Database e Storage (`docker-compose.yml`)
 
-Il docker-compose include anche i servizi per il vector storage:
+Il docker-compose include i servizi di storage:
 
 | Servizio | Immagine | Porta | Uso |
 |----------|----------|-------|-----|
 | `qdrant` | `qdrant/qdrant:latest` | 6333 (REST), 6334 (gRPC) | Vector search con HNSW |
 | `postgres-vector` | `pgvector/pgvector:pg16` | 5433 | PostgreSQL 16 + estensione pgvector |
+| `neo4j` | `neo4j:5-community` | 7474 (HTTP), 7687 (Bolt) | Graph database (Cognee knowledge graph) |
+| `phoenix` | `arizephoenix/phoenix:latest` | 6006 (HTTP), 4317 (gRPC) | LLM observability + tracing |
 
-Entrambi sono opzionali: basta avviare solo quelli necessari con `docker compose up -d qdrant` o `docker compose up -d postgres-vector`.
+#### Mappa Database
+
+| Database / Storage | Toolkit | Schema / Namespace | Dati |
+|---|---|---|---|
+| PostgreSQL `vectors` | Retrieval (RAG) | schema `retrieval` | Tabelle pgvector per embedding documenti |
+| PostgreSQL `vectors` | DeepEval RAG evaluators | schema `deepeval` | Tabelle pgvector per contesti di valutazione |
+| PostgreSQL `phoenix` | Phoenix (tracing + evals) | default | Trace, span, valutazioni, annotazioni |
+| Qdrant | Retrieval (RAG) | collection per agente | Vector store principale per semantic search |
+| Qdrant | Cognee | collection interna | Vettori knowledge graph entities |
+| Neo4j | Cognee | database default | Grafi di conoscenza (entita, relazioni) |
+| Filesystem locale | Multimodal RAG | `./rag_storage/` | Storage RAG-Anything / LightRAG |
+
+#### Schema Isolation (PostgreSQL)
+
+Il database `vectors` utilizza schema PostgreSQL separati per isolare i dati di ogni toolkit:
+
+```sql
+-- deploy/docker/init-db.sql
+CREATE DATABASE phoenix;
+\c vectors
+CREATE EXTENSION IF NOT EXISTS vector;
+CREATE SCHEMA IF NOT EXISTS retrieval;
+CREATE SCHEMA IF NOT EXISTS deepeval;
+```
+
+| Schema | Env var | Default | Toolkit |
+|--------|---------|---------|---------|
+| `retrieval` | `PGVECTOR_SCHEMA` | `public` | `src/shared/retrieval/` |
+| `deepeval` | `PGVECTOR_SCHEMA_DEEPEVAL` | `deepeval` | `src/shared/deep_eval/` |
+
+Il parametro `schema` e supportato da `PgVectorStore` (`src/shared/retrieval/vectorstores/pgvector.py`) e propagato automaticamente a tutte le query. Per backward compatibility, senza env var il retrieval usa schema `public`.
 
 ### 2. Modulo Shared (`src/shared/`)
 
-Cinque file + un sotto-modulo con responsabilita distinte:
+Cinque file core + sei sotto-moduli con responsabilita distinte:
 
 | File | Responsabilita |
 |------|---------------|
@@ -89,6 +121,11 @@ Cinque file + un sotto-modulo con responsabilita distinte:
 | `registry.py` | `AgentRegistry` con discovery via `pkgutil.iter_modules`. Singleton `registry`. |
 | `orchestration.py` | Factory `build_supervisor()`, `build_network()`, `build_independent()` per composizione multi-agent. |
 | `retrieval/` | Pipeline RAG modulare: embedding, vector stores (Qdrant, pgvector), chunking, indici in-memory (BM25, dense), RRF fusion, reranking. Vedi [Vector Storage e Retrieval](vector-storage.md). |
+| `retrieval/multimodal/` | Pipeline RAG multimodale (RAG-Anything): parsing PDF/immagini/tabelle/equazioni, knowledge graph + vector retrieval, 4 parser intercambiabili. Vedi [RAG Multimodale](multimodal-rag.md). |
+| `cognee_toolkit/` | Knowledge graph memory (Cognee): trasforma testo in grafi di conoscenza, 14 tipi di ricerca, nodi e tool LangGraph. Usa Qdrant + Neo4j + LiteLLM proxy. Vedi [Cognee](cognee.md). |
+| `phoenix_eval/` | Evaluation toolkit (arize-phoenix-evals): 11 evaluator built-in, LLM-as-Judge custom, batch evaluation con annotazioni Phoenix. Vedi [Phoenix Eval](phoenix-eval.md). |
+| `deep_eval/` | Evaluation toolkit (deepeval): 10 metriche, RAG evaluators per Cognee/Qdrant/PGVector, AgentEvaluator end-to-end. Vedi [DeepEval](deep-eval.md). |
+| `giskard_vulnerability_eval/` | Vulnerability scanning (Giskard): 9 categorie di vulnerabilita, wrapping predict_fn e LangGraph, report HTML. Vedi [Giskard](giskard.md). |
 
 ### 3. Modulo Agenti (`src/agents/`)
 

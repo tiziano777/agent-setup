@@ -41,14 +41,37 @@ openai-embeddings = [
 rerankers = [
     "sentence-transformers>=3.0",
 ]
+multimodal-rag = [
+    "raganything>=0.1",
+    "lightrag-hku>=1.0",
+    "numpy>=1.26",
+]
+glmocr = [
+    "glmocr>=0.1",
+]
+glmocr-selfhosted = [
+    "glmocr[selfhosted]>=0.1",
+]
 retrieval-all = [
-    "agent-setup[retrieval,qdrant,pgvector,openai-embeddings,rerankers]",
+    "agent-setup[retrieval,qdrant,pgvector,openai-embeddings,rerankers,multimodal-rag,glmocr]",
 ]
 phoenix = [
     "arize-phoenix-otel>=0.8",
     "openinference-instrumentation-langchain>=0.1",
     "arize-phoenix-evals>=0.18",
     "opentelemetry-exporter-otlp>=1.20",
+]
+giskard = [
+    "giskard[llm]>=2.0",
+]
+cognee = [
+    "cognee>=0.1",
+]
+deepeval = [
+    "deepeval>=2.0",
+]
+sandbox = [
+    "docker>=7.0",
 ]
 
 [build-system]

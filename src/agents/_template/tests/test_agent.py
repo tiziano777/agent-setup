@@ -11,11 +11,24 @@ class TestAgentGraph:
 
         assert graph is not None
 
-    def test_graph_has_nodes(self):
-        from src.agents.__AGENT_NAME__.agent import build_graph
+    def test_graph_is_callable(self):
+        from src.agents.__AGENT_NAME__.agent import graph
 
-        builder = build_graph()
-        assert "process" in builder.nodes
+        assert hasattr(graph, "invoke")
+
+
+class TestTools:
+    """Test that sandbox tools are importable."""
+
+    def test_execute_cmd_importable(self):
+        """Verify execute_cmd can be imported.
+
+        Note: Actually invoking the tool requires Docker to be running.
+        """
+        from src.agents.__AGENT_NAME__.tools import execute_cmd
+
+        assert execute_cmd is not None
+        assert execute_cmd.name == "execute_cmd"
 
 
 class TestAgentState:

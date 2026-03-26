@@ -35,6 +35,9 @@ class RetrievalSettings:
         )
     )
     pgvector_index_type: str = "hnsw"  # or "ivfflat"
+    pgvector_schema: str = field(
+        default_factory=lambda: os.getenv("PGVECTOR_SCHEMA", "public")
+    )
 
     # Retrieval
     search_k: int = 5

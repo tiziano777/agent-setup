@@ -427,6 +427,27 @@ k8s-destroy:
 	kubectl delete namespace $(K8S_NS)
 
 # ==========================================
+# Sandbox - Docker Shell Execution
+# ==========================================
+
+# Pre-pull the sandbox image
+sandbox-pull:
+	docker pull python:3.11-slim
+
+# List running sandbox containers
+sandbox-ps:
+	@docker ps --filter "label=managed-by=agent-setup-sandbox" --format "table {{.ID}}\t{{.Status}}\t{{.Names}}"
+
+# Clean up orphaned sandbox containers
+sandbox-clean:
+	@docker ps -aq --filter "label=managed-by=agent-setup-sandbox" | xargs -r docker rm -f 2>/dev/null || true
+	@echo "Sandbox containers cleaned."
+
+# Integration tests for sandbox (requires Docker)
+test-sandbox:
+	python -m pytest src/shared/sandbox/tests/ -v
+
+# ==========================================
 # Docker Image (per push a registry)
 # ==========================================
 

@@ -52,6 +52,9 @@ __all__ = [
     "get_chunker",
     "get_reranker",
     "get_retriever",
+    # multimodal factories
+    "get_multimodal_retriever",
+    "get_multimodal_parser",
 ]
 
 
@@ -87,6 +90,9 @@ def get_vectorstore(provider: str = "qdrant", **kwargs) -> BaseVectorStore:
     Supported providers:
         * ``"qdrant"`` – Qdrant (default).
         * ``"pgvector"`` – PostgreSQL + pgvector.
+
+    For pgvector, the ``schema`` kwarg controls which PostgreSQL schema
+    tables are created in.  Defaults to ``PGVECTOR_SCHEMA`` env var.
     """
     if provider == "qdrant":
         from src.shared.retrieval.vectorstores.qdrant import QdrantVectorStore
@@ -189,3 +195,23 @@ def get_retriever(
         k_rrf=settings.rrf_k,
         **kwargs,
     )
+
+
+# ── Factory: Multimodal Retriever ────────────────────────────────────
+
+
+def get_multimodal_retriever(settings=None, **kwargs):
+    """Convenience re-export.  See :mod:`src.shared.retrieval.multimodal`."""
+    from src.shared.retrieval.multimodal import get_multimodal_retriever as _factory
+
+    return _factory(settings=settings, **kwargs)
+
+
+# ── Factory: Multimodal Parser ───────────────────────────────────────
+
+
+def get_multimodal_parser(parser: str = "mineru", **kwargs):
+    """Convenience re-export.  See :mod:`src.shared.retrieval.multimodal`."""
+    from src.shared.retrieval.multimodal import get_multimodal_parser as _factory
+
+    return _factory(parser=parser, **kwargs)
