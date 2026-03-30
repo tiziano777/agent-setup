@@ -11,7 +11,7 @@ Endpoints:
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from src.agents.agent1.agent import graph
+from src.agents.code_runner.agent import graph
 from src.shared.env_validation import print_validation_report, validate_env
 from src.shared.tracing import setup_tracing
 
@@ -26,7 +26,7 @@ setup_tracing()
 
 app = FastAPI(
     title="Agent Setup API",
-    description="REST API per il grafo LangGraph agent1",
+    description="REST API per il grafo LangGraph code_runner",
     version="0.1.0",
 )
 

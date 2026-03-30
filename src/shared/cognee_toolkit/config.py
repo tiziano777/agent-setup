@@ -2,7 +2,7 @@
 
 Provides :class:`CogneeSettings` dataclass and :func:`setup_cognee` to
 configure the Cognee runtime to use the project's LiteLLM proxy,
-existing Qdrant/PgVector vector stores, and Neo4j graph database.
+PGVector (default) or LanceDB for vectors, and Neo4j for the graph database.
 
 All Cognee LLM calls are routed through the LiteLLM proxy — never
 directly to a provider.
@@ -51,7 +51,8 @@ class CogneeSettings:
     """
 
     # -- LLM (routes through LiteLLM proxy) --
-    llm_provider: str = "custom"
+    # "openai" provider passes endpoint as api_base to litellm correctly
+    llm_provider: str = "openai"
     llm_model: str = field(
         default_factory=lambda: os.getenv("DEFAULT_MODEL", "llm")
     )
@@ -62,12 +63,37 @@ class CogneeSettings:
         default_factory=lambda: os.getenv("OPENAI_API_KEY", "not-needed")
     )
 
-    # -- Vector DB (reuse existing infrastructure) --
-    vector_db_provider: Literal["qdrant", "pgvector", "lancedb"] = "qdrant"
+    # -- Vector DB (PGVector default, LanceDB as fallback) --
+    vector_db_provider: Literal["lancedb", "pgvector"] = "pgvector"
     vector_db_url: str = field(
-        default_factory=lambda: os.getenv("QDRANT_URL", "http://localhost:6333")
+        default_factory=lambda: os.getenv("COGNEE_VECTOR_DB_URL", "")
     )
     vector_db_key: str | None = None
+    # PGVector connection fields (ignored when provider is lancedb)
+    vector_db_host: str = field(
+        default_factory=lambda: os.getenv("COGNEE_VECTOR_DB_HOST", "localhost")
+    )
+    vector_db_port: str = field(
+        default_factory=lambda: os.getenv("COGNEE_VECTOR_DB_PORT", "5433")
+    )
+    vector_db_name: str = field(
+        default_factory=lambda: os.getenv("COGNEE_VECTOR_DB_NAME", "vectors")
+    )
+    vector_db_username: str = field(
+        default_factory=lambda: os.getenv("COGNEE_VECTOR_DB_USERNAME", "postgres")
+    )
+    vector_db_password: str = field(
+        default_factory=lambda: os.getenv("COGNEE_VECTOR_DB_PASSWORD", "postgres")
+    )
+
+    # -- Embeddings (local fastembed by default, no API needed) --
+    embedding_provider: str = field(
+        default_factory=lambda: os.getenv("EMBEDDING_PROVIDER", "fastembed")
+    )
+    embedding_model: str = field(
+        default_factory=lambda: os.getenv("EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
+    )
+    embedding_dimensions: int = 384
 
     # -- Graph DB (Neo4j) --
     graph_db_provider: Literal["neo4j", "kuzu", "falkordb", "networkx"] = "neo4j"
@@ -96,8 +122,8 @@ def setup_cognee(settings: CogneeSettings | None = None) -> None:
     """Configure Cognee to use the project's infrastructure (idempotent).
 
     Wires:
-    - **LLM** → LiteLLM proxy (``custom`` provider with ``openai/`` prefix)
-    - **Vector DB** → existing Qdrant or PgVector
+    - **LLM** → LiteLLM proxy (``openai`` provider with ``openai/`` prefix)
+    - **Vector DB** → PGVector (existing PostgreSQL) or LanceDB
     - **Graph DB** → Neo4j
 
     Args:
@@ -114,10 +140,10 @@ def setup_cognee(settings: CogneeSettings | None = None) -> None:
     # LLM → LiteLLM proxy
     model_name = f"openai/{settings.llm_model}"
     cognee.config.set_llm_config({
-        "provider": settings.llm_provider,
-        "model": model_name,
-        "api_key": settings.llm_api_key,
-        "endpoint": settings.llm_endpoint,
+        "llm_provider": settings.llm_provider,
+        "llm_model": model_name,
+        "llm_api_key": settings.llm_api_key,
+        "llm_endpoint": settings.llm_endpoint,
     })
     # Also set env vars for anything Cognee reads at import time
     os.environ.setdefault("LLM_PROVIDER", settings.llm_provider)
@@ -125,29 +151,66 @@ def setup_cognee(settings: CogneeSettings | None = None) -> None:
     os.environ.setdefault("LLM_ENDPOINT", settings.llm_endpoint)
     os.environ.setdefault("LLM_API_KEY", settings.llm_api_key)
 
-    # Vector DB → existing infrastructure
+    # Set a writable system root so LanceDB defaults to a project-local path
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    cognee_data_dir = os.path.join(project_root, ".cognee_system")
+    cognee.config.system_root_directory(cognee_data_dir)
+
+    # Vector DB → PGVector (default) or LanceDB
     vdb_config: dict = {
         "vector_db_provider": settings.vector_db_provider,
-        "vector_db_url": settings.vector_db_url,
+        "vector_db_host": settings.vector_db_host,
+        "vector_db_port": settings.vector_db_port,
+        "vector_db_name": settings.vector_db_name,
+        "vector_db_username": settings.vector_db_username,
+        "vector_db_password": settings.vector_db_password,
     }
+    if settings.vector_db_url:
+        vdb_config["vector_db_url"] = settings.vector_db_url
     if settings.vector_db_key:
         vdb_config["vector_db_key"] = settings.vector_db_key
     cognee.config.set_vector_db_config(vdb_config)
 
+    # Embeddings → local fastembed (no API key needed)
+    from cognee.infrastructure.databases.vector.embeddings.config import get_embedding_config
+    from cognee.infrastructure.databases.vector.embeddings.get_embedding_engine import (
+        create_embedding_engine,
+    )
+
+    embedding_cfg = get_embedding_config()
+    embedding_cfg.embedding_provider = settings.embedding_provider
+    embedding_cfg.embedding_model = settings.embedding_model
+    embedding_cfg.embedding_dimensions = settings.embedding_dimensions
+    # Clear lru_cache so next get_embedding_engine() picks up the new config
+    create_embedding_engine.cache_clear()
+
     # Graph DB → Neo4j
     cognee.config.set_graph_db_config({
-        "provider": settings.graph_db_provider,
-        "url": settings.graph_db_url,
-        "username": settings.graph_db_username,
-        "password": settings.graph_db_password,
+        "graph_database_provider": settings.graph_db_provider,
+        "graph_database_url": settings.graph_db_url,
+        "graph_database_username": settings.graph_db_username,
+        "graph_database_password": settings.graph_db_password,
+        "graph_dataset_database_handler": settings.graph_db_provider,
     })
 
+    # Disable multi-user access control (requires matching handlers)
+    os.environ.setdefault("ENABLE_BACKEND_ACCESS_CONTROL", "false")
+
+    # Skip Cognee's internal LLM connection test (proxy routing handles validation)
+    os.environ.setdefault("COGNEE_SKIP_CONNECTION_TEST", "true")
+
     _CONFIGURED = True
+    vdb_detail = settings.vector_db_provider
+    if settings.vector_db_provider == "pgvector":
+        vdb_detail = (
+            f"pgvector@{settings.vector_db_host}:"
+            f"{settings.vector_db_port}/{settings.vector_db_name}"
+        )
     logger.info(
         "Cognee configured: LLM=%s via %s, VectorDB=%s, GraphDB=%s",
         model_name,
         settings.llm_endpoint,
-        settings.vector_db_provider,
+        vdb_detail,
         settings.graph_db_provider,
     )
 

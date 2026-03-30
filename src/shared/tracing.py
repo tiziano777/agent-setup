@@ -51,7 +51,7 @@ def setup_tracing(
     if project_name is None:
         project_name = os.getenv("PHOENIX_PROJECT_NAME", "agent-setup")
     if endpoint is None:
-        endpoint = os.getenv("PHOENIX_COLLECTOR_ENDPOINT", "http://localhost:6006")
+        endpoint = os.getenv("PHOENIX_COLLECTOR_ENDPOINT", "http://localhost:4317")
 
     try:
         from phoenix.otel import register

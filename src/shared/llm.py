@@ -34,7 +34,7 @@ def get_llm(
     return ChatOpenAI(
         model=model,
         base_url=LITELLM_BASE_URL,
-        api_key=None,
+        api_key=os.getenv("OPENAI_API_KEY", "sk-not-needed"),
         temperature=temperature,
         max_tokens=max_tokens,
     )

@@ -92,8 +92,8 @@ class DockerSandbox:
                 detach=True,
                 read_only=True,
                 tmpfs={
-                    "/tmp": "size=64M,noexec=false",
-                    "/workspace": f"size={s.workspace_size},noexec=false",
+                    "/tmp": "size=64M,mode=1777",
+                    "/workspace": f"size={s.workspace_size},mode=1777",
                 },
                 working_dir="/workspace",
                 network_mode=s.network_mode,

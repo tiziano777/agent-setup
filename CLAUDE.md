@@ -119,10 +119,10 @@ Usage: `from src.shared.deep_eval import get_deepeval_model, answer_relevancy_me
 
 ## Cognee Knowledge Graph Memory (`src/shared/cognee_toolkit/`)
 
-Knowledge graph memory toolkit powered by Cognee. Transforms text into structured knowledge graphs with entities, relationships, and semantic search. Routes all LLM calls through the LiteLLM proxy, uses existing Qdrant for vectors, and Neo4j for the graph database.
+Knowledge graph memory toolkit powered by Cognee. Transforms text into structured knowledge graphs with entities, relationships, and semantic search. Routes all LLM calls through the LiteLLM proxy, uses PGVector (existing PostgreSQL) for vectors (LanceDB as optional fallback), and Neo4j for the graph database.
 
 Files:
-- `config.py` - `CogneeSettings` dataclass + `setup_cognee()` infrastructure wiring (LiteLLM proxy, Qdrant, Neo4j)
+- `config.py` - `CogneeSettings` dataclass + `setup_cognee()` infrastructure wiring (LiteLLM proxy, PGVector, Neo4j)
 - `memory.py` - `CogneeMemory` class wrapping add/cognify/search/memify with async + sync interfaces
 - `tools.py` - `get_cognee_tools()` and `get_cognee_memory_tools()` factories for LangGraph @tool functions
 - `nodes.py` - Node factories: `create_cognee_search_node()`, `create_cognee_add_node()`, `create_cognee_enriched_llm_node()` (RAG-over-KG)
@@ -169,6 +169,11 @@ Key infrastructure vars (all have defaults):
 - `NEO4J_URL` (default: bolt://localhost:7687)
 - `NEO4J_USERNAME` (default: neo4j)
 - `NEO4J_PASSWORD` (default: password)
+- `COGNEE_VECTOR_DB_HOST` (default: localhost)
+- `COGNEE_VECTOR_DB_PORT` (default: 5433)
+- `COGNEE_VECTOR_DB_NAME` (default: vectors)
+- `COGNEE_VECTOR_DB_USERNAME` (default: postgres)
+- `COGNEE_VECTOR_DB_PASSWORD` (default: postgres)
 
 Run `make env-check` to validate configuration.
 

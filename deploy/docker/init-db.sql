@@ -19,3 +19,6 @@ CREATE SCHEMA IF NOT EXISTS retrieval;
 
 -- Schema per i RAG evaluator di DeepEval
 CREATE SCHEMA IF NOT EXISTS deepeval;
+
+-- Schema per Cognee knowledge graph vector storage
+CREATE SCHEMA IF NOT EXISTS cognee;
