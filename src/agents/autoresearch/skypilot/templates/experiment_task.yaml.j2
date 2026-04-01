@@ -1,0 +1,59 @@
+{# SkyPilot task template for autoresearch experiments.
+   Rendered by the orchestrator with Jinja2.
+#}
+name: ar-{{ run_id }}
+
+resources:
+{% if accelerators %}
+  accelerators: {{ accelerators }}
+{% endif %}
+{% if cloud %}
+  cloud: {{ cloud }}
+{% endif %}
+{% if region %}
+  region: {{ region }}
+{% endif %}
+{% if instance_type %}
+  instance_type: {{ instance_type }}
+{% endif %}
+  use_spot: {{ use_spot | default(false) | lower }}
+
+num_nodes: {{ num_nodes | default(1) }}
+
+workdir: {{ setup_path }}
+
+file_mounts:
+  /tmp/setup:
+    source: {{ setup_path }}
+    mode: COPY
+
+{% if env_vars %}
+envs:
+{% for key, value in env_vars.items() %}
+  {{ key }}: "{{ value }}"
+{% endfor %}
+{% endif %}
+
+setup: |
+  echo "=== AutoResearch experiment {{ run_id }} ==="
+  cd /tmp/setup
+  # Install dependencies if requirements.txt exists
+  if [ -f requirements.txt ]; then
+    pip install -r requirements.txt
+  fi
+
+run: |
+  cd /tmp/setup
+  echo "EXPERIMENT_RUN_ID={{ run_id }}"
+  echo "EXPERIMENT_STATUS=running"
+{% for key, value in hparams.items() %}
+  export HPARAM_{{ key | upper }}="{{ value }}"
+{% endfor %}
+  python {{ entrypoint | default("train.py") }} 2>&1
+  EXIT_CODE=$?
+  if [ $EXIT_CODE -eq 0 ]; then
+    echo "EXPERIMENT_STATUS=completed"
+  else
+    echo "EXPERIMENT_STATUS=failed"
+    exit $EXIT_CODE
+  fi

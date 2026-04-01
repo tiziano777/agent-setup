@@ -151,14 +151,11 @@ def setup_cognee(settings: CogneeSettings | None = None) -> None:
     os.environ.setdefault("LLM_ENDPOINT", settings.llm_endpoint)
     os.environ.setdefault("LLM_API_KEY", settings.llm_api_key)
 
-    # Set a writable system root so LanceDB defaults to a project-local path
-    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-    cognee_data_dir = os.path.join(project_root, ".cognee_system")
-    cognee.config.system_root_directory(cognee_data_dir)
-
     # Vector DB → PGVector (default) or LanceDB
+    # Must be set BEFORE system_root_directory() which checks vector_db_provider
     vdb_config: dict = {
         "vector_db_provider": settings.vector_db_provider,
+        "vector_dataset_database_handler": settings.vector_db_provider,
         "vector_db_host": settings.vector_db_host,
         "vector_db_port": settings.vector_db_port,
         "vector_db_name": settings.vector_db_name,
@@ -170,6 +167,25 @@ def setup_cognee(settings: CogneeSettings | None = None) -> None:
     if settings.vector_db_key:
         vdb_config["vector_db_key"] = settings.vector_db_key
     cognee.config.set_vector_db_config(vdb_config)
+
+    # Set a writable system root (after vector config so lancedb check sees pgvector)
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    cognee_data_dir = os.path.join(project_root, ".cognee_system")
+    cognee.config.system_root_directory(cognee_data_dir)
+
+    # Relational DB → PostgreSQL (same instance as PGVector)
+    # Cognee's SqlAlchemyAdapter.create_database() runs CREATE EXTENSION vector
+    # on the relational engine when vector_db_provider=="pgvector", so the
+    # relational DB must also be PostgreSQL to avoid SQLite dialect errors.
+    if settings.vector_db_provider == "pgvector":
+        cognee.config.set_relational_db_config({
+            "db_provider": "postgres",
+            "db_host": settings.vector_db_host,
+            "db_port": settings.vector_db_port,
+            "db_name": settings.vector_db_name,
+            "db_username": settings.vector_db_username,
+            "db_password": settings.vector_db_password,
+        })
 
     # Embeddings → local fastembed (no API key needed)
     from cognee.infrastructure.databases.vector.embeddings.config import get_embedding_config

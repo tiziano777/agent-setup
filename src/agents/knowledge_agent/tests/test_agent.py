@@ -61,6 +61,20 @@ def _reset_cognee_caches():
         get_vectordb_config.cache_clear()
     except ImportError:
         pass
+    try:
+        from cognee.infrastructure.databases.relational.config import get_relational_config
+
+        get_relational_config.cache_clear()
+    except ImportError:
+        pass
+    try:
+        from cognee.infrastructure.databases.relational.create_relational_engine import (
+            create_relational_engine,
+        )
+
+        create_relational_engine.cache_clear()
+    except ImportError:
+        pass
     # Reset our own config flag so setup_cognee() runs fresh
     try:
         import src.shared.cognee_toolkit.config as _cognee_cfg
@@ -182,8 +196,12 @@ class TestCogneeECLIsolated:
 
             try:
                 # --- CLEAN SLATE: Remove any leftover state from previous runs ---
-                await cognee.prune.prune_data()
-                await cognee.prune.prune_system(graph=True, vector=True, metadata=True)
+                # prune_data may fail if relational tables don't exist yet
+                try:
+                    await cognee.prune.prune_data()
+                except Exception:
+                    pass
+                await cognee.prune.prune_system(graph=True, vector=True)
 
                 # --- EXTRACT: Add 3 documents ---
                 for doc in TEST_DOCUMENTS:
@@ -222,10 +240,138 @@ class TestCogneeECLIsolated:
 
             finally:
                 # --- CLEANUP: Always prune, even on failure ---
-                await cognee.prune.prune_data()
+                try:
+                    await cognee.prune.prune_data()
+                except Exception:
+                    pass
                 await cognee.prune.prune_system(graph=True, vector=True)
 
         asyncio.run(_run_ecl_test())
+
+
+class TestPGVectorBackend:
+    """Tests verifying PGVector is the active vector storage backend.
+
+    Validates that setup_cognee() correctly wires PGVector (not SQLite/LanceDB),
+    that vector similarity search returns ranked results, and that prune
+    clears the PGVector data.
+
+    Run with: pytest src/agents/knowledge_agent/tests/ -v -k "pgvector"
+    """
+
+    def test_vector_engine_is_pgvector(self):
+        """Verify the vector engine is PGVectorAdapter, not LanceDB/SQLite."""
+
+        async def _run():
+            from src.shared.cognee_toolkit import CogneeSettings, setup_cognee
+
+            settings = CogneeSettings(default_dataset=TEST_DATASET)
+            setup_cognee(settings=settings)
+
+            from cognee.infrastructure.databases.vector.get_vector_engine import (
+                get_vector_engine,
+            )
+
+            engine = get_vector_engine()
+            class_name = type(engine).__name__
+            print(f"\nVector engine class: {class_name}")
+            assert "PGVector" in class_name, (
+                f"Expected PGVectorAdapter, got {class_name}"
+            )
+
+        asyncio.run(_run())
+
+    def test_relational_engine_is_postgres(self):
+        """Verify the relational engine uses PostgreSQL dialect, not SQLite."""
+
+        async def _run():
+            from src.shared.cognee_toolkit import CogneeSettings, setup_cognee
+
+            settings = CogneeSettings(default_dataset=TEST_DATASET)
+            setup_cognee(settings=settings)
+
+            from cognee.infrastructure.databases.relational.config import get_relational_config
+
+            rel_config = get_relational_config()
+            print(f"\nRelational DB provider: {rel_config.db_provider}")
+            assert rel_config.db_provider == "postgres", (
+                f"Expected postgres, got {rel_config.db_provider}"
+            )
+
+        asyncio.run(_run())
+
+    def test_pgvector_search_returns_ranked_results(self):
+        """Verify PGVector returns results with the most relevant doc first."""
+
+        async def _run():
+            import cognee
+
+            from src.shared.cognee_toolkit import CogneeSettings, get_cognee_memory, setup_cognee
+
+            settings = CogneeSettings(default_dataset=TEST_DATASET)
+            setup_cognee(settings=settings)
+            memory = get_cognee_memory(settings=settings)
+
+            try:
+                # Prune may fail if tables don't exist yet (first run)
+                try:
+                    await cognee.prune.prune_data()
+                except Exception:
+                    pass
+                await cognee.prune.prune_system(graph=True, vector=True)
+
+                for doc in TEST_DOCUMENTS:
+                    await memory.add(doc, dataset_name=TEST_DATASET)
+                await memory.cognify(datasets=TEST_DATASET)
+
+                # Query about Protokol-9 — should rank Protokol doc first
+                results = await memory.search(
+                    "Che cos'è Protokol-9 e quale latenza raggiunge?",
+                    search_type="CHUNKS",
+                    top_k=3,
+                )
+                assert len(results) > 0, "Expected search results"
+                first_result_text = str(results[0]).lower()
+                assert "protokol" in first_result_text, (
+                    f"Expected Protokol-9 as top result, got: {first_result_text[:200]}"
+                )
+
+            finally:
+                try:
+                    await cognee.prune.prune_data()
+                except Exception:
+                    pass
+                await cognee.prune.prune_system(graph=True, vector=True)
+
+        asyncio.run(_run())
+
+    def test_pgvector_prune_does_not_error(self):
+        """Verify prune runs successfully on PGVector without SQLite errors."""
+
+        async def _run():
+            import cognee
+
+            from src.shared.cognee_toolkit import CogneeSettings, get_cognee_memory, setup_cognee
+
+            settings = CogneeSettings(default_dataset=TEST_DATASET)
+            setup_cognee(settings=settings)
+            memory = get_cognee_memory(settings=settings)
+
+            # Add and cognify some data, then prune — should not raise
+            try:
+                await cognee.prune.prune_data()
+            except Exception:
+                pass
+            await cognee.prune.prune_system(graph=True, vector=True)
+
+            await memory.add(DOC_SYNTHEX, dataset_name=TEST_DATASET)
+            await memory.cognify(datasets=TEST_DATASET)
+
+            # Prune should succeed without any SQLite dialect errors
+            await cognee.prune.prune_data()
+            await cognee.prune.prune_system(graph=True, vector=True)
+
+        asyncio.run(_run())
 
 
 class TestKnowledgeAgentIsolated:
@@ -253,8 +399,11 @@ class TestKnowledgeAgentIsolated:
 
             try:
                 # --- CLEAN SLATE ---
-                await cognee.prune.prune_data()
-                await cognee.prune.prune_system(graph=True, vector=True, metadata=True)
+                try:
+                    await cognee.prune.prune_data()
+                except Exception:
+                    pass
+                await cognee.prune.prune_system(graph=True, vector=True)
 
                 # --- SETUP: Pre-load knowledge ---
                 for doc in TEST_DOCUMENTS:
@@ -333,7 +482,10 @@ class TestKnowledgeAgentIsolated:
 
             finally:
                 # --- CLEANUP ---
-                await cognee.prune.prune_data()
+                try:
+                    await cognee.prune.prune_data()
+                except Exception:
+                    pass
                 await cognee.prune.prune_system(graph=True, vector=True)
 
         asyncio.run(_run())

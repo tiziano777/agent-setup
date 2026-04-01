@@ -1,6 +1,6 @@
 # Knowledge Graph Memory (Cognee)
 
-Toolkit per knowledge graph memory basato su Cognee. Trasforma testo in grafi di conoscenza strutturati con entita, relazioni e ricerca semantica. Tutte le chiamate LLM passano per il proxy LiteLLM, usa Qdrant per i vettori e Neo4j per il grafo.
+Toolkit per knowledge graph memory basato su Cognee. Trasforma testo in grafi di conoscenza strutturati con entita, relazioni e ricerca semantica. Tutte le chiamate LLM passano per il proxy LiteLLM, usa PGVector (PostgreSQL) per i vettori e Neo4j per il grafo.
 
 ## Indice
 
@@ -40,16 +40,17 @@ Toolkit per knowledge graph memory basato su Cognee. Trasforma testo in grafi di
 └───┬───────────┬───────────────┬──────────────┘
     │           │               │
     ▼           ▼               ▼
- LiteLLM     Qdrant          Neo4j
- Proxy       (vettori)       (grafo)
- :4000       :6333           :7687
+ LiteLLM    PostgreSQL       Neo4j
+ Proxy      PGVector         (grafo)
+ :4000      :5433            :7687
 ```
 
 **Scelte architetturali:**
 
-- **LLM via proxy**: Cognee viene configurato con `provider: "custom"` + `openai/{model}` per instradare tutte le chiamate LLM tramite il LiteLLM proxy. Nessuna API key Cognee necessaria.
-- **Qdrant condiviso**: Riutilizza la stessa istanza Qdrant del modulo retrieval text-only.
+- **LLM via proxy**: Cognee usa `provider: "openai"` + modello `openai/{model}` per instradare tutte le chiamate LLM tramite il LiteLLM proxy (`openai` e il format standard di LiteLLM). Nessuna API key Cognee necessaria.
+- **PGVector (PostgreSQL)**: Stesso PostgreSQL dell'infrastruttura (porta 5433, database `vectors`). Cognee usa PGVector sia come vector DB che come relational DB per evitare errori `CREATE EXTENSION vector` su SQLite.
 - **Neo4j dedicato**: Il graph database e esclusivo per Cognee. Browser UI su http://localhost:7474.
+- **Embeddings locali**: `fastembed` con modello `BAAI/bge-small-en-v1.5` — nessuna API key necessaria per gli embedding.
 - **Lazy init**: `setup_cognee()` e idempotente e viene chiamato automaticamente al primo uso di `CogneeMemory`.
 
 ---
@@ -84,11 +85,15 @@ src/shared/cognee_toolkit/
 from src.shared.cognee_toolkit import CogneeSettings
 
 settings = CogneeSettings(
-    llm_provider="custom",
-    llm_model="llm",                     # modello nel proxy_config.yml
+    llm_provider="openai",                # LiteLLM usa format OpenAI-compatible
+    llm_model="llm",                      # modello nel proxy_config.yml
     llm_endpoint="http://localhost:4000/v1",
-    vector_db_provider="qdrant",          # o "pgvector", "lancedb"
-    vector_db_url="http://localhost:6333",
+    vector_db_provider="pgvector",        # o "lancedb" come fallback locale
+    vector_db_host="localhost",
+    vector_db_port="5433",
+    vector_db_name="vectors",
+    vector_db_username="postgres",
+    vector_db_password="postgres",
     graph_db_provider="neo4j",            # o "kuzu", "falkordb", "networkx"
     graph_db_url="bolt://localhost:7687",
     graph_db_username="neo4j",
@@ -101,10 +106,19 @@ settings = CogneeSettings(
 
 | Campo | Default | Env Var | Descrizione |
 |-------|---------|---------|-------------|
+| `llm_provider` | `"openai"` | — | Provider LLM (format OpenAI via LiteLLM) |
 | `llm_model` | `"llm"` | `DEFAULT_MODEL` | Nome modello nel proxy |
 | `llm_endpoint` | `http://localhost:4000/v1` | `LITELLM_BASE_URL` | URL proxy LiteLLM |
-| `vector_db_provider` | `"qdrant"` | — | Backend vettoriale |
-| `vector_db_url` | `http://localhost:6333` | `QDRANT_URL` | URL Qdrant |
+| `llm_api_key` | `"not-needed"` | `OPENAI_API_KEY` | API key (il proxy gestisce le chiavi reali) |
+| `vector_db_provider` | `"pgvector"` | — | Backend vettoriale (`"pgvector"` o `"lancedb"`) |
+| `vector_db_host` | `"localhost"` | `COGNEE_VECTOR_DB_HOST` | Host PostgreSQL |
+| `vector_db_port` | `"5433"` | `COGNEE_VECTOR_DB_PORT` | Porta PostgreSQL |
+| `vector_db_name` | `"vectors"` | `COGNEE_VECTOR_DB_NAME` | Database PostgreSQL |
+| `vector_db_username` | `"postgres"` | `COGNEE_VECTOR_DB_USERNAME` | Utente PostgreSQL |
+| `vector_db_password` | `"postgres"` | `COGNEE_VECTOR_DB_PASSWORD` | Password PostgreSQL |
+| `embedding_provider` | `"fastembed"` | `EMBEDDING_PROVIDER` | Provider embeddings (locale, no API) |
+| `embedding_model` | `"BAAI/bge-small-en-v1.5"` | `EMBEDDING_MODEL` | Modello embeddings |
+| `embedding_dimensions` | `384` | — | Dimensioni vettore embedding |
 | `graph_db_provider` | `"neo4j"` | — | Backend grafo |
 | `graph_db_url` | `bolt://localhost:7687` | `NEO4J_URL` | URL Neo4j |
 | `graph_db_username` | `"neo4j"` | `NEO4J_USERNAME` | Utente Neo4j |
@@ -112,7 +126,14 @@ settings = CogneeSettings(
 
 ### `setup_cognee()`
 
-Configura l'infrastruttura Cognee (idempotente):
+Configura l'infrastruttura Cognee (idempotente). L'ordine delle operazioni e critico:
+
+1. **LLM** → `set_llm_config()` con provider `openai` e modello `openai/{model}` verso il proxy LiteLLM
+2. **Vector DB** → `set_vector_db_config()` con `vector_db_provider` e `vector_dataset_database_handler` impostati a `"pgvector"` — **deve precede** `system_root_directory()` perche quest'ultimo sovrascrive l'URL se vede `"lancedb"` (default Cognee)
+3. **System root** → `system_root_directory()` imposta la directory dati locale (`.cognee_system/`)
+4. **Relational DB** → `set_relational_db_config()` con `db_provider: "postgres"` sullo stesso PostgreSQL — **necessario** perche `SqlAlchemyAdapter.create_database()` esegue `CREATE EXTENSION vector` sulla connessione relazionale quando `vector_db_provider=="pgvector"`, e questo fallirebbe su SQLite
+5. **Embeddings** → `fastembed` locale (nessuna API key necessaria)
+6. **Graph DB** → `set_graph_db_config()` verso Neo4j
 
 ```python
 from src.shared.cognee_toolkit import setup_cognee
@@ -127,9 +148,17 @@ setup_cognee(settings=CogneeSettings(graph_db_provider="networkx"))  # override
 
 ### Sviluppo (`docker-compose.yml`)
 
-Neo4j gira come servizio Docker:
+Cognee usa PostgreSQL (PGVector) e Neo4j come servizi Docker:
 
 ```yaml
+postgres:
+  image: pgvector/pgvector:pg17
+  ports:
+    - "5433:5432"
+  environment:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+
 neo4j:
   image: neo4j:5-community
   ports:
@@ -138,6 +167,8 @@ neo4j:
   environment:
     NEO4J_AUTH: neo4j/password
 ```
+
+> **Nota**: PostgreSQL e condiviso con il resto dell'infrastruttura (Phoenix, PGVector per retrieval). Il database `vectors` e usato da Cognee sia come vector store (PGVector) che come relational store.
 
 ### Produzione (`docker-compose.prod.yml`)
 
@@ -320,7 +351,14 @@ all_results = await multi_search(
 |-----------|---------|-------------|
 | `DEFAULT_MODEL` | `llm` | Modello LLM nel proxy |
 | `LITELLM_BASE_URL` | `http://localhost:4000/v1` | URL proxy LiteLLM |
-| `QDRANT_URL` | `http://localhost:6333` | URL Qdrant |
+| `OPENAI_API_KEY` | `not-needed` | API key (il proxy gestisce le chiavi reali) |
+| `COGNEE_VECTOR_DB_HOST` | `localhost` | Host PostgreSQL per PGVector |
+| `COGNEE_VECTOR_DB_PORT` | `5433` | Porta PostgreSQL |
+| `COGNEE_VECTOR_DB_NAME` | `vectors` | Database PostgreSQL |
+| `COGNEE_VECTOR_DB_USERNAME` | `postgres` | Utente PostgreSQL |
+| `COGNEE_VECTOR_DB_PASSWORD` | `postgres` | Password PostgreSQL |
+| `EMBEDDING_PROVIDER` | `fastembed` | Provider embeddings |
+| `EMBEDDING_MODEL` | `BAAI/bge-small-en-v1.5` | Modello embeddings |
 | `NEO4J_URL` | `bolt://localhost:7687` | URL Neo4j (Bolt protocol) |
 | `NEO4J_USERNAME` | `neo4j` | Utente Neo4j |
 | `NEO4J_PASSWORD` | `password` | Password Neo4j |
@@ -345,4 +383,4 @@ cognee = [
 |-----------|-------|
 | `cognee` | Knowledge graph engine (add, cognify, search, memify) |
 
-L'infrastruttura Neo4j e Qdrant e gestita separatamente via Docker. Non servono pacchetti Python aggiuntivi per il graph database.
+L'infrastruttura PostgreSQL, Neo4j e Qdrant e gestita separatamente via Docker. Non servono pacchetti Python aggiuntivi per i database.

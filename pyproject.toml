@@ -73,6 +73,9 @@ deepeval = [
 sandbox = [
     "docker>=7.0",
 ]
+guidance = [
+    "guidance>=0.1",
+]
 
 [build-system]
 requires = ["setuptools>=75.0"]

@@ -153,6 +153,19 @@ Env vars (all optional, have defaults):
 - `SANDBOX_WORKSPACE_SIZE` (default: 128M)
 - `SANDBOX_NETWORK` (default: none)
 
+## Guidance Structured Generation Toolkit (`src/shared/guidance_toolkit/`)
+
+Constrained text generation powered by guidance-ai. Forces LLM outputs to match JSON schemas, regex patterns, or fixed option sets via grammar-based decoding. Routes all LLM calls through the LiteLLM proxy using `guidance.models.OpenAI`.
+
+Files:
+- `config.py` - `GuidanceSettings` dataclass + `setup_guidance()` with env var defaults
+- `llm_bridge.py` - `get_guidance_model()` creates `guidance.models.OpenAI` via proxy (cached)
+- `programs.py` - Built-in programs: `structured_json()`, `constrained_select()`, `regex_generate()`, `grammar_generate()`, `cfg_generate()`, `build_cfg_grammar()`
+- `tools.py` - `get_guidance_tools()` factory for LangGraph @tool functions
+- `nodes.py` - Node factories: `create_guidance_structured_node()`, `create_guidance_select_node()`
+
+Usage: `from src.shared.guidance_toolkit import structured_json, get_guidance_tools`
+
 ## Environment Variables
 
 All LLM API keys go in `.env` (never committed). Copy from `.env.template`.

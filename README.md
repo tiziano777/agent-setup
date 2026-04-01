@@ -16,6 +16,7 @@ Ambiente modulare per lo sviluppo di agenti LangGraph con rotazione automatica t
 - **Evaluation (DeepEval)** - Metriche RAG, safety, agent con BaseDeepEvaluator estensibile
 - **Vulnerability Scanning** - Giskard per 9 categorie di vulnerabilita LLM
 - **Scaffolding** - Nuovo agente in un comando: `make new-agent name=my_agent`
+- **Structured Generation** - Generazione vincolata con Guidance (JSON schema, regex, select, grammatiche)
 - **Registry** - Discovery automatica degli agenti a runtime
 
 ## Requisiti
@@ -76,6 +77,7 @@ agent-setup/
 │   │   │   ├── pipeline.py    # RetrieverPipeline (multi-index + RRF)
 │   │   │   └── contextual.py  # Arricchimento chunk con LLM
 │   │   ├── cognee_toolkit/    # Knowledge graph memory (Cognee + Neo4j)
+│   │   ├── guidance_toolkit/  # Structured generation (Guidance)
 │   │   ├── phoenix_eval/      # Evaluation toolkit (arize-phoenix-evals)
 │   │   ├── deep_eval/         # Evaluation toolkit (deepeval)
 │   │   └── giskard_vulnerability_eval/  # Vulnerability scanning (Giskard)
@@ -210,6 +212,7 @@ Tutti i provider ruotano automaticamente sotto il nome unificato `model="llm"` c
 - [Vector Storage e Retrieval (RAG)](docs/vector-storage.md)
 - [Multimodal RAG](docs/multimodal-rag.md)
 - [Knowledge Graph Memory (Cognee)](docs/cognee.md)
+- [Guidance Structured Generation](docs/guidance.md)
 
 ### Observability e Valutazione
 
@@ -236,4 +239,5 @@ Tutti i provider ruotano automaticamente sotto il nome unificato `model="llm"` c
 - [Neo4j](https://neo4j.com/) - Graph database per knowledge graph
 - [DeepEval](https://docs.confident-ai.com/docs/) - Framework valutazione LLM
 - [Giskard](https://docs.giskard.ai/) - Vulnerability scanning per LLM
+- [Guidance](https://github.com/guidance-ai/guidance) - Generazione vincolata con grammatiche e regex
 - [RAGAnything](https://github.com/HKUDS/RAGAnything) - RAG multimodale

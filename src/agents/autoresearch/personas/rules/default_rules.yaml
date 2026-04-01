@@ -1,0 +1,70 @@
+# Default Rules for Autoresearch Agent
+# ======================================
+#
+# These rules govern how the agent explores the hyperparameter search space.
+# They are loaded by the orchestrator and injected into the agent's prompt.
+
+version: "1.0"
+
+# ---------------------------------------------------------------------------
+# Hard constraints -- the agent MUST respect these
+# ---------------------------------------------------------------------------
+constraints:
+  - "Never modify files inside the base_setup directory; treat it as read-only."
+  - "All hyperparameters must be passed exclusively through HPARAM_* environment variables."
+  - "Do not exceed the budget (max_experiments, max_wall_time_hours) defined in the sweep config."
+  - "Do not launch more concurrent jobs than hardware.max_concurrent_jobs allows."
+  - "Always parse experiment results from EXPERIMENT_RESULT structured stdout lines."
+  - "Record every experiment in the history database before and after execution."
+  - "If max_run_time_seconds is set, each experiment must not exceed that time limit."
+
+# ---------------------------------------------------------------------------
+# Soft preferences -- the agent SHOULD try to follow these
+# ---------------------------------------------------------------------------
+preferences:
+  - "Prefer exploring high-importance parameters first."
+  - "After the initial random wave, use insights from completed runs to guide the next choices."
+  - "If a configuration crashes, avoid nearby regions unless the crash cause is understood."
+  - "Favour configurations that balance metric improvement with training stability."
+  - "Log agent reasoning for every decision so the sweep is fully auditable."
+  - "When the improvement plateau is detected (< 1% gain over 5 runs), consider stopping early."
+  - "All else being equal, simpler is better: prefer fewer parameter changes over many simultaneous tweaks."
+
+# ---------------------------------------------------------------------------
+# Exploration strategy defaults
+# ---------------------------------------------------------------------------
+exploration:
+  # Initial phase: pure exploration
+  initial_random_waves: 2
+  # After initial phase, ratio of explore vs. exploit
+  explore_exploit_ratio: 0.3
+  # If the best metric has not improved after this many runs, suggest early stopping
+  patience_runs: 10
+  # Minimum number of runs before making any importance-based decisions
+  min_runs_for_importance: 5
+
+# ---------------------------------------------------------------------------
+# Safety rails
+# ---------------------------------------------------------------------------
+safety:
+  # Maximum fraction of crashed runs before the agent should pause and alert
+  max_crash_rate: 0.4
+  # If a single hyperparameter value causes >N crashes, blacklist it
+  crash_blacklist_threshold: 3
+  # Require confirmation before spending more than this many GPU-hours
+  gpu_hour_confirmation_threshold: 100
+
+# ---------------------------------------------------------------------------
+# Code-edit mode rules (active only when agent_mode: code_edit)
+# ---------------------------------------------------------------------------
+code_edit:
+  constraints:
+    - "Non modificare prepare.py, config.yaml e requirements.txt."
+    - "Mantenere il contratto EXPERIMENT_RESULT/emit() in train.py."
+    - "Non rimuovere la funzione resolve_hyperparams() da train.py."
+    - "Non introdurre dipendenze esterne senza aggiungerle a requirements.txt."
+  preferences:
+    - "Preferire modifiche piccole e mirate che cambiano un singolo aspetto del training."
+    - "Partire da optimizer/scheduler prima di modifiche architetturali."
+    - "Committare sempre un baseline funzionante prima di sperimentare."
+    - "Documentare il reasoning di ogni modifica nel messaggio di commit."
