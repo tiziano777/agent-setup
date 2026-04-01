@@ -1,0 +1,39 @@
+# ==========================================
+# Modulo: RDF Store (Apache Jena Fuseki)
+# ==========================================
+# Fuseki SPARQL endpoint per RDF Memory (named graphs, SPARQL 1.1).
+# UI: http://localhost:3030
+#
+# Uso standalone:  make rdf-up
+# Aggregazione:    docker compose --project-directory . -f docker-parts/llm.yml -f docker-parts/rdf.yml up -d
+
+services:
+  fuseki:
+    image: stain/jena-fuseki:latest
+    container_name: fuseki
+    user: "0:0"
+    ports:
+      - "${FUSEKI_PORT:-3030}:3030"
+    environment:
+      ADMIN_PASSWORD: ${FUSEKI_ADMIN_PASSWORD:-admin}
+      FUSEKI_DATASET_1: ${FUSEKI_DATASET:-knowledge}
+    volumes:
+      - fuseki_data:/fuseki/databases
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3030/$$/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - agent-net
+
+volumes:
+  fuseki_data:
+    name: agent-fuseki-data
+
+networks:
+  agent-net:
+    name: agent-net
+    driver: bridge
