@@ -158,6 +158,7 @@ services:
   fuseki:
     image: stain/jena-fuseki:latest
     container_name: fuseki
+    user: "0:0"
     ports:
       - "${FUSEKI_PORT:-3030}:3030"
     environment:
