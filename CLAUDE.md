@@ -19,8 +19,8 @@ All agents use `get_llm()` from `src/shared/llm.py` which points at the LiteLLM 
 ## Key Commands
 
 ```bash
-make build              # Start LiteLLM proxy + Qdrant + PostgreSQL + Phoenix
-make down               # Stop infrastructure
+make build              # Start full dev ecosystem (all services including Fuseki)
+make down               # Stop full dev ecosystem
 make test               # Run all tests
 make new-agent name=X   # Create new agent from template
 make list-agents        # List available agents
@@ -39,6 +39,15 @@ make test-sandbox       # Run sandbox integration tests
 make k8s-apply-all      # Deploy everything to Kubernetes via Kustomize
 make k8s-logs-phoenix   # Phoenix logs in Kubernetes
 make k8s-port-forward-phoenix  # Access Phoenix UI on localhost:6006 via K8s
+
+# Modular infrastructure (docker-parts/) — selective startup
+make help-modules                        # Show all modules + dependency matrix
+make llm-up                              # Start LLM proxy module only
+make database-up                         # Start PostgreSQL + pgvector only
+make observability-up                    # Start Phoenix + PostgreSQL (auto-included)
+make rdf-up                              # Start Fuseki only
+make modules-up m="llm vectordb rdf"     # Start specific modules together
+make up-all / down-all                   # All modules via docker-parts/
 ```
 
 ## Code Conventions
@@ -187,6 +196,10 @@ Key infrastructure vars (all have defaults):
 - `COGNEE_VECTOR_DB_NAME` (default: vectors)
 - `COGNEE_VECTOR_DB_USERNAME` (default: postgres)
 - `COGNEE_VECTOR_DB_PASSWORD` (default: postgres)
+- `FUSEKI_URL` (default: http://localhost:3030)
+- `FUSEKI_DATASET` (default: knowledge)
+- `FUSEKI_ADMIN_PASSWORD` (default: admin)
+- `FUSEKI_PORT` (default: 3030)
 
 Run `make env-check` to validate configuration.
 
@@ -210,10 +223,11 @@ Most relevant skills for this project:
 ## Important Files
 
 - `proxy_config.yml` - LiteLLM config for all 12 LLM providers
-- `Makefile` - All project commands
+- `Makefile` - All project commands (run `make help-modules` for modular infra guide)
 - `serve.py` - FastAPI server wrapping agent1's graph
-- `docker-compose.yml` - Dev infrastructure (proxy + Qdrant + PostgreSQL + Phoenix + Neo4j)
-- `docker-compose.prod.yml` - Full production stack
+- `docker-compose.yml` - Dev infrastructure, full ecosystem (proxy + Qdrant + PostgreSQL + Phoenix + Neo4j + Fuseki)
+- `docker-compose.prod.yml` - Full production stack (app + all infrastructure)
+- `docker-parts/` - Modular compose files for selective startup (llm, vectordb, database, observability, graphdb, rdf)
 - `src/shared/llm.py` - Central LLM client factory
 - `src/shared/registry.py` - Agent auto-discovery
 - `src/shared/orchestration.py` - Multi-agent composition factories
@@ -224,6 +238,7 @@ Most relevant skills for this project:
 - `src/shared/deep_eval/` - DeepEval evaluation toolkit (see DeepEval Toolkit section above)
 - `src/shared/cognee_toolkit/` - Cognee knowledge graph memory (see Cognee section above)
 - `src/shared/sandbox/` - Docker sandboxed shell execution (see Sandbox Toolkit section above)
+- `src/shared/rdf_memory/` - RDF Memory toolkit with Fuseki SPARQL backend (see docs/rdf_memory.md)
 - `deploy/docker/init-db.sql` - Phoenix database init for PostgreSQL
 - `deploy/kubernetes/infra.yml` - K8s infrastructure (LiteLLM + Qdrant + PostgreSQL + Phoenix)
 - `deploy/kubernetes/configmap.yml` - K8s non-sensitive config (includes Phoenix endpoint)

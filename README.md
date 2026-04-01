@@ -32,7 +32,7 @@ Ambiente modulare per lo sviluppo di agenti LangGraph con rotazione automatica t
 cp .env.template .env
 # Compila .env con le tue API key (anche solo alcune)
 
-# 2. Avvia il proxy LLM
+# 2. Avvia l'ecosistema dev (LLM proxy + DB + observability)
 make build
 
 # 3. Verifica che il proxy funzioni
@@ -52,8 +52,9 @@ make test
 ```
 agent-setup/
 ├── .env.template              # Template API key per i provider
-├── docker-compose.yml         # LiteLLM proxy + Qdrant + PostgreSQL + Phoenix + Neo4j
-├── docker-compose.prod.yml    # Stack completo produzione (app + infra + Neo4j)
+├── docker-compose.yml         # Ecosistema dev completo (LLM + Qdrant + PostgreSQL + Phoenix + Neo4j + Fuseki)
+├── docker-compose.prod.yml    # Stack completo produzione (app + infra)
+├── docker-parts/              # Compose modulari per avvio selettivo (llm, vectordb, database, observability, graphdb, rdf)
 ├── proxy_config.yml           # Configurazione 12 provider LLM
 ├── pyproject.toml             # Dipendenze e tool config
 ├── langgraph.json             # Entry point per deployment LangGraph
@@ -78,6 +79,8 @@ agent-setup/
 │   │   │   └── contextual.py  # Arricchimento chunk con LLM
 │   │   ├── cognee_toolkit/    # Knowledge graph memory (Cognee + Neo4j)
 │   │   ├── guidance_toolkit/  # Structured generation (Guidance)
+│   │   ├── sandbox/           # Shell execution in Docker sandbox
+│   │   ├── rdf_memory/        # RDF Memory con Fuseki SPARQL backend
 │   │   ├── phoenix_eval/      # Evaluation toolkit (arize-phoenix-evals)
 │   │   ├── deep_eval/         # Evaluation toolkit (deepeval)
 │   │   └── giskard_vulnerability_eval/  # Vulnerability scanning (Giskard)
@@ -106,37 +109,52 @@ agent-setup/
 │   │   └── init-db.sql  # Init database phoenix + schema isolation
 │   └── kubernetes/              # Manifesti K8s (infra + app + configmap)
 │
-└── docs/                      # Documentazione
-    ├── getting-started.md     # Guida setup completa
-    ├── architecture.md        # Architettura del sistema
-    ├── agent-development.md   # Guida sviluppo agenti
-    ├── multi-agent.md         # Pattern multi-agente
-    ├── vector-storage.md      # RAG: vector DB, embedding, chunking, RRF
-    ├── multimodal-rag.md      # RAG multimodale (PDF, immagini, tabelle)
-    ├── cognee.md              # Knowledge graph memory (Cognee)
-    ├── arize-phoenix.md       # Integrazione Phoenix (tracing + observability)
-    ├── phoenix-eval.md        # Evaluation toolkit Phoenix
-    ├── deep-eval.md           # Valutazione con DeepEval
-    ├── giskard.md             # Vulnerability scanning (Giskard)
-    ├── api-reference.md       # Reference modulo shared
-    ├── deployment.md          # Guida deployment (Docker, K8s, Cloud)
-    ├── makefile.md            # Reference comandi Makefile
-    └── update-external-repos.md  # Gestione repo esterni
+├── docs/                      # Documentazione
+│   ├── getting-started.md     # Guida setup completa
+│   ├── architecture.md        # Architettura del sistema
+│   ├── agent-development.md   # Guida sviluppo agenti
+│   ├── multi-agent.md         # Pattern multi-agente
+│   ├── vector-storage.md      # RAG: vector DB, embedding, chunking, RRF
+│   ├── multimodal-rag.md      # RAG multimodale (PDF, immagini, tabelle)
+│   ├── cognee.md              # Knowledge graph memory (Cognee)
+│   ├── rdf_memory.md          # RDF Memory (Fuseki SPARQL)
+│   ├── arize-phoenix.md       # Integrazione Phoenix (tracing + observability)
+│   ├── phoenix-eval.md        # Evaluation toolkit Phoenix
+│   ├── deep-eval.md           # Valutazione con DeepEval
+│   ├── giskard.md             # Vulnerability scanning (Giskard)
+│   ├── api-reference.md       # Reference modulo shared
+│   ├── deployment.md          # Guida deployment (Docker, K8s, Cloud)
+│   ├── makefile.md            # Reference comandi Makefile
+│   └── update-external-repos.md  # Gestione repo esterni
 ```
 
 ## Comandi Makefile
 
-### Proxy LLM
+### Ecosistema Completo
 
 | Comando | Descrizione |
 |---------|-------------|
-| `make build` | Avvia il proxy LiteLLM |
-| `make down` | Ferma il proxy |
+| `make build` | Avvia l'intero ecosistema dev (LLM + Qdrant + PostgreSQL + Phoenix + Neo4j + Fuseki) |
+| `make down` | Ferma l'intero ecosistema |
 | `make llm-proxy-health` | Controlla lo stato del proxy |
 | `make llm-proxy-logs` | Log in tempo reale |
 | `make llm-proxy-restart` | Riavvia dopo modifica config |
 | `make llm-proxy-test` | Test rapido del rotator |
 | `make test-all` | Test di tutti i provider configurati |
+
+### Infrastruttura Modulare (`docker-parts/`)
+
+| Comando | Descrizione |
+|---------|-------------|
+| `make llm-up` | Solo LiteLLM proxy (prerequisito per tutti) |
+| `make vectordb-up` | Solo Qdrant |
+| `make database-up` | Solo PostgreSQL/pgvector |
+| `make observability-up` | Phoenix + PostgreSQL (auto-incluso) |
+| `make graphdb-up` | Solo Neo4j |
+| `make rdf-up` | Solo Fuseki |
+| `make modules-up m="llm vectordb"` | Composizione libera di moduli |
+| `make up-all` | Tutti i moduli via docker-parts/ |
+| `make help-modules` | Guida completa moduli e dipendenze |
 
 ### Gestione Agenti
 
@@ -155,12 +173,23 @@ agent-setup/
 | `make lint` | Lint con ruff |
 | `make fmt` | Auto-format con ruff |
 
+### Sandbox (Docker)
+
+| Comando | Descrizione |
+|---------|-------------|
+| `make sandbox-pull` | Pre-pull immagine Docker sandbox |
+| `make sandbox-ps` | Lista container sandbox in esecuzione |
+| `make sandbox-clean` | Pulizia container sandbox orfani |
+| `make test-sandbox` | Test integrazione sandbox |
+
 ### Observability (Phoenix)
 
 | Comando | Descrizione |
 |---------|-------------|
 | `make phoenix-logs` | Log Phoenix in tempo reale |
 | `make test-phoenix` | Healthcheck Phoenix |
+| `make test-fuseki` | Healthcheck Fuseki |
+| `make test-rdf` | Test integrazione RDF memory |
 | `make k8s-logs-phoenix` | Log Phoenix in Kubernetes |
 | `make k8s-port-forward-phoenix` | Phoenix UI su localhost:6006 via K8s |
 
@@ -212,6 +241,7 @@ Tutti i provider ruotano automaticamente sotto il nome unificato `model="llm"` c
 - [Vector Storage e Retrieval (RAG)](docs/vector-storage.md)
 - [Multimodal RAG](docs/multimodal-rag.md)
 - [Knowledge Graph Memory (Cognee)](docs/cognee.md)
+- [RDF Memory (Fuseki SPARQL)](docs/rdf_memory.md)
 - [Guidance Structured Generation](docs/guidance.md)
 
 ### Observability e Valutazione

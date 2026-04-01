@@ -6,16 +6,43 @@ CONFIG_FILE=proxy_config.yml
 # Rimuove i duplicati (se presenti) per evitare test ripetuti
 MODELS := $(shell grep "id:" $(CONFIG_FILE) | sed 's/.*id:[[:space:]]*//' | tr -d '"' | tr -d "'")
 
+# ==========================================
+# Infrastruttura Modulare (docker-parts/)
+# ==========================================
+# Ogni modulo e un docker-compose autocontenuto.
+# Per l'ecosistema completo: make build / make down
+# Per singoli moduli: make <modulo>-up / make <modulo>-down
+# Per la guida completa: make help-modules
 
-# Avvia il proxy
+PARTS_DIR      = docker-parts
+COMPOSE_MOD    = docker compose --project-directory . -p agent-mod
+
+# Flag compose per ogni modulo
+MOD_LLM           = -f $(PARTS_DIR)/llm.yml
+MOD_VECTORDB      = -f $(PARTS_DIR)/vectordb.yml
+MOD_DATABASE      = -f $(PARTS_DIR)/database.yml
+MOD_OBSERVABILITY = -f $(PARTS_DIR)/observability.yml
+MOD_GRAPHDB       = -f $(PARTS_DIR)/graphdb.yml
+MOD_RDF           = -f $(PARTS_DIR)/rdf.yml
+MOD_ALL           = $(MOD_LLM) $(MOD_VECTORDB) $(MOD_DATABASE) $(MOD_OBSERVABILITY) $(MOD_GRAPHDB) $(MOD_RDF)
+
+# Dipendenze (auto-incluse dal Makefile)
+DEPS_OBSERVABILITY = $(MOD_DATABASE)
+
+
+# ==========================================
+# Ecosistema Completo (root docker-compose)
+# ==========================================
+
+# Avvia tutta l'infrastruttura dev (tutti i servizi incluso Fuseki)
 build:
 	docker compose up -d --build
 
-# Ferma il proxy
+# Ferma tutta l'infrastruttura dev
 down:
 	docker compose down
 
-# Log in tempo reale
+# Log in tempo reale del proxy LLM (root compose)
 llm-proxy-logs:
 	docker compose logs -f litellm-proxy
 
@@ -26,6 +53,121 @@ llm-proxy-health:
 # Riavvia il proxy (utile dopo modifica config)
 llm-proxy-restart:
 	docker compose restart litellm-proxy
+
+# ==========================================
+# Singoli Moduli (docker-parts/)
+# ==========================================
+# LLM e il gateway obbligatorio per tutti i workflow agentici.
+# I target individuali avviano SOLO il servizio richiesto.
+# Per aggregare piu moduli: make modules-up m="llm vectordb rdf"
+
+# --- LLM Proxy (litellm-proxy) ---
+llm-up:
+	$(COMPOSE_MOD) $(MOD_LLM) up -d
+llm-down:
+	$(COMPOSE_MOD) $(MOD_LLM) down
+llm-logs:
+	$(COMPOSE_MOD) $(MOD_LLM) logs -f
+
+# --- Vector Database (Qdrant) ---
+vectordb-up:
+	$(COMPOSE_MOD) $(MOD_VECTORDB) up -d
+vectordb-down:
+	$(COMPOSE_MOD) $(MOD_VECTORDB) down
+vectordb-logs:
+	$(COMPOSE_MOD) $(MOD_VECTORDB) logs -f
+
+# --- Database (PostgreSQL + pgvector) ---
+database-up:
+	$(COMPOSE_MOD) $(MOD_DATABASE) up -d
+database-down:
+	$(COMPOSE_MOD) $(MOD_DATABASE) down
+database-logs:
+	$(COMPOSE_MOD) $(MOD_DATABASE) logs -f
+
+# --- Observability (Phoenix) — auto-include database ---
+observability-up:
+	$(COMPOSE_MOD) $(DEPS_OBSERVABILITY) $(MOD_OBSERVABILITY) up -d
+observability-down:
+	$(COMPOSE_MOD) $(DEPS_OBSERVABILITY) $(MOD_OBSERVABILITY) down
+observability-logs:
+	$(COMPOSE_MOD) $(DEPS_OBSERVABILITY) $(MOD_OBSERVABILITY) logs -f phoenix
+
+# --- Graph Database (Neo4j) ---
+graphdb-up:
+	$(COMPOSE_MOD) $(MOD_GRAPHDB) up -d
+graphdb-down:
+	$(COMPOSE_MOD) $(MOD_GRAPHDB) down
+graphdb-logs:
+	$(COMPOSE_MOD) $(MOD_GRAPHDB) logs -f
+
+# --- RDF Store (Fuseki) ---
+rdf-up:
+	$(COMPOSE_MOD) $(MOD_RDF) up -d
+rdf-down:
+	$(COMPOSE_MOD) $(MOD_RDF) down
+rdf-logs:
+	$(COMPOSE_MOD) $(MOD_RDF) logs -f
+
+# --- Multi-modulo (composizione libera) ---
+# Usage: make modules-up m="llm vectordb database"
+modules-up:
+ifndef m
+	$(error Usage: make modules-up m="llm vectordb database observability graphdb rdf")
+endif
+	$(COMPOSE_MOD) $(foreach mod,$(m),-f $(PARTS_DIR)/$(mod).yml) up -d
+
+modules-down:
+ifndef m
+	$(error Usage: make modules-down m="llm vectordb database observability graphdb rdf")
+endif
+	$(COMPOSE_MOD) $(foreach mod,$(m),-f $(PARTS_DIR)/$(mod).yml) down
+
+modules-ps:
+ifndef m
+	$(error Usage: make modules-ps m="llm vectordb database observability graphdb rdf")
+endif
+	$(COMPOSE_MOD) $(foreach mod,$(m),-f $(PARTS_DIR)/$(mod).yml) ps
+
+# --- Tutti i moduli ---
+up-all:
+	$(COMPOSE_MOD) $(MOD_ALL) up -d
+
+down-all:
+	$(COMPOSE_MOD) $(MOD_ALL) down
+
+ps-all:
+	$(COMPOSE_MOD) $(MOD_ALL) ps
+
+# --- Guida moduli ---
+help-modules:
+	@echo "=== Infrastruttura Modulare (docker-parts/) ==="
+	@echo ""
+	@echo "Moduli disponibili:"
+	@echo "  llm            LiteLLM proxy - gateway LLM (prerequisito per tutti i workflow)"
+	@echo "  vectordb       Qdrant vector database"
+	@echo "  database       PostgreSQL + pgvector"
+	@echo "  observability  Arize Phoenix tracing (richiede: database)"
+	@echo "  graphdb        Neo4j graph database"
+	@echo "  rdf            Apache Fuseki RDF store"
+	@echo ""
+	@echo "Comandi per singolo modulo:"
+	@echo "  make <modulo>-up      Avvia un modulo"
+	@echo "  make <modulo>-down    Ferma un modulo"
+	@echo "  make <modulo>-logs    Log in tempo reale"
+	@echo ""
+	@echo "Comandi multi-modulo:"
+	@echo "  make modules-up m=\"llm vectordb database\"   Avvia i moduli elencati"
+	@echo "  make modules-down m=\"llm vectordb\"           Ferma i moduli elencati"
+	@echo "  make modules-ps m=\"llm vectordb\"             Stato dei moduli"
+	@echo "  make up-all / down-all / ps-all              Tutti i moduli"
+	@echo ""
+	@echo "Matrice dipendenze:"
+	@echo "  observability -> database  (auto-incluso per observability-up)"
+	@echo "  llm           -> prerequisito per tutti i workflow agentici"
+	@echo ""
+	@echo "Ecosistema completo (root docker-compose, include tutto):"
+	@echo "  make build / make down"
 
 
 
@@ -241,8 +383,8 @@ test-agents:
 		python -m pytest $$agent/tests/ -v || true; \
 	done
 
-# Test completo di tutti i moduli (db + llm + agents + app + phoenix)
-test-modules: test-db llm-proxy-health test-all test-agents test-app test-phoenix
+# Test completo di tutti i moduli (db + llm + agents + app + phoenix + rdf)
+test-modules: test-db llm-proxy-health test-all test-agents test-app test-phoenix test-fuseki test-rdf
 	@echo "\n--- Test di tutti i moduli completato ---"
 
 # ==========================================
@@ -425,6 +567,24 @@ endif
 # Elimina tutto il namespace (ATTENZIONE: cancella tutto)
 k8s-destroy:
 	kubectl delete namespace $(K8S_NS)
+
+# ==========================================
+# Fuseki - RDF Store (alias retrocompatibili)
+# ==========================================
+# I target fuseki-* sono alias ai nuovi rdf-* (docker-parts/rdf.yml)
+
+fuseki-up: rdf-up
+fuseki-down: rdf-down
+fuseki-logs: rdf-logs
+
+# Healthcheck Fuseki
+test-fuseki:
+	@echo "--- Test Fuseki ---"
+	@curl -sf http://localhost:3030/$$/ping && echo " Fuseki OK" || echo "Fuseki non raggiungibile su :3030"
+
+# Test RDF memory module
+test-rdf:
+	python -m pytest src/shared/rdf_memory/tests/ -v
 
 # ==========================================
 # Sandbox - Docker Shell Execution

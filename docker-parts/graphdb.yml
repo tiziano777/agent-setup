@@ -1,0 +1,39 @@
+# ==========================================
+# Modulo: Graph Database (Neo4j)
+# ==========================================
+# Neo4j per Cognee knowledge graph memory.
+# Browser UI: http://localhost:7474 | Bolt: localhost:7687
+#
+# Uso standalone:  make graphdb-up
+# Aggregazione:    docker compose --project-directory . -f docker-parts/llm.yml -f docker-parts/graphdb.yml up -d
+
+services:
+  neo4j:
+    image: neo4j:5-community
+    container_name: neo4j
+    ports:
+      - "7474:7474"   # Browser UI
+      - "7687:7687"   # Bolt protocol
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-password}
+      NEO4J_PLUGINS: '["apoc"]'
+    volumes:
+      - neo4j_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - agent-net
+
+volumes:
+  neo4j_data:
+    name: agent-neo4j-data
+
+networks:
+  agent-net:
+    name: agent-net
+    driver: bridge

@@ -1,0 +1,38 @@
+# ==========================================
+# Modulo: LLM Proxy (LiteLLM)
+# ==========================================
+# Gateway obbligatorio per tutti i workflow agentici.
+# Ogni agente chiama get_llm() -> proxy su localhost:4000.
+#
+# Uso standalone:  make llm-up
+# Aggregazione:    docker compose --project-directory . -f docker-parts/llm.yml -f docker-parts/vectordb.yml up -d
+
+services:
+  litellm-proxy:
+    image: ghcr.io/berriai/litellm:main-latest
+    container_name: litellm-proxy
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./proxy_config.yml:/app/config.yaml:ro
+    env_file:
+      - .env
+    command:
+      - "--config"
+      - "/app/config.yaml"
+      - "--port"
+      - "4000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - agent-net
+
+networks:
+  agent-net:
+    name: agent-net
+    driver: bridge

@@ -76,14 +76,17 @@ uv pip install -e ".[retrieval-all]"
 
 ## Avvio Infrastruttura Docker
 
-Il `docker-compose.yml` include Qdrant e PostgreSQL/pgvector:
+Il `docker-compose.yml` include Qdrant e PostgreSQL/pgvector (insieme a tutti gli altri servizi).
 
 ```bash
-# Avvia tutto (proxy LLM + Qdrant + PostgreSQL)
-docker compose up -d
+# Ecosistema completo (LLM + Qdrant + PostgreSQL + Phoenix + Neo4j + Fuseki)
+make build
 
-# Solo i vector database
-docker compose up -d qdrant postgres-vector
+# Oppure solo i moduli necessari via docker-parts/
+make llm-up         # LLM proxy (prerequisito)
+make vectordb-up    # Solo Qdrant
+make database-up    # Solo PostgreSQL/pgvector
+make modules-up m="llm vectordb database"  # Composizione libera
 
 # Verifica stato
 docker compose ps

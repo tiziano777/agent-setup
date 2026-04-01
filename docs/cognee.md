@@ -170,6 +170,8 @@ neo4j:
 
 > **Nota**: PostgreSQL e condiviso con il resto dell'infrastruttura (Phoenix, PGVector per retrieval). Il database `vectors` e usato da Cognee sia come vector store (PGVector) che come relational store.
 
+> **Avvio modulare**: Per avviare solo i servizi necessari a Cognee, usa `make llm-up && make graphdb-up && make database-up` oppure `make modules-up m="llm graphdb database"`. Vedi `make help-modules` per la guida completa.
+
 ### Produzione (`docker-compose.prod.yml`)
 
 Include Neo4j con APOC plugin, healthcheck, e limiti di memoria (1G).

@@ -399,11 +399,12 @@ class TestKnowledgeAgentIsolated:
 
             try:
                 # --- CLEAN SLATE ---
+                # Don't call prune_system initially — it drops pipeline_runs table
+                # that cognify() needs. The test fixture clears caches already.
                 try:
                     await cognee.prune.prune_data()
                 except Exception:
-                    pass
-                await cognee.prune.prune_system(graph=True, vector=True)
+                    pass  # Tables may not exist yet on first run
 
                 # --- SETUP: Pre-load knowledge ---
                 for doc in TEST_DOCUMENTS:
@@ -486,6 +487,9 @@ class TestKnowledgeAgentIsolated:
                     await cognee.prune.prune_data()
                 except Exception:
                     pass
-                await cognee.prune.prune_system(graph=True, vector=True)
+                try:
+                    await cognee.prune.prune_system(graph=True, vector=True)
+                except Exception:
+                    pass  # Relational DB cleanup may fail; acceptable for test teardown
 
         asyncio.run(_run())

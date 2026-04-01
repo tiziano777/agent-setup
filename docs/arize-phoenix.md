@@ -130,6 +130,7 @@ Questo garantisce che quando il graph viene compilato e le classi LLM vengono is
 |------|-------|
 | `docker-compose.yml` | Phoenix container per sviluppo locale |
 | `docker-compose.prod.yml` | Phoenix container per produzione (stack completo) |
+| `docker-parts/observability.yml` | Phoenix come modulo standalone (`make observability-up`, auto-include database) |
 | `deploy/docker/init-db.sql` | Script SQL che crea il database `phoenix` in PostgreSQL |
 
 ### Infrastruttura Kubernetes

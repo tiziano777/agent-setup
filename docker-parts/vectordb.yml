@@ -1,0 +1,35 @@
+# ==========================================
+# Modulo: Vector Database (Qdrant)
+# ==========================================
+# Qdrant per embedding storage e similarity search.
+#
+# Uso standalone:  make vectordb-up
+# Aggregazione:    docker compose --project-directory . -f docker-parts/llm.yml -f docker-parts/vectordb.yml up -d
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    ports:
+      - "6333:6333"   # REST API
+      - "6334:6334"   # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - agent-net
+
+volumes:
+  qdrant_data:
+    name: agent-qdrant-data
+
+networks:
+  agent-net:
+    name: agent-net
+    driver: bridge

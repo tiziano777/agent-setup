@@ -53,7 +53,7 @@ Provider LLM esterno (Groq, Gemini, Mistral, ...)
 
 ## Componenti Principali
 
-### 1. LiteLLM Proxy (`docker-compose.yml` + `proxy_config.yml`)
+### 1. LiteLLM Proxy (`docker-compose.yml` / `docker-parts/llm.yml` + `proxy_config.yml`)
 
 Container Docker che espone un endpoint OpenAI-compatible su `localhost:4000`. Tutti i 12 provider LLM sono registrati sotto lo stesso `model_name: "llm"`, il che abilita la rotazione automatica.
 
@@ -66,16 +66,17 @@ Container Docker che espone un endpoint OpenAI-compatible su `localhost:4000`. T
 
 Il proxy gestisce autenticazione, retry e fallback. Gli agenti non hanno bisogno di conoscere i dettagli dei singoli provider.
 
-### 1b. Database e Storage (`docker-compose.yml`)
+### 1b. Database e Storage (`docker-compose.yml` / `docker-parts/`)
 
-Il docker-compose include i servizi di storage:
+Il docker-compose include i servizi di storage (avviabili anche singolarmente via `docker-parts/`):
 
-| Servizio | Immagine | Porta | Uso |
-|----------|----------|-------|-----|
-| `qdrant` | `qdrant/qdrant:latest` | 6333 (REST), 6334 (gRPC) | Vector search con HNSW |
-| `postgres-vector` | `pgvector/pgvector:pg16` | 5433 | PostgreSQL 16 + estensione pgvector |
-| `neo4j` | `neo4j:5-community` | 7474 (HTTP), 7687 (Bolt) | Graph database (Cognee knowledge graph) |
-| `phoenix` | `arizephoenix/phoenix:latest` | 6006 (HTTP), 4317 (gRPC) | LLM observability + tracing |
+| Servizio | Immagine | Porta | Uso | Modulo |
+|----------|----------|-------|-----|--------|
+| `qdrant` | `qdrant/qdrant:latest` | 6333 (REST), 6334 (gRPC) | Vector search con HNSW | `make vectordb-up` |
+| `postgres-vector` | `pgvector/pgvector:pg16` | 5433 | PostgreSQL 16 + estensione pgvector | `make database-up` |
+| `neo4j` | `neo4j:5-community` | 7474 (HTTP), 7687 (Bolt) | Graph database (Cognee knowledge graph) | `make graphdb-up` |
+| `phoenix` | `arizephoenix/phoenix:latest` | 6006 (HTTP), 4317 (gRPC) | LLM observability + tracing | `make observability-up` |
+| `fuseki` | `stain/jena-fuseki:latest` | 3030 | Apache Jena Fuseki (RDF/SPARQL store) | `make rdf-up` |
 
 #### Mappa Database
 
@@ -87,6 +88,7 @@ Il docker-compose include i servizi di storage:
 | Qdrant | Retrieval (RAG) | collection per agente | Vector store principale per semantic search |
 | Qdrant | Cognee | collection interna | Vettori knowledge graph entities |
 | Neo4j | Cognee | database default | Grafi di conoscenza (entita, relazioni) |
+| Fuseki | RDF Memory | dataset `knowledge` | Triple store RDF/SPARQL per memoria semantica |
 | Filesystem locale | Multimodal RAG | `./rag_storage/` | Storage RAG-Anything / LightRAG |
 
 #### Schema Isolation (PostgreSQL)
@@ -111,7 +113,7 @@ Il parametro `schema` e supportato da `PgVectorStore` (`src/shared/retrieval/vec
 
 ### 2. Modulo Shared (`src/shared/`)
 
-Cinque file core + sei sotto-moduli con responsabilita distinte:
+Cinque file core + otto sotto-moduli con responsabilita distinte:
 
 | File | Responsabilita |
 |------|---------------|
@@ -126,6 +128,8 @@ Cinque file core + sei sotto-moduli con responsabilita distinte:
 | `phoenix_eval/` | Evaluation toolkit (arize-phoenix-evals): 11 evaluator built-in, LLM-as-Judge custom, batch evaluation con annotazioni Phoenix. Vedi [Phoenix Eval](phoenix-eval.md). |
 | `deep_eval/` | Evaluation toolkit (deepeval): 10 metriche, RAG evaluators per Cognee/Qdrant/PGVector, AgentEvaluator end-to-end. Vedi [DeepEval](deep-eval.md). |
 | `giskard_vulnerability_eval/` | Vulnerability scanning (Giskard): 9 categorie di vulnerabilita, wrapping predict_fn e LangGraph, report HTML. Vedi [Giskard](giskard.md). |
+| `sandbox/` | Shell execution in Docker sandbox isolato: filesystem read-only, no network, limiti risorse. Tool `execute_cmd` per agenti. |
+| `rdf_memory/` | RDF Memory con Fuseki SPARQL backend: triple store semantico, ciclo di vita grafi, dispatcher per agenti. Vedi [RDF Memory](rdf_memory.md). |
 
 ### 3. Modulo Agenti (`src/agents/`)
 

@@ -81,7 +81,7 @@ make prod-build
 make build
 ```
 
-Questo avvia un container Docker con LiteLLM proxy sulla porta 4000. Verifica che funzioni:
+Questo avvia l'intero ecosistema dev (LiteLLM proxy, Qdrant, PostgreSQL, Phoenix, Neo4j, Fuseki) sulla porta 4000 e altre porte. Per avviare solo moduli specifici, vedi `make help-modules`. Verifica che funzioni:
 
 ```bash
 # Health check
@@ -99,7 +99,7 @@ Comandi utili per il proxy:
 ```bash
 make llm-proxy-logs      # Log in tempo reale
 make llm-proxy-restart   # Riavvia (utile dopo modifica proxy_config.yml)
-make down                # Ferma il proxy
+make down                # Ferma l'ecosistema
 ```
 
 ## 3. Setup Ambiente Python

@@ -1,0 +1,40 @@
+# ==========================================
+# Modulo: Database (PostgreSQL + pgvector)
+# ==========================================
+# PostgreSQL con estensione pgvector per RAG, DeepEval, Cognee, AutoResearch.
+# Crea anche il database 'phoenix' per l'observability.
+#
+# Uso standalone:  make database-up
+# Aggregazione:    docker compose --project-directory . -f docker-parts/llm.yml -f docker-parts/database.yml up -d
+
+services:
+  postgres-vector:
+    image: pgvector/pgvector:pg16
+    container_name: postgres-vector
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: vectors
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+      - ./deploy/docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - agent-net
+
+volumes:
+  pgvector_data:
+    name: agent-pgvector-data
+
+networks:
+  agent-net:
+    name: agent-net
+    driver: bridge

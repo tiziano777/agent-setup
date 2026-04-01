@@ -1,0 +1,37 @@
+# ==========================================
+# Modulo: Observability (Arize Phoenix)
+# ==========================================
+# Phoenix per LLM tracing e observability via OpenTelemetry.
+# DIPENDENZA: richiede il modulo 'database' (postgres-vector).
+# Il Makefile include automaticamente database.yml per observability-up.
+#
+# Uso standalone:  make observability-up  (auto-include database)
+# Aggregazione:    docker compose --project-directory . -f docker-parts/database.yml -f docker-parts/observability.yml up -d
+
+services:
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    container_name: phoenix
+    ports:
+      - "6006:6006"    # UI + OTLP HTTP
+      - "4317:4317"    # OTLP gRPC
+    environment:
+      PHOENIX_SQL_DATABASE_URL: postgresql://postgres:postgres@postgres-vector:5432/phoenix
+      PHOENIX_ENABLE_PROMETHEUS: "false"
+    depends_on:
+      postgres-vector:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:6006/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - agent-net
+
+networks:
+  agent-net:
+    name: agent-net
+    driver: bridge

@@ -7,7 +7,7 @@ Guida passo-passo per collegare il tuo progetto di training all'autoresearch age
 ## 1. Prerequisiti
 
 ```bash
-# Avvia l'infrastruttura (LiteLLM proxy, PostgreSQL, Qdrant, Phoenix, Neo4j)
+# Avvia l'infrastruttura (LiteLLM proxy, PostgreSQL, Qdrant, Phoenix, Neo4j, Fuseki)
 make build
 
 # Verifica che almeno una API key LLM sia configurata in .env

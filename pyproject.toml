@@ -76,6 +76,17 @@ sandbox = [
 guidance = [
     "guidance>=0.1",
 ]
+rdf = [
+    "rdflib>=7.0",
+    "SPARQLWrapper>=2.0",
+    "httpx>=0.27",
+]
+rdf-shacl = [
+    "rdflib>=7.0",
+    "SPARQLWrapper>=2.0",
+    "httpx>=0.27",
+    "pyshacl>=0.26",
+]
 
 [build-system]
 requires = ["setuptools>=75.0"]

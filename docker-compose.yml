@@ -1,3 +1,16 @@
+# ============================================
+# Docker Compose - SVILUPPO (ecosistema completo)
+# ============================================
+#
+# Avvia tutta l'infrastruttura locale per lo sviluppo.
+# Per i singoli moduli usa docker-parts/ (vedi: make help-modules).
+#
+# Uso:
+#   make build     # avvia tutto
+#   make down      # ferma tutto
+#
+# ============================================
+
 services:
 
   # ==========================================
@@ -24,6 +37,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 15s
+    networks:
+      - agent-net
 
   # ==========================================
   # Qdrant Vector Database
@@ -43,6 +58,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    networks:
+      - agent-net
 
   # ==========================================
   # PostgreSQL + pgvector
@@ -66,6 +83,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    networks:
+      - agent-net
 
   # ==========================================
   # Arize Phoenix - LLM Observability
@@ -89,6 +108,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
+    networks:
+      - agent-net
 
   # ==========================================
   # Streamlit App (da definire)
@@ -128,8 +149,49 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
+    networks:
+      - agent-net
 
+  # ==========================================
+  # Fuseki - RDF Store (RDF Memory)
+  # ==========================================
+  fuseki:
+    image: stain/jena-fuseki:latest
+    container_name: fuseki
+    ports:
+      - "${FUSEKI_PORT:-3030}:3030"
+    environment:
+      ADMIN_PASSWORD: ${FUSEKI_ADMIN_PASSWORD:-admin}
+      FUSEKI_DATASET_1: ${FUSEKI_DATASET:-knowledge}
+    volumes:
+      - fuseki_data:/fuseki/databases
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3030/$$/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - agent-net
+
+# ==========================================
+# Rete condivisa tra tutti i servizi
+# ==========================================
+networks:
+  agent-net:
+    name: agent-net
+    driver: bridge
+
+# ==========================================
+# Volumi persistenti
+# ==========================================
 volumes:
   qdrant_data:
+    name: agent-qdrant-data
   pgvector_data:
+    name: agent-pgvector-data
   neo4j_data:
+    name: agent-neo4j-data
+  fuseki_data:
+    name: agent-fuseki-data
