@@ -15,7 +15,7 @@ MODELS := $(shell grep "id:" $(CONFIG_FILE) | sed 's/.*id:[[:space:]]*//' | tr -
 # Per la guida completa: make help-modules
 
 PARTS_DIR      = docker-parts
-COMPOSE_MOD    = docker compose --project-directory . -p agent-mod
+COMPOSE_MOD    = docker compose --project-directory . -p agent-setup
 
 # Flag compose per ogni modulo
 MOD_LLM           = -f $(PARTS_DIR)/llm.yml
