@@ -32,6 +32,8 @@
 - [List Revisions](https://docs.langchain.com/api-reference/deployments-v2/list-revisions.md): List all revisions for a deployment.
 - [Patch Deployment](https://docs.langchain.com/api-reference/deployments-v2/patch-deployment.md): Patch a deployment by ID.
 - [Redeploy Revision](https://docs.langchain.com/api-reference/deployments-v2/redeploy-revision.md): Redeploy a specific revision ID.
+- [List Forge GitHub Integrations](https://docs.langchain.com/api-reference/integrations-v1/list-forge-github-integrations.md): List available Forge GitHub integrations.
+- [List Forge GitHub Repositories](https://docs.langchain.com/api-reference/integrations-v1/list-forge-github-repositories.md): List available GitHub repositories for a Forge integration.
 - [List GitHub Integrations](https://docs.langchain.com/api-reference/integrations-v1/list-github-integrations.md): List available GitHub integrations for LangGraph Platfom Cloud SaaS.
 - [List GitHub Repositories](https://docs.langchain.com/api-reference/integrations-v1/list-github-repositories.md): List available GitHub repositories for an integration that are available to deploy to LangSmith Deployment.
 - [Create Listener](https://docs.langchain.com/api-reference/listeners-v2/create-listener.md): Create a listener.<br> <br> Creating a listener is only allowed for LangSmith organizations with self-hosted enterprise plans.
@@ -123,6 +125,7 @@
 - [Assistants](https://docs.langchain.com/langsmith/assistants.md)
 - [Log user feedback using the SDK](https://docs.langchain.com/langsmith/attach-user-feedback.md)
 - [How to audit evaluator scores](https://docs.langchain.com/langsmith/audit-evaluator-scores.md)
+- [Audit logs](https://docs.langchain.com/langsmith/audit-logs.md): Track and review administrative actions across your LangSmith organization for security, compliance, and operational visibility.
 - [Authentication & access control](https://docs.langchain.com/langsmith/auth.md)
 - [Authentication methods](https://docs.langchain.com/langsmith/authentication-methods.md)
 - [Self-hosted LangSmith on AWS](https://docs.langchain.com/langsmith/aws-self-hosted.md)
@@ -164,6 +167,7 @@
 - [Connect to an OpenAI compliant model provider/proxy](https://docs.langchain.com/langsmith/custom-openai-compliant-model.md)
 - [Custom output rendering](https://docs.langchain.com/langsmith/custom-output-rendering.md)
 - [How to add custom routes](https://docs.langchain.com/langsmith/custom-routes.md)
+- [Specify a custom run ID](https://docs.langchain.com/langsmith/custom-run-id.md): How to specify a custom run ID when tracing with LangSmith.
 - [How to use a custom store](https://docs.langchain.com/langsmith/custom-store.md): Replace the built-in Postgres store with a custom BaseStore implementation in your agent deployment.
 - [Monitor projects with dashboards](https://docs.langchain.com/langsmith/dashboards.md)
 - [Bulk export trace data](https://docs.langchain.com/langsmith/data-export.md): Export LangSmith trace data to an S3-compatible bucket in Parquet format.
@@ -218,6 +222,7 @@
 - [How to fetch performance metrics for an experiment](https://docs.langchain.com/langsmith/fetch-perf-metrics-experiment.md)
 - [How to filter experiments in the UI](https://docs.langchain.com/langsmith/filter-experiments-ui.md)
 - [Filter traces](https://docs.langchain.com/langsmith/filter-traces-in-application.md)
+- [Access & oversight](https://docs.langchain.com/langsmith/fleet/access-and-oversight.md): Control who can access agents, how they authenticate, and audit everything they do.
 - [Agent identity](https://docs.langchain.com/langsmith/fleet/agent-identity.md): Choose whether your Fleet agent authenticates with its own credentials or with each user's credentials.
 - [Auth-aware tool responses](https://docs.langchain.com/langsmith/fleet/auth-format.md): Format tool responses to trigger OAuth flows and resume execution automatically.
 - [Channels](https://docs.langchain.com/langsmith/fleet/channels.md): Configure channels to trigger your Fleet agents automatically.
@@ -231,9 +236,11 @@
 - [Remote MCP servers](https://docs.langchain.com/langsmith/fleet/remote-mcp-servers.md): Connect Fleet to popular remote MCP servers
 - [Schedules](https://docs.langchain.com/langsmith/fleet/schedules.md): Configure schedules to run your Fleet agents on a recurring basis.
 - [Manage Fleet](https://docs.langchain.com/langsmith/fleet/self-hosted.md)
-- [Self-hosted Fleet](https://docs.langchain.com/langsmith/fleet/self-hosted-link.md)
+- [Self-hosted](https://docs.langchain.com/langsmith/fleet/self-hosted-link.md)
 - [Workspace setup](https://docs.langchain.com/langsmith/fleet/setup.md): Add required workspace secrets for models and tools used by Fleet.
+- [Skills](https://docs.langchain.com/langsmith/fleet/skills.md): Use skills to give your agents access to specific capabilities.
 - [Integrate Slack with an agent](https://docs.langchain.com/langsmith/fleet/slack-app.md): Connect LangSmith Fleet to your Slack workspace to let your agents communicate with users in Slack.
+- [Integrate Teams with an agent](https://docs.langchain.com/langsmith/fleet/teams-app.md): Connect LangSmith Fleet to Microsoft Teams by bringing your own Azure Bot to let agents communicate with users in Teams.
 - [Templates](https://docs.langchain.com/langsmith/fleet/templates.md): Start faster with curated Fleet templates and customize tools, prompts, and channels.
 - [Tool integrations](https://docs.langchain.com/langsmith/fleet/tools.md): Give your agents access to a wide range of tools and services.
 - [Fleet webhooks](https://docs.langchain.com/langsmith/fleet/webhooks.md): Integrate agent publishing with external systems, CI/CD pipelines, or custom deployment workflows.
@@ -272,7 +279,7 @@
 - [Create and manage datasets in the UI](https://docs.langchain.com/langsmith/manage-datasets-in-application.md)
 - [How to create and manage datasets programmatically](https://docs.langchain.com/langsmith/manage-datasets-programmatically.md)
 - [Manage your organization using the API](https://docs.langchain.com/langsmith/manage-organization-by-api.md)
-- [Manage prompts](https://docs.langchain.com/langsmith/manage-prompts.md)
+- [Manage prompts](https://docs.langchain.com/langsmith/manage-prompts.md): Manage prompt versions, environments, and access controls in LangSmith.
 - [Manage prompts programmatically](https://docs.langchain.com/langsmith/manage-prompts-programmatically.md)
 - [Manage a trace](https://docs.langchain.com/langsmith/manage-trace.md): Compare traces side-by-side, share traces publicly, and view server logs from the trace view in LangSmith.
 - [Configure prompt settings](https://docs.langchain.com/langsmith/managing-model-configurations.md)
@@ -417,8 +424,9 @@
 - [Trace Mastra applications](https://docs.langchain.com/langsmith/trace-with-mastra.md)
 - [Trace Microsoft Agent Framework applications](https://docs.langchain.com/langsmith/trace-with-microsoft-agent-framework.md)
 - [Trace Mistral applications](https://docs.langchain.com/langsmith/trace-with-mistral.md)
+- [Trace n8n workflows](https://docs.langchain.com/langsmith/trace-with-n8n.md): Learn how to trace n8n AI workflows in LangSmith.
 - [Trace OpenAI Agents SDK applications](https://docs.langchain.com/langsmith/trace-with-openai-agents-sdk.md)
-- [Trace with OpenTelemetry](https://docs.langchain.com/langsmith/trace-with-opentelemetry.md)
+- [Trace with OpenTelemetry](https://docs.langchain.com/langsmith/trace-with-opentelemetry.md): Configure OpenTelemetry tracing in LangSmith, including LANGSMITH_OTEL_ENABLED and OTEL fanout with the OpenTelemetry Collector.
 - [Trace Pipecat applications](https://docs.langchain.com/langsmith/trace-with-pipecat.md)
 - [Trace PydanticAI applications](https://docs.langchain.com/langsmith/trace-with-pydantic-ai.md)
 - [Trace Semantic Kernel applications](https://docs.langchain.com/langsmith/trace-with-semantic-kernel.md)
@@ -454,18 +462,24 @@
 - [Publish an integration](https://docs.langchain.com/oss/javascript/contributing/publish-langchain.md)
 - [Using standard tests](https://docs.langchain.com/oss/javascript/contributing/standard-tests-langchain.md)
 - [Agent Client Protocol (ACP)](https://docs.langchain.com/oss/javascript/deepagents/acp.md): Expose Deep Agents over the Agent Client Protocol (ACP) to integrate with code editors and IDEs.
+- [Async subagents](https://docs.langchain.com/oss/javascript/deepagents/async-subagents.md): Launch background subagents that run concurrently while the supervisor continues interacting with the user
 - [Backends](https://docs.langchain.com/oss/javascript/deepagents/backends.md): Choose and configure filesystem backends for Deep Agents. You can specify routes to different backends, implement virtual filesystems, and enforce policies.
 - [Changelog](https://docs.langchain.com/oss/javascript/deepagents/changelog-js.md)
 - [Deep Agents CLI](https://docs.langchain.com/oss/javascript/deepagents/cli/overview.md): Terminal coding agent built on the Deep Agents SDK
 - [Custom model providers](https://docs.langchain.com/oss/javascript/deepagents/cli/providers.md): Configure any LangChain-compatible model provider for the Deep Agents CLI
 - [Comparison with Claude Agent SDK and Codex](https://docs.langchain.com/oss/javascript/deepagents/comparison.md): Compare LangChain Deep Agents with Claude Agent SDK and Codex SDK to choose the right tool for your use case
+- [Build a content builder agent](https://docs.langchain.com/oss/javascript/deepagents/content-builder.md): Build a content writing agent with brand memory, skills, subagents, and image generation
+- [Context engineering in Deep Agents](https://docs.langchain.com/oss/javascript/deepagents/context-engineering.md): Control what context your deep agent has access to and how it is managed across long-running tasks
 - [Customize Deep Agents](https://docs.langchain.com/oss/javascript/deepagents/customization.md): Learn how to customize Deep Agents with system prompts, tools, subagents, and more
-- [Overview](https://docs.langchain.com/oss/javascript/deepagents/frontend/overview.md): Build UIs that display real-time subagent streams from Deep Agents
+- [Build a deep research agent](https://docs.langchain.com/oss/javascript/deepagents/deep-research.md): Build a multi-step web research agent with subagent delegation
+- [Overview](https://docs.langchain.com/oss/javascript/deepagents/frontend/overview.md): Build UIs that display real-time subagent streams, task progress, and sandbox for Deep Agents
+- [Sandbox](https://docs.langchain.com/oss/javascript/deepagents/frontend/sandbox.md): Build an IDE-like UI for a coding agent backed by a sandbox environment
 - [Subagent streaming](https://docs.langchain.com/oss/javascript/deepagents/frontend/subagent-streaming.md): Display specialist subagents with streaming content, progress tracking, and collapsible cards
 - [Todo list](https://docs.langchain.com/oss/javascript/deepagents/frontend/todo-list.md): Track agent progress with a real-time todo list synced from agent state
+- [Going to production](https://docs.langchain.com/oss/javascript/deepagents/going-to-production.md): Take your Deep Agent to production with persistent memory, sandboxes, resilience middleware, and deployment options
 - [Harness capabilities](https://docs.langchain.com/oss/javascript/deepagents/harness.md)
 - [Human-in-the-loop](https://docs.langchain.com/oss/javascript/deepagents/human-in-the-loop.md): Learn how to configure human approval for sensitive tool operations
-- [Long-term memory](https://docs.langchain.com/oss/javascript/deepagents/long-term-memory.md): Learn how to extend Deep Agents with persistent memory across threads
+- [Memory](https://docs.langchain.com/oss/javascript/deepagents/long-term-memory.md): Configure short-term and long-term memory for Deep Agents
 - [Models](https://docs.langchain.com/oss/javascript/deepagents/models.md)
 - [Deep Agents overview](https://docs.langchain.com/oss/javascript/deepagents/overview.md): Build agents that can plan, use subagents, and leverage file systems for complex tasks
 - [Quickstart](https://docs.langchain.com/oss/javascript/deepagents/quickstart.md): Build your first deep agent in minutes
@@ -625,6 +639,7 @@
 - [Publish an integration](https://docs.langchain.com/oss/python/contributing/publish-langchain.md)
 - [Using standard tests](https://docs.langchain.com/oss/python/contributing/standard-tests-langchain.md)
 - [Agent Client Protocol (ACP)](https://docs.langchain.com/oss/python/deepagents/acp.md): Expose Deep Agents over the Agent Client Protocol (ACP) to integrate with code editors and IDEs.
+- [Async subagents](https://docs.langchain.com/oss/python/deepagents/async-subagents.md): Launch background subagents that run concurrently while the supervisor continues interacting with the user
 - [Backends](https://docs.langchain.com/oss/python/deepagents/backends.md): Choose and configure filesystem backends for Deep Agents. You can specify routes to different backends, implement virtual filesystems, and enforce policies.
 - [Changelog](https://docs.langchain.com/oss/python/deepagents/changelog-py.md)
 - [Configuration](https://docs.langchain.com/oss/python/deepagents/cli/configuration.md): Configure the Deep Agents CLI with config.toml, hooks, and MCP servers
@@ -632,14 +647,19 @@
 - [Deep Agents CLI](https://docs.langchain.com/oss/python/deepagents/cli/overview.md): Terminal coding agent built on the Deep Agents SDK
 - [Custom model providers](https://docs.langchain.com/oss/python/deepagents/cli/providers.md): Configure any LangChain-compatible model provider for the Deep Agents CLI
 - [Comparison with Claude Agent SDK and Codex](https://docs.langchain.com/oss/python/deepagents/comparison.md): Compare LangChain Deep Agents with Claude Agent SDK and Codex SDK to choose the right tool for your use case
+- [Build a content builder agent](https://docs.langchain.com/oss/python/deepagents/content-builder.md): Build a content writing agent with brand memory, skills, subagents, and image generation
+- [Context engineering in Deep Agents](https://docs.langchain.com/oss/python/deepagents/context-engineering.md): Control what context your deep agent has access to and how it is managed across long-running tasks
 - [Customize Deep Agents](https://docs.langchain.com/oss/python/deepagents/customization.md): Learn how to customize Deep Agents with system prompts, tools, subagents, and more
 - [Build a data analysis agent](https://docs.langchain.com/oss/python/deepagents/data-analysis.md): Build an agent that analyzes data files, generates visualizations, and shares results
-- [Overview](https://docs.langchain.com/oss/python/deepagents/frontend/overview.md): Build UIs that display real-time subagent streams from Deep Agents
+- [Build a deep research agent](https://docs.langchain.com/oss/python/deepagents/deep-research.md): Build a multi-step web research agent with subagent delegation
+- [Overview](https://docs.langchain.com/oss/python/deepagents/frontend/overview.md): Build UIs that display real-time subagent streams, task progress, and sandbox for Deep Agents
+- [Sandbox](https://docs.langchain.com/oss/python/deepagents/frontend/sandbox.md): Build an IDE-like UI for a coding agent backed by a sandbox environment
 - [Subagent streaming](https://docs.langchain.com/oss/python/deepagents/frontend/subagent-streaming.md): Display specialist subagents with streaming content, progress tracking, and collapsible cards
 - [Todo list](https://docs.langchain.com/oss/python/deepagents/frontend/todo-list.md): Track agent progress with a real-time todo list synced from agent state
+- [Going to production](https://docs.langchain.com/oss/python/deepagents/going-to-production.md): Take your Deep Agent to production with persistent memory, sandboxes, resilience middleware, and deployment options
 - [Harness capabilities](https://docs.langchain.com/oss/python/deepagents/harness.md)
 - [Human-in-the-loop](https://docs.langchain.com/oss/python/deepagents/human-in-the-loop.md): Learn how to configure human approval for sensitive tool operations
-- [Long-term memory](https://docs.langchain.com/oss/python/deepagents/long-term-memory.md): Learn how to extend Deep Agents with persistent memory across threads
+- [Memory](https://docs.langchain.com/oss/python/deepagents/long-term-memory.md): Configure short-term and long-term memory for Deep Agents
 - [Models](https://docs.langchain.com/oss/python/deepagents/models.md)
 - [Deep Agents overview](https://docs.langchain.com/oss/python/deepagents/overview.md): Build agents that can plan, use subagents, and leverage file systems for complex tasks
 - [Quickstart](https://docs.langchain.com/oss/python/deepagents/quickstart.md): Build your first deep agent in minutes

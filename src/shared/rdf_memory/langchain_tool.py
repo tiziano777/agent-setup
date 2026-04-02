@@ -4,6 +4,11 @@ Exposes a single ``rdf_query`` tool whose description is dynamically
 generated from the active :class:`PolicyConfig` and the list of
 registered persistent graphs.
 
+Tool invocations are automatically traced as child spans of LangGraph
+execution via OpenTelemetry's implicit context propagation. Each SPARQL
+operation (SELECT, INSERT, etc.) will appear as a nested ``rdf.<OPERATION>``
+span in the Phoenix trace hierarchy.
+
 Only file in the module that imports from ``langchain_core``.
 """
 

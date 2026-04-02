@@ -329,10 +329,7 @@ class TestRDFReaderE2E:
         last_error = None
         for attempt in range(3):
             try:
-                dispatcher_inst = __import__(
-                    "src.shared.rdf_memory.dispatcher", fromlist=["RDFDispatcher"]
-                ).RDFDispatcher()
-                agent = build_graph(dispatcher=dispatcher_inst, session_uuid=session_id)
+                agent = build_graph(session_uuid=session_id)
 
                 try:
                     result = agent.invoke(

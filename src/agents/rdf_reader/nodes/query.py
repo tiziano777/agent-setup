@@ -1,7 +1,7 @@
 """Query node for rdf_reader.
 
 Reads the instruction from state, asks the LLM to generate a SPARQL
-SELECT query, executes it via the dispatcher, then formats a
+SELECT query, executes it via the rdf_query tool, then formats a
 natural-language answer from the results.
 """
 
@@ -11,12 +11,13 @@ import logging
 import re
 
 from langchain_core.messages import AIMessage
+from langchain_core.runnables import RunnableConfig
 
 from src.agents.rdf_reader.config import settings
 from src.agents.rdf_reader.prompts.system import ANSWER_PROMPT, QUERY_PROMPT
 from src.agents.rdf_reader.states.state import AgentState
+from src.agents.rdf_reader.tools import rdf_query
 from src.shared.llm import get_llm
-from src.shared.rdf_memory.dispatcher import RDFDispatcher
 
 logger = logging.getLogger(__name__)
 
@@ -31,21 +32,47 @@ def _extract_sparql(text: str) -> str:
     return text.strip()
 
 
-def _format_bindings(bindings: list[dict]) -> str:
-    """Format SPARQL result bindings into a readable string."""
-    if not bindings:
-        return "No results found."
-    rows: list[str] = []
-    for b in bindings[:50]:
-        parts = [f"{k}={v.get('value', '')}" for k, v in b.items()]
-        rows.append(" | ".join(parts))
-    return "\n".join(rows)
+def _extract_results_from_tool_output(result_text: str) -> str:
+    """Extract results section from rdf_query tool output.
+
+    Tool output format: "OK [SELECT] on <...> (N result(s)):\n<results>"
+    Returns just the results part (after the header).
+    """
+    if not result_text.startswith("OK"):
+        return ""
+
+    # Find the first newline - everything after is results
+    newline_idx = result_text.find("\n")
+    if newline_idx == -1:
+        # No results (single line like "OK [SELECT] on <...>: no results.")
+        if "no results" in result_text.lower():
+            return "No results found."
+        return result_text
+
+    return result_text[newline_idx + 1:].rstrip()
 
 
-def query(state: AgentState, *, dispatcher: RDFDispatcher, session_uuid: str) -> dict:
+def _is_success(result_text: str) -> bool:
+    """Check if result_text indicates success."""
+    return result_text.startswith("OK ")
+
+
+def query(
+    state: AgentState,
+    *,
+    session_uuid: str,
+    config: RunnableConfig | None = None,
+) -> dict:
     """Query the session KB and return a precise answer.
 
-    The dispatcher is injected via functools.partial in build_graph().
+    Uses the rdf_query tool for all SPARQL operations, which ensures
+    automatic tracing in the LangGraph execution trace.
+
+    Args:
+        state: Current agent state.
+        session_uuid: Session identifier for RDF graph routing.
+        config: LangChain RunnableConfig with execution context (propagates
+                run_manager to tool for unified trace linkage).
     """
     instruction = state["instruction"]
     llm = get_llm(temperature=settings.temperature)
@@ -59,14 +86,13 @@ def query(state: AgentState, *, dispatcher: RDFDispatcher, session_uuid: str) ->
 
     sparql = _extract_sparql(sparql_response.content)
 
-    result = dispatcher.dispatch(
-        sparql=sparql,
-        target_lifecycle="session",
-        session_uuid=session_uuid,
+    result_text = rdf_query.invoke(
+        {"sparql_command": sparql, "session_uuid": session_uuid},
+        config=config,  # ← Pass config for trace linkage
     )
 
-    if not result["success"]:
-        error_msg = result.get("error", "Unknown error")
+    if not _is_success(result_text):
+        error_msg = result_text
         logger.warning("SELECT failed: %s. Retrying with LLM feedback.", error_msg)
         retry_response = llm.invoke(
             [
@@ -81,19 +107,17 @@ def query(state: AgentState, *, dispatcher: RDFDispatcher, session_uuid: str) ->
             ]
         )
         sparql = _extract_sparql(retry_response.content)
-        result = dispatcher.dispatch(
-            sparql=sparql,
-            target_lifecycle="session",
-            session_uuid=session_uuid,
+        result_text = rdf_query.invoke(
+            {"sparql_command": sparql, "session_uuid": session_uuid},
+            config=config,
         )
-        if not result["success"]:
+        if not _is_success(result_text):
             return {
                 "sparql_result": "",
-                "messages": [AIMessage(content=f"Query failed: {result.get('error')}")],
+                "messages": [AIMessage(content=f"Query failed: {result_text}")],
             }
 
-    raw_bindings = result["data"].get("results", {}).get("bindings", [])
-    formatted_results = _format_bindings(raw_bindings)
+    formatted_results = _extract_results_from_tool_output(result_text)
 
     answer_response = llm.invoke(
         [
@@ -109,3 +133,4 @@ def query(state: AgentState, *, dispatcher: RDFDispatcher, session_uuid: str) ->
         "sparql_result": formatted_results,
         "messages": [AIMessage(content=answer_response.content)],
     }
+

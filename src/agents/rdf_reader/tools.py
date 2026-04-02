@@ -1,35 +1,60 @@
-"""Tools for rdf_reader.
+"""RDF query tool for RDF reader agent.
 
-Provides a single rdf_query @tool that wraps all SPARQL operations.
-Automatically traced as a LangChain tool call in the agent trajectory.
+Single @tool wrapper for all SPARQL operations (INSERT, SELECT, etc.).
+Handles classification, permissions, and execution via dispatcher.
+Automatically traced as langchain.tool::rdf_query in Phoenix.
 """
 
-import atexit
+from __future__ import annotations
+
 import json
 import logging
 import uuid
+from typing import Any
 
+from langchain_core.callbacks.manager import get_callback_manager
 from langchain_core.tools import tool
 
-from src.shared.rdf_memory import (
-    FusekiClient,
-    RDFMemorySettings,
-    purge_session_graphs,
-)
 from src.shared.rdf_memory.dispatcher import RDFDispatcher
 
 logger = logging.getLogger(__name__)
 
-_SESSION_UUID = uuid.uuid4().hex
+# Single dispatcher instance for all operations
 _dispatcher: RDFDispatcher | None = None
 
 
-def _get_dispatcher(settings: RDFMemorySettings | None = None) -> RDFDispatcher:
+def _get_dispatcher() -> RDFDispatcher:
     """Get or create singleton dispatcher."""
     global _dispatcher
     if _dispatcher is None:
-        _dispatcher = RDFDispatcher(settings=settings)
+        _dispatcher = RDFDispatcher()
     return _dispatcher
+
+
+def get_dispatcher() -> RDFDispatcher:
+    """Get the singleton RDFDispatcher instance."""
+    return _get_dispatcher()
+
+
+def get_session_uuid() -> str:
+    """Generate a new session UUID."""
+    return uuid.uuid4().hex
+
+
+def get_rdf_reader_tools(session_uuid: str | None = None) -> list:
+    """Get list of RDF reader tools.
+
+    Args:
+        session_uuid: Optional session ID. If None, generates a new one.
+
+    Returns:
+        List containing the rdf_query tool.
+    """
+    if session_uuid is None:
+        session_uuid = get_session_uuid()
+
+    #  Return the tool (already has session_uuid in its closure if needed)
+    return [rdf_query]
 
 
 @tool
@@ -41,7 +66,16 @@ def rdf_query(
     """Execute SPARQL command against RDF knowledge graph.
 
     Accepts any valid SPARQL 1.1 command: SELECT, INSERT, DELETE, etc.
-    Automatically traced as a LangChain tool call in the agent trajectory.
+    The dispatcher automatically:
+    - Classifies the operation type
+    - Enforces access policies
+    - Injects the named graph URI
+    - Executes the command
+
+    Automatically traced as a LangChain tool call, making RDF operations
+    visible in LangGraph execution traces. Tool calls register in Phoenix
+    via the LangChain callback system, and RDF operations nest as child spans
+    under the tool call.
 
     Args:
         sparql_command: Valid SPARQL 1.1 query or update.
@@ -53,11 +87,23 @@ def rdf_query(
     """
     dispatcher = _get_dispatcher()
 
+    # Extract run_manager from LangChain's callback context
+    # This links RDF spans to the tool call span in Phoenix
+    run_manager = None
+    try:
+        callback_manager = get_callback_manager()
+        if callback_manager:
+            run_manager = callback_manager.get_run_manager()
+    except Exception:
+        # Callback manager may not be available in all contexts - that's fine
+        pass
+
     try:
         result = dispatcher.dispatch(
             sparql=sparql_command,
             target_lifecycle=target_lifecycle,  # type: ignore[arg-type]
             session_uuid=session_uuid,
+            run_manager=run_manager,  # ← Pass for explicit trace linkage
         )
 
         if not result["success"]:
@@ -94,33 +140,4 @@ def rdf_query(
     except Exception as e:
         logger.exception("rdf_query tool failed")
         return f"Error executing SPARQL: {str(e)[:500]}"
-
-
-def get_rdf_reader_tools(session_uuid: str | None = None) -> list:
-    """Build the tool set: [rdf_query] scoped to a session graph."""
-    # Return the single rdf_query tool
-    return [rdf_query]
-
-
-def get_dispatcher(settings: RDFMemorySettings | None = None) -> RDFDispatcher:
-    """Create an RDFDispatcher for direct node usage."""
-    return _get_dispatcher(settings)
-
-
-def get_session_uuid() -> str:
-    """Generate a new session UUID."""
-    return uuid.uuid4().hex
-
-
-def _cleanup():
-    try:
-        settings = RDFMemorySettings()
-        client = FusekiClient(settings)
-        purge_session_graphs(client, _SESSION_UUID)
-        client.close()
-    except Exception:
-        pass
-
-
-atexit.register(_cleanup)
 

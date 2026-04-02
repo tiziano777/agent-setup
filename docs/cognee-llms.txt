@@ -134,6 +134,7 @@
 - [Distributed Execution](https://docs.cognee.ai/guides/distributed-execution.md): Step-by-step guide to running Cognee pipelines across Modal containers
 - [Feedback System](https://docs.cognee.ai/guides/feedback-system.md): Step-by-step guide to using feedback with Cognee sessions
 - [Graph Visualization](https://docs.cognee.ai/guides/graph-visualization.md): Step-by-step guide to rendering interactive knowledge graphs
+- [Local Setup (No API Key)](https://docs.cognee.ai/guides/local-setup.md): Run Cognee entirely on your own machine using Ollama and Fastembed — no cloud API key required
 - [Low-Level LLM](https://docs.cognee.ai/guides/low-level-llm.md): Step-by-step guide to using acreate_structured_output for direct LLM interaction
 - [Entity Consolidation](https://docs.cognee.ai/guides/memify-entity-consolidation.md): Rewrite fragmented entity descriptions using LLM analysis of graph neighborhoods
 - [Memify Quickstart](https://docs.cognee.ai/guides/memify-quickstart.md): Step-by-step guide to enriching existing knowledge graphs with derived facts
@@ -152,6 +153,7 @@
 - [AWS Bedrock Integration](https://docs.cognee.ai/integrations/aws-bedrock-integration.md): Use AWS Bedrock LLMs with Cognee through LiteLLM proxy
 - [Claude Agent SDK](https://docs.cognee.ai/integrations/claude-agent-sdk-integration.md)
 - [Evaluation with DeepEval](https://docs.cognee.ai/integrations/deepeval-integration.md)
+- [dlt (Data Load Tool)](https://docs.cognee.ai/integrations/dlt-integration.md)
 - [Google ADK](https://docs.cognee.ai/integrations/google-adk-integration.md)
 - [Integrations](https://docs.cognee.ai/integrations/index.md): Connect Cognee with your favorite Agent frameworks and for observability, evaluation, and development tools
 - [Observability with Keywords AI](https://docs.cognee.ai/integrations/keywordsai-integration.md)

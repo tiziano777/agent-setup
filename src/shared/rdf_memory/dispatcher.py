@@ -72,12 +72,15 @@ class RDFDispatcher:
         session_uuid: str,
         persistent_graph: str | None = None,
         force: bool = False,
+        run_manager: Any = None,
     ) -> dict[str, Any]:
         """Classify, validate, inject named graph, execute, and return results.
 
         Args:
             persistent_graph: Required when *target_lifecycle* is ``"persistent"``.
                 Falls back to ``settings.default_persistent_graph`` when *None*.
+            run_manager: Optional LangChain RunManager for explicit trace linkage
+                (fallback to OpenTelemetry contextvars if not provided).
 
         Returns:
             ``{"success": bool, "operation": str, "data": ..., "graph": str}``
@@ -127,6 +130,7 @@ class RDFDispatcher:
         with traced_sparql(
             operation,
             target_lifecycle,
+            run_manager=run_manager,
             query_preview=sparql[:300],
             session_graph=graph_uri,
         ) as span:

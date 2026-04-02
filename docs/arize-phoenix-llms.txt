@@ -224,6 +224,12 @@ Arize AX supports integrations with over 30+ LLM providers, agent frameworks, pl
 - https://arize.com/docs/ax/integrations/java/spring-ai - Spring AI integration (tracing)
 - https://arize.com/docs/ax/integrations/java/arconia - Arconia integration (tracing)
 
+### Coding Agent Integrations
+- https://arize.com/docs/ax/integrations/platforms/claude-code - Claude Code integration overview
+- https://arize.com/docs/ax/integrations/platforms/claude-code/claude-code-tracing - Claude Code tracing with Arize AX
+- https://arize.com/docs/ax/integrations/platforms/cursor - Cursor integration overview
+- https://arize.com/docs/ax/integrations/platforms/cursor/cursor-tracing - Cursor tracing with Arize AX using Cursor hooks
+
 ### Platform Integrations
 - https://arize.com/docs/ax/integrations/platforms/langflow - LangFlow integration (tracing)
 - https://arize.com/docs/ax/integrations/platforms/flowise - Flowise integration (tracing)
@@ -251,7 +257,7 @@ Arize AX supports integrations with over 30+ LLM providers, agent frameworks, pl
 The API Reference section provides comprehensive documentation for all Arize AX APIs, including REST and GraphQL endpoints. It also includes SDK documentation for Python and TypeScript, with tutorials and migration guides to help you integrate programmatically.
 
 ### REST API
-- https://arize.com/docs/ax/rest-reference - REST API reference overview
+- https://arize.com/docs/ax/rest-reference/overview - Arize REST API overview
 - https://arize.com/docs/ax/rest-reference/download-openapi-spec - Download OpenAPI specification
 - https://api.arize.com/v2/spec.yaml - OpenAPI specification (YAML)
 
@@ -336,6 +342,7 @@ The Security & Settings section covers all security, compliance, and configurati
 
 ### Cost Tracking
 - https://arize.com/docs/ax/security-and-settings/cost-tracking - Cost tracking configuration
+- https://arize.com/docs/ax/security-and-settings/space-rate-limiting - Per-space monthly ingestion limits in Organization settings; enterprise, opt-in; admins rebalance caps; contract total via Arize/support team
 
 ### Data Fabric
 - https://arize.com/docs/ax/security-and-settings/data-fabric - Data fabric overview
@@ -361,16 +368,18 @@ The Self-Hosting section provides complete documentation for deploying Arize AX 
 
 ### Overview
 - https://arize.com/docs/ax/selfhosting - Self-hosting overview
-- https://arize.com/docs/ax/selfhosting/info/on-premise-overview - On-premise overview
-- https://arize.com/docs/ax/selfhosting/info/on-premise-installation - On-premise installation
-- https://arize.com/docs/ax/selfhosting/info/on-premise-installation/installation-on-aws - Installation on AWS
-- https://arize.com/docs/ax/selfhosting/info/on-premise-installation/installation-on-azure - Installation on Azure
-- https://arize.com/docs/ax/selfhosting/info/on-premise-installation/installation-on-gcp - Installation on GCP
-- https://arize.com/docs/ax/selfhosting/info/on-premise-installation/installation-on-openshift - Installation on OpenShift
-- https://arize.com/docs/ax/selfhosting/info/on-premise-installation/configuring-ingress-endpoints - Configuring ingress endpoints
-- https://arize.com/docs/ax/selfhosting/info/on-premise-installation/configuring-saml - Configuring SAML
-- https://arize.com/docs/ax/selfhosting/on-premise-integrations - On-premise integrations
-- https://arize.com/docs/ax/selfhosting/on-premise-sdk-usage - On-premise SDK usage
+- https://arize.com/docs/ax/selfhosting/architecture - Architecture
+- https://arize.com/docs/ax/selfhosting/getting-started/overview - Getting started (installation flow)
+- https://arize.com/docs/ax/selfhosting/getting-started/prerequisites - Prerequisites
+- https://arize.com/docs/ax/selfhosting/installation/installation-on-aws - Installation on AWS
+- https://arize.com/docs/ax/selfhosting/installation/installation-on-azure - Installation on Azure
+- https://arize.com/docs/ax/selfhosting/installation/installation-on-gcp - Installation on GCP
+- https://arize.com/docs/ax/selfhosting/installation/installation-on-openshift - Installation on OpenShift
+- https://arize.com/docs/ax/selfhosting/installation/configuring-ingress-endpoints - Configuring ingress endpoints
+- https://arize.com/docs/ax/selfhosting/installation/configuring-saml - Configuring SAML
+- https://arize.com/docs/ax/selfhosting/guides/integrations - Integrations
+- https://arize.com/docs/ax/selfhosting/guides/sdk-usage - On-premise SDK usage
+- https://arize.com/docs/ax/selfhosting/guides/releases - On-premise releases
 
 ---
 
@@ -404,7 +413,7 @@ The Machine Learning section covers ML observability for traditional machine lea
 - https://arize.com/docs/ax/machine-learning/machine-learning/api-reference-ml/python-sdk - Python SDK reference
 - https://arize.com/docs/ax/machine-learning/machine-learning/api-reference-ml/java-sdk - Java SDK reference
 - https://arize.com/docs/ax/machine-learning/machine-learning/api-reference-ml/r-sdk - R SDK reference
-- https://arize.com/docs/ax/machine-learning/machine-learning/api-reference-ml/rest-api - REST API reference
+- https://arize.com/docs/ax/machine-learning/machine-learning/api-reference-ml/grpc-api - gRPC API reference
 
 ### Computer Vision
 - https://arize.com/docs/ax/machine-learning/computer-vision - Computer vision observability overview
