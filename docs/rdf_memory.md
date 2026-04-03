@@ -90,6 +90,21 @@ Trace: agent.invoke()
 3. **Trace Visibility**: Phoenix UI at http://localhost:6006 shows full agent trajectory
    with RDF operations as part of the unified trace tree (not orphaned).
 
+
+### Canonical Tool-Call Payload & Message Middleware
+
+This project provides a canonical JSON payload for RDF tool calls and a small
+middleware helper to attach structured records to agent state and persist them.
+
+- `summary`: compact summary (operation, graph, success, rows/preview when available)
+- `formatted`: human-readable string (legacy compatibility)
+- `raw`: raw bindings or results as returned by Fuseki
+- `timestamp`, `run_id`, `node_name`, `tool_name`
+
+Use the helper in `src.shared.rdf_memory.middleware.attach_tool_call_to_state`
+to automatically append a `tool_calls` record to your agent state and write
+an NDJSON line for reproducibility. Agents should prefer reading the structured
+`tool_calls` entries rather than parsing free-text `messages`.
 ### Best Practices
 
 **For agents using RDF:**
