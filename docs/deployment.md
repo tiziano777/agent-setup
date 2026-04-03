@@ -227,20 +227,18 @@ docker-compose.prod.yml
   |
   +-- app            (la tua app Python, porta 8000)
   |     |
-  |     +-- dipende da: litellm-proxy, qdrant, postgres-vector, phoenix, neo4j, fuseki
+  |     +-- dipende da: litellm-proxy, qdrant, postgres-vector, phoenix, neo4j
   |
   +-- litellm-proxy  (gateway LLM, porta 4000)
   +-- qdrant          (vector DB, porta 6333)
   +-- postgres-vector (PostgreSQL, porta 5433)
   +-- phoenix         (observability, porta 6006)
   +-- neo4j           (graph DB, porta 7474/7687)
-  +-- fuseki          (RDF store, porta 3030)
   |
   +-- agent-net       (rete privata tra i container)
   +-- agent-qdrant-data    (volume persistente)
   +-- agent-pgvector-data  (volume persistente)
   +-- agent-neo4j-data     (volume persistente)
-  +-- agent-fuseki-data    (volume persistente)
 ```
 
 Differenze chiave rispetto allo sviluppo locale:
@@ -253,7 +251,6 @@ Differenze chiave rispetto allo sviluppo locale:
 | URL PostgreSQL | `localhost:5433` | `postgres-vector:5432` |
 | URL Phoenix | `http://localhost:6006` | `http://phoenix:6006` |
 | URL Neo4j | `bolt://localhost:7687` | `bolt://neo4j:7687` |
-| URL Fuseki | `http://localhost:3030` | `http://fuseki:3030` |
 | Rete | Porte esposte sull'host | Rete Docker interna (`agent-net`) |
 
 In Docker, i container si parlano usando i **nomi dei servizi** come hostname (es. `litellm-proxy`, `qdrant`). La porta e' quella interna del container (es. `5432` per Postgres, non `5433`).

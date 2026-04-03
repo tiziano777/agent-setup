@@ -76,7 +76,7 @@ Il docker-compose include i servizi di storage (avviabili anche singolarmente vi
 | `postgres-vector` | `pgvector/pgvector:pg16` | 5433 | PostgreSQL 16 + estensione pgvector | `make database-up` |
 | `neo4j` | `neo4j:5-community` | 7474 (HTTP), 7687 (Bolt) | Graph database (Cognee knowledge graph) | `make graphdb-up` |
 | `phoenix` | `arizephoenix/phoenix:latest` | 6006 (HTTP), 4317 (gRPC) | LLM observability + tracing | `make observability-up` |
-| `fuseki` | `stain/jena-fuseki:latest` | 3030 | Apache Jena Fuseki (RDF/SPARQL store) | `make rdf-up` |
+
 
 #### Mappa Database
 
@@ -88,7 +88,6 @@ Il docker-compose include i servizi di storage (avviabili anche singolarmente vi
 | Qdrant | Retrieval (RAG) | collection per agente | Vector store principale per semantic search |
 | Qdrant | Cognee | collection interna | Vettori knowledge graph entities |
 | Neo4j | Cognee | database default | Grafi di conoscenza (entita, relazioni) |
-| Fuseki | RDF Memory | dataset `knowledge` | Triple store RDF/SPARQL per memoria semantica |
 | Filesystem locale | Multimodal RAG | `./rag_storage/` | Storage RAG-Anything / LightRAG |
 
 #### Schema Isolation (PostgreSQL)
@@ -129,7 +128,6 @@ Cinque file core + otto sotto-moduli con responsabilita distinte:
 | `deep_eval/` | Evaluation toolkit (deepeval): 10 metriche, RAG evaluators per Cognee/Qdrant/PGVector, AgentEvaluator end-to-end. Vedi [DeepEval](deep-eval.md). |
 | `giskard_vulnerability_eval/` | Vulnerability scanning (Giskard): 9 categorie di vulnerabilita, wrapping predict_fn e LangGraph, report HTML. Vedi [Giskard](giskard.md). |
 | `sandbox/` | Shell execution in Docker sandbox isolato: filesystem read-only, no network, limiti risorse. Tool `execute_cmd` per agenti. |
-| `rdf_memory/` | RDF Memory con Fuseki SPARQL backend: triple store semantico, ciclo di vita grafi, dispatcher per agenti. Vedi [RDF Memory](rdf_memory.md). |
 
 ### 3. Modulo Agenti (`src/agents/`)
 

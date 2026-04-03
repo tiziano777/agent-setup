@@ -4,7 +4,7 @@
 
 Prima di utilizzare qualsiasi workflow, assicurarsi che:
 
-1. **Infrastruttura attiva**: `make build` (avvia LiteLLM proxy + PostgreSQL + Qdrant + Phoenix + Neo4j + Fuseki)
+1. **Infrastruttura attiva**: `make build` (avvia LiteLLM proxy + PostgreSQL + Qdrant + Phoenix + Neo4j)
 2. **Almeno una API key LLM** configurata nel `.env` (verificare con `make env-check`)
 3. **Directory `base_setup`** con uno script di training compatibile col protocollo EXPERIMENT_*
 

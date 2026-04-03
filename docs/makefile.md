@@ -6,7 +6,7 @@ Riferimento completo di tutti i comandi `make` disponibili, organizzati per sezi
 
 ## Sviluppo Locale (Ecosistema Completo)
 
-Comandi per gestire l'intero ecosistema locale (LiteLLM proxy, Qdrant, PostgreSQL, Phoenix, Neo4j, Fuseki) tramite `docker-compose.yml`. Il codice Python gira direttamente sul tuo PC.
+Comandi per gestire l'intero ecosistema locale (LiteLLM proxy, Qdrant, PostgreSQL, Phoenix, Neo4j) tramite `docker-compose.yml`. Il codice Python gira direttamente sul tuo PC.
 
 | Comando | Cosa fa |
 |---------|---------|
@@ -42,18 +42,13 @@ Avvio selettivo dei singoli moduli. Ogni modulo e un file compose autonomo in `d
 | `make graphdb-up` | Avvia Neo4j (porta 7474/7687) | `docker-parts/graphdb.yml` |
 | `make graphdb-down` | Ferma Neo4j | |
 | `make graphdb-logs` | Log Neo4j | |
-| `make rdf-up` | Avvia Fuseki (porta 3030) | `docker-parts/rdf.yml` |
-| `make rdf-down` | Ferma Fuseki | |
-| `make rdf-logs` | Log Fuseki | |
-
-> Legacy aliases: `make fuseki-up/down/logs` funzionano ancora (alias a `rdf-*`).
 
 ### Composizione Multi-Modulo
 
 | Comando | Cosa fa |
 |---------|---------|
-| `make modules-up m="llm vectordb rdf"` | Avvia i moduli specificati insieme |
-| `make modules-down m="llm vectordb rdf"` | Ferma i moduli specificati |
+| `make modules-up m="llm vectordb"` | Avvia i moduli specificati insieme |
+| `make modules-down m="llm vectordb"` | Ferma i moduli specificati |
 | `make modules-ps m="llm vectordb"` | Stato container dei moduli specificati |
 | `make up-all` | Avvia tutti i moduli via `docker-parts/` |
 | `make down-all` | Ferma tutti i moduli |
@@ -69,7 +64,6 @@ Avvio selettivo dei singoli moduli. Ogni modulo e un file compose autonomo in `d
 | `database` | nessuno |
 | `observability` | `database` (auto-incluso) |
 | `graphdb` | nessuno |
-| `rdf` | nessuno |
 
 ---
 
@@ -126,7 +120,7 @@ Comandi per gestire lo stack completo containerizzato tramite `docker-compose.pr
 | `make prod-down-volumes` | Ferma tutto e **cancella i dati persistenti** (Qdrant + PostgreSQL) |
 | `make prod-rebuild` | Ricostruisce solo le immagini, senza avviare |
 | `make prod-rebuild-app` | Ricostruisce e riavvia solo il container dell'app (scelta rapida dopo modifiche al codice) |
-| `make prod-restart service=app` | Riavvia un singolo servizio. Valori: `app`, `litellm-proxy`, `qdrant`, `postgres-vector`, `phoenix`, `neo4j`, `fuseki` |
+| `make prod-restart service=app` | Riavvia un singolo servizio. Valori: `app`, `litellm-proxy`, `qdrant`, `postgres-vector`, `phoenix`, `neo4j` |
 
 ### Monitoraggio
 
@@ -168,13 +162,11 @@ Questi test verificano l'app containerizzata su porta 8000. Richiedono che lo st
 | `make test-agent name=agent1` | Esegue pytest sui test di un singolo agente |
 | `make test-agents` | Esegue pytest su **tutti** gli agenti (esclude `_template`) |
 
-### Observability e RDF
+### Observability
 
 | Comando | Cosa fa |
 |---------|---------|
 | `make test-phoenix` | Healthcheck di Phoenix su `localhost:6006` |
-| `make test-fuseki` | Healthcheck di Fuseki su `localhost:3030` |
-| `make test-rdf` | Test di integrazione modulo rdf_memory |
 | `make phoenix-logs` | Log Phoenix in tempo reale |
 
 ### Sandbox
@@ -190,7 +182,7 @@ Questi test verificano l'app containerizzata su porta 8000. Richiedono che lo st
 
 | Comando | Cosa fa |
 |---------|---------|
-| `make test-modules` | Esegue in sequenza: test DB, health proxy, test provider LLM, test agenti, test app, test Phoenix, test Fuseki, test RDF. Panoramica completa dello stato del sistema |
+| `make test-modules` | Esegue in sequenza: test DB, health proxy, test provider LLM, test agenti, test app, test Phoenix. Panoramica completa dello stato del sistema |
 
 ---
 
@@ -269,7 +261,7 @@ make docker-release registry=mioregistry.azurecr.io/agent-setup
 
 ### Sviluppo locale (ecosistema completo)
 ```bash
-make build              # Avvia tutto (LLM + Qdrant + PostgreSQL + Phoenix + Neo4j + Fuseki)
+make build              # Avvia tutto (LLM + Qdrant + PostgreSQL + Phoenix + Neo4j)
 make llm-proxy-health   # Verifica proxy
 make test               # Esegui pytest
 make down               # Ferma tutto

@@ -34,7 +34,7 @@ DEPS_OBSERVABILITY = $(MOD_DATABASE)
 # Ecosistema Completo (root docker-compose)
 # ==========================================
 
-# Avvia tutta l'infrastruttura dev (tutti i servizi incluso Fuseki)
+# Avvia tutta l'infrastruttura dev (tutti i servizi)
 build:
 	docker compose up -d --build
 
@@ -101,14 +101,6 @@ graphdb-down:
 graphdb-logs:
 	$(COMPOSE_MOD) $(MOD_GRAPHDB) logs -f
 
-# --- RDF Store (Fuseki) ---
-rdf-up:
-	$(COMPOSE_MOD) $(MOD_RDF) up -d
-rdf-down:
-	$(COMPOSE_MOD) $(MOD_RDF) down
-rdf-logs:
-	$(COMPOSE_MOD) $(MOD_RDF) logs -f
-
 # --- Multi-modulo (composizione libera) ---
 # Usage: make modules-up m="llm vectordb database"
 modules-up:
@@ -149,7 +141,6 @@ help-modules:
 	@echo "  database       PostgreSQL + pgvector"
 	@echo "  observability  Arize Phoenix tracing (richiede: database)"
 	@echo "  graphdb        Neo4j graph database"
-	@echo "  rdf            Apache Fuseki RDF store"
 	@echo ""
 	@echo "Comandi per singolo modulo:"
 	@echo "  make <modulo>-up      Avvia un modulo"
@@ -384,7 +375,7 @@ test-agents:
 	done
 
 # Test completo di tutti i moduli (db + llm + agents + app + phoenix + rdf)
-test-modules: test-db llm-proxy-health test-all test-agents test-app test-phoenix test-fuseki test-rdf
+test-modules: test-db llm-proxy-health test-all test-agents test-app test-phoenix
 	@echo "\n--- Test di tutti i moduli completato ---"
 
 # ==========================================
@@ -567,24 +558,6 @@ endif
 # Elimina tutto il namespace (ATTENZIONE: cancella tutto)
 k8s-destroy:
 	kubectl delete namespace $(K8S_NS)
-
-# ==========================================
-# Fuseki - RDF Store (alias retrocompatibili)
-# ==========================================
-# I target fuseki-* sono alias ai nuovi rdf-* (docker-parts/rdf.yml)
-
-fuseki-up: rdf-up
-fuseki-down: rdf-down
-fuseki-logs: rdf-logs
-
-# Healthcheck Fuseki
-test-fuseki:
-	@echo "--- Test Fuseki ---"
-	@curl -sf http://localhost:3030/$$/ping && echo " Fuseki OK" || echo "Fuseki non raggiungibile su :3030"
-
-# Test RDF memory module
-test-rdf:
-	python -m pytest src/shared/rdf_memory/tests/ -v
 
 # ==========================================
 # Sandbox - Docker Shell Execution

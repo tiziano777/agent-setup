@@ -81,7 +81,7 @@ make prod-build
 make build
 ```
 
-Questo avvia l'intero ecosistema dev (LiteLLM proxy, Qdrant, PostgreSQL, Phoenix, Neo4j, Fuseki) sulla porta 4000 e altre porte. Per avviare solo moduli specifici, vedi `make help-modules`. Verifica che funzioni:
+Questo avvia l'intero ecosistema dev (LiteLLM proxy, Qdrant, PostgreSQL, Phoenix, Neo4j) sulla porta 4000 e altre porte. Per avviare solo moduli specifici, vedi `make help-modules`. Verifica che funzioni:
 
 ```bash
 # Health check

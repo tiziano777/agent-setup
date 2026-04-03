@@ -79,7 +79,7 @@ uv pip install -e ".[retrieval-all]"
 Il `docker-compose.yml` include Qdrant e PostgreSQL/pgvector (insieme a tutti gli altri servizi).
 
 ```bash
-# Ecosistema completo (LLM + Qdrant + PostgreSQL + Phoenix + Neo4j + Fuseki)
+# Ecosistema completo (LLM + Qdrant + PostgreSQL + Phoenix + Neo4j)
 make build
 
 # Oppure solo i moduli necessari via docker-parts/

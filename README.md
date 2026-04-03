@@ -52,7 +52,7 @@ make test
 ```
 agent-setup/
 ├── .env.template              # Template API key per i provider
-├── docker-compose.yml         # Ecosistema dev completo (LLM + Qdrant + PostgreSQL + Phoenix + Neo4j + Fuseki)
+├── docker-compose.yml         # Ecosistema dev completo (LLM + Qdrant + PostgreSQL + Phoenix + Neo4j)
 ├── docker-compose.prod.yml    # Stack completo produzione (app + infra)
 ├── docker-parts/              # Compose modulari per avvio selettivo (llm, vectordb, database, observability, graphdb, rdf)
 ├── proxy_config.yml           # Configurazione 12 provider LLM
@@ -80,7 +80,6 @@ agent-setup/
 │   │   ├── cognee_toolkit/    # Knowledge graph memory (Cognee + Neo4j)
 │   │   ├── guidance_toolkit/  # Structured generation (Guidance)
 │   │   ├── sandbox/           # Shell execution in Docker sandbox
-│   │   ├── rdf_memory/        # RDF Memory con Fuseki SPARQL backend
 │   │   ├── phoenix_eval/      # Evaluation toolkit (arize-phoenix-evals)
 │   │   ├── deep_eval/         # Evaluation toolkit (deepeval)
 │   │   └── giskard_vulnerability_eval/  # Vulnerability scanning (Giskard)
@@ -117,7 +116,6 @@ agent-setup/
 │   ├── vector-storage.md      # RAG: vector DB, embedding, chunking, RRF
 │   ├── multimodal-rag.md      # RAG multimodale (PDF, immagini, tabelle)
 │   ├── cognee.md              # Knowledge graph memory (Cognee)
-│   ├── rdf_memory.md          # RDF Memory (Fuseki SPARQL)
 │   ├── arize-phoenix.md       # Integrazione Phoenix (tracing + observability)
 │   ├── phoenix-eval.md        # Evaluation toolkit Phoenix
 │   ├── deep-eval.md           # Valutazione con DeepEval
@@ -134,7 +132,7 @@ agent-setup/
 
 | Comando | Descrizione |
 |---------|-------------|
-| `make build` | Avvia l'intero ecosistema dev (LLM + Qdrant + PostgreSQL + Phoenix + Neo4j + Fuseki) |
+| `make build` | Avvia l'intero ecosistema dev (LLM + Qdrant + PostgreSQL + Phoenix + Neo4j) |
 | `make down` | Ferma l'intero ecosistema |
 | `make llm-proxy-health` | Controlla lo stato del proxy |
 | `make llm-proxy-logs` | Log in tempo reale |
@@ -151,7 +149,6 @@ agent-setup/
 | `make database-up` | Solo PostgreSQL/pgvector |
 | `make observability-up` | Phoenix + PostgreSQL (auto-incluso) |
 | `make graphdb-up` | Solo Neo4j |
-| `make rdf-up` | Solo Fuseki |
 | `make modules-up m="llm vectordb"` | Composizione libera di moduli |
 | `make up-all` | Tutti i moduli via docker-parts/ |
 | `make help-modules` | Guida completa moduli e dipendenze |
@@ -188,7 +185,6 @@ agent-setup/
 |---------|-------------|
 | `make phoenix-logs` | Log Phoenix in tempo reale |
 | `make test-phoenix` | Healthcheck Phoenix |
-| `make test-fuseki` | Healthcheck Fuseki |
 | `make test-rdf` | Test integrazione RDF memory |
 | `make k8s-logs-phoenix` | Log Phoenix in Kubernetes |
 | `make k8s-port-forward-phoenix` | Phoenix UI su localhost:6006 via K8s |
@@ -241,7 +237,6 @@ Tutti i provider ruotano automaticamente sotto il nome unificato `model="llm"` c
 - [Vector Storage e Retrieval (RAG)](docs/vector-storage.md)
 - [Multimodal RAG](docs/multimodal-rag.md)
 - [Knowledge Graph Memory (Cognee)](docs/cognee.md)
-- [RDF Memory (Fuseki SPARQL)](docs/rdf_memory.md)
 - [Guidance Structured Generation](docs/guidance.md)
 
 ### Observability e Valutazione
