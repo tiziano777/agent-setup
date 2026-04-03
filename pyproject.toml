@@ -76,6 +76,12 @@ sandbox = [
 guidance = [
     "guidance>=0.1",
 ]
+rdf = [
+    "rdflib>=7.0",
+    "pyshacl>=0.25",
+    "spacy>=3.7",
+    "pyyaml>=6.0",
+]
 
 [build-system]
 requires = ["setuptools>=75.0"]

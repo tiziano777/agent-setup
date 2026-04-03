@@ -23,6 +23,10 @@ CREATE SCHEMA IF NOT EXISTS deepeval;
 -- Schema per Cognee knowledge graph vector storage
 CREATE SCHEMA IF NOT EXISTS cognee;
 
+
+
+
+
 -- Schema per AutoResearch hyperparameter optimization
 CREATE SCHEMA IF NOT EXISTS autoresearch;
 

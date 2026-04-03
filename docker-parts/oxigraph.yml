@@ -1,0 +1,36 @@
+# ==========================================
+# Modulo: Oxigraph Triple Store (RDF/SPARQL)
+# ==========================================
+# Oxigraph per RDF triple store con SPARQL endpoint.
+# SPARQL UI: http://localhost:7878
+#
+# Uso standalone:  make oxigraph-up
+# Aggregazione:    docker compose --project-directory . -f docker-parts/llm.yml -f docker-parts/oxigraph.yml up -d
+
+services:
+  oxigraph:
+    image: ghcr.io/oxigraph/oxigraph:latest
+    container_name: oxigraph
+    ports:
+      - "7878:7878"   # SPARQL endpoint + UI
+    volumes:
+      - oxigraph_data:/data
+    command: serve --location /data --bind 0.0.0.0:7878
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:7878/query?query=ASK%7B%7D || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - agent-net
+
+volumes:
+  oxigraph_data:
+    name: agent-oxigraph-data
+
+networks:
+  agent-net:
+    name: agent-net
+    driver: bridge

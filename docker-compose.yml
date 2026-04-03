@@ -129,6 +129,27 @@ services:
   #   restart: unless-stopped
 
   # ==========================================
+  # Oxigraph Triple Store (RDF/SPARQL)
+  # ==========================================
+  oxigraph:
+    image: ghcr.io/oxigraph/oxigraph:latest
+    container_name: oxigraph
+    ports:
+      - "7878:7878"   # SPARQL endpoint + UI
+    volumes:
+      - oxigraph_data:/data
+    command: serve --location /data --bind 0.0.0.0:7878
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:7878/query?query=ASK%7B%7D || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - agent-net
+
+  # ==========================================
   # Neo4j Graph Database (Cognee)
   # ==========================================
   neo4j:
@@ -170,3 +191,5 @@ volumes:
     name: agent-pgvector-data
   neo4j_data:
     name: agent-neo4j-data
+  oxigraph_data:
+    name: agent-oxigraph-data

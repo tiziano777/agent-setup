@@ -132,7 +132,6 @@ Files:
 - `config.py` - `CogneeSettings` dataclass + `setup_cognee()` infrastructure wiring (LiteLLM proxy, PGVector, Neo4j)
 - `memory.py` - `CogneeMemory` class wrapping add/cognify/search/memify with async + sync interfaces
 - `tools.py` - `get_cognee_tools()` and `get_cognee_memory_tools()` factories for LangGraph @tool functions
-- `nodes.py` - Node factories: `create_cognee_search_node()`, `create_cognee_add_node()`, `create_cognee_enriched_llm_node()` (RAG-over-KG)
 - `search.py` - `CogneeSearchType` enum (14 search types), `search_with_fallback()`, `multi_search()`
 
 Usage: `from src.shared.cognee_toolkit import get_cognee_memory, get_cognee_tools`
@@ -173,6 +172,30 @@ Files:
 
 Usage: `from src.shared.guidance_toolkit import structured_json, get_guidance_tools`
 
+## Oxigraph Triple Store Toolkit (`src/shared/oxygraph/`)
+
+HTTP client and LangGraph tools for Oxigraph SPARQL endpoint. Used by the `rdf_extractor` agent for triple store operations.
+
+Files:
+- `config.py` - `OxigraphSettings` dataclass with env var defaults (OXIGRAPH_URL, timeout, retries)
+- `client.py` - `OxigraphClient` with query/update/load_triples/health_check methods
+- `tools.py` - `get_oxigraph_tools()` factory returning `[execute_sparql, load_turtle]`
+
+Usage: `from src.shared.oxygraph import OxigraphClient, get_oxigraph_tools`
+
+Infrastructure: Oxigraph SPARQL UI at http://localhost:7878
+
+## RDF Validation Toolkit (`src/shared/rdf_validation/`)
+
+Reusable RDF validation (syntax + SHACL) for any agent working with RDF triples.
+
+Files:
+- `syntax.py` - `check_syntax(triples)` validates Turtle syntax via rdflib
+- `shacl.py` - `check_shacl(triples, shapes_path)` validates against SHACL shapes via pyshacl
+- `validator.py` - `validate_rdf(triples, shapes_path)` combines both phases
+
+Usage: `from src.shared.rdf_validation import check_syntax, check_shacl, validate_rdf`
+
 ## Environment Variables
 
 All LLM API keys go in `.env` (never committed). Copy from `.env.template`.
@@ -194,6 +217,7 @@ Key infrastructure vars (all have defaults):
 - `COGNEE_VECTOR_DB_NAME` (default: vectors)
 - `COGNEE_VECTOR_DB_USERNAME` (default: postgres)
 - `COGNEE_VECTOR_DB_PASSWORD` (default: postgres)
+- `OXIGRAPH_URL` (default: http://localhost:7878)
 
 Run `make env-check` to validate configuration.
 
@@ -219,9 +243,9 @@ Most relevant skills for this project:
 - `proxy_config.yml` - LiteLLM config for all 12 LLM providers
 - `Makefile` - All project commands (run `make help-modules` for modular infra guide)
 - `serve.py` - FastAPI server wrapping agent1's graph
-- `docker-compose.yml` - Dev infrastructure, full ecosystem (proxy + Qdrant + PostgreSQL + Phoenix + Neo4j)
+- `docker-compose.yml` - Dev infrastructure, full ecosystem (proxy + Qdrant + PostgreSQL + Phoenix + Neo4j + Oxigraph)
 - `docker-compose.prod.yml` - Full production stack (app + all infrastructure)
-- `docker-parts/` - Modular compose files for selective startup (llm, vectordb, database, observability)
+- `docker-parts/` - Modular compose files for selective startup (llm, vectordb, database, observability, graphdb, oxigraph)
 - `src/shared/llm.py` - Central LLM client factory
 - `src/shared/registry.py` - Agent auto-discovery
 - `src/shared/orchestration.py` - Multi-agent composition factories
@@ -233,8 +257,11 @@ Most relevant skills for this project:
 - `src/shared/cognee_toolkit/` - Cognee knowledge graph memory (see Cognee section above)
 - `src/shared/sandbox/` - Docker sandboxed shell execution (see Sandbox Toolkit section above)
 - `deploy/docker/init-db.sql` - Phoenix database init for PostgreSQL
-- `deploy/kubernetes/infra.yml` - K8s infrastructure (LiteLLM + Qdrant + PostgreSQL + Phoenix)
-- `deploy/kubernetes/configmap.yml` - K8s non-sensitive config (includes Phoenix endpoint)
+- `deploy/kubernetes/infra.yml` - K8s infrastructure (LiteLLM + Qdrant + PostgreSQL + Phoenix + Oxigraph)
+- `deploy/kubernetes/configmap.yml` - K8s non-sensitive config (includes Phoenix + Oxigraph endpoints)
+- `src/shared/oxygraph/` - Oxigraph triple store client and SPARQL tools
+- `src/shared/rdf_validation/` - RDF syntax + SHACL validation toolkit
+- `src/agents/rdf_extractor/` - RDF extraction pipeline (LangGraph StateGraph with parallel workers)
 
 ## Do NOT
 

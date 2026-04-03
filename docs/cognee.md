@@ -25,10 +25,7 @@ Toolkit per knowledge graph memory basato su Cognee. Trasforma testo in grafi di
 ┌──────────────────────────────────────────────┐
 │  Agent (LangGraph StateGraph)                │
 │                                              │
-│  tools/ ──── get_cognee_tools()              │
-│  nodes/ ──── create_cognee_enriched_llm_node │
-│              create_cognee_search_node        │
-│              create_cognee_add_node           │
+│  tools/ ──── get_cognee_tools()              │        │
 └───────────────────┬──────────────────────────┘
                     │
                     ▼
@@ -301,17 +298,6 @@ CODE_TYPES            # ["CODING_RULES", "CHUNKS"]
 | `cognee_cognify` | Costruisce/aggiorna il knowledge graph da un dataset |
 
 `get_cognee_memory_tools()` ritorna solo `(cognee_add, cognee_search)` per un pattern conversazionale minimale.
-
----
-
-## LangGraph Nodes
-
-| Factory | Descrizione |
-|---------|-------------|
-| `create_cognee_add_node(state_key="cognee_input")` | Legge da `state[state_key]`, ingestisce nel KG |
-| `create_cognee_search_node(query_key, result_key)` | Cerca nel KG, scrive in `state[result_key]` |
-| `create_cognee_cognify_node(datasets)` | Triggera costruzione del knowledge graph |
-| `create_cognee_enriched_llm_node(search_type, system_prompt)` | RAG-over-KG: cerca contesto → chiama LLM |
 
 ---
 

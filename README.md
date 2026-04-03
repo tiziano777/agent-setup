@@ -11,6 +11,7 @@ Ambiente modulare per lo sviluppo di agenti LangGraph con rotazione automatica t
 - **Retrieval (RAG)** - Pipeline ibrida con vector DB (Qdrant, pgvector), BM25, RRF fusion e reranking
 - **Multimodal RAG** - Pipeline RAG-Anything per PDF, immagini, tabelle, equazioni con GLM-OCR
 - **Knowledge Graph** - Cognee per grafi di conoscenza con 14 tipi di ricerca (Qdrant + Neo4j)
+- **RDF Extraction** - Pipeline RDF da testo naturale con Oxigraph, validazione SHACL, human-in-the-loop
 - **Observability** - Tracing automatico con Arize Phoenix via OpenTelemetry (PostgreSQL backend)
 - **Evaluation (Phoenix)** - LLM-as-Judge, evaluator built-in, batch runner con annotazioni Phoenix
 - **Evaluation (DeepEval)** - Metriche RAG, safety, agent con BaseDeepEvaluator estensibile
@@ -54,7 +55,7 @@ agent-setup/
 ├── .env.template              # Template API key per i provider
 ├── docker-compose.yml         # Ecosistema dev completo (LLM + Qdrant + PostgreSQL + Phoenix + Neo4j)
 ├── docker-compose.prod.yml    # Stack completo produzione (app + infra)
-├── docker-parts/              # Compose modulari per avvio selettivo (llm, vectordb, database, observability, graphdb, rdf)
+├── docker-parts/              # Compose modulari per avvio selettivo (llm, vectordb, database, observability, graphdb, oxigraph)
 ├── proxy_config.yml           # Configurazione 12 provider LLM
 ├── pyproject.toml             # Dipendenze e tool config
 ├── langgraph.json             # Entry point per deployment LangGraph
@@ -80,6 +81,8 @@ agent-setup/
 │   │   ├── cognee_toolkit/    # Knowledge graph memory (Cognee + Neo4j)
 │   │   ├── guidance_toolkit/  # Structured generation (Guidance)
 │   │   ├── sandbox/           # Shell execution in Docker sandbox
+│   │   ├── oxygraph/          # Oxigraph triple store client + SPARQL tools
+│   │   ├── rdf_validation/    # RDF syntax + SHACL validation
 │   │   ├── phoenix_eval/      # Evaluation toolkit (arize-phoenix-evals)
 │   │   ├── deep_eval/         # Evaluation toolkit (deepeval)
 │   │   └── giskard_vulnerability_eval/  # Vulnerability scanning (Giskard)
@@ -149,6 +152,7 @@ agent-setup/
 | `make database-up` | Solo PostgreSQL/pgvector |
 | `make observability-up` | Phoenix + PostgreSQL (auto-incluso) |
 | `make graphdb-up` | Solo Neo4j |
+| `make oxigraph-up` | Solo Oxigraph (RDF/SPARQL) |
 | `make modules-up m="llm vectordb"` | Composizione libera di moduli |
 | `make up-all` | Tutti i moduli via docker-parts/ |
 | `make help-modules` | Guida completa moduli e dipendenze |
@@ -185,7 +189,6 @@ agent-setup/
 |---------|-------------|
 | `make phoenix-logs` | Log Phoenix in tempo reale |
 | `make test-phoenix` | Healthcheck Phoenix |
-| `make test-rdf` | Test integrazione RDF memory |
 | `make k8s-logs-phoenix` | Log Phoenix in Kubernetes |
 | `make k8s-port-forward-phoenix` | Phoenix UI su localhost:6006 via K8s |
 
@@ -265,4 +268,8 @@ Tutti i provider ruotano automaticamente sotto il nome unificato `model="llm"` c
 - [DeepEval](https://docs.confident-ai.com/docs/) - Framework valutazione LLM
 - [Giskard](https://docs.giskard.ai/) - Vulnerability scanning per LLM
 - [Guidance](https://github.com/guidance-ai/guidance) - Generazione vincolata con grammatiche e regex
+- [Oxigraph](https://github.com/oxigraph/oxigraph) - Triple store RDF con SPARQL endpoint
+- [pyshacl](https://github.com/RDFLib/pySHACL) - Validazione SHACL per RDF
+- [rdflib](https://rdflib.readthedocs.io/) - Parsing e manipolazione RDF
+- [spaCy](https://spacy.io/) - NLP per chunking adattivo
 - [RAGAnything](https://github.com/HKUDS/RAGAnything) - RAG multimodale

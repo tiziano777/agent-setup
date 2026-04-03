@@ -484,3 +484,80 @@ spec:
       name: bolt
   selector:
     app: neo4j
+
+
+# ==================================================
+# Oxigraph - RDF Triple Store (SPARQL)
+# ==================================================
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: oxigraph
+  namespace: agent-setup
+  labels:
+    app: oxigraph
+    app.kubernetes.io/part-of: agent-setup
+spec:
+  serviceName: oxigraph
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oxigraph
+  template:
+    metadata:
+      labels:
+        app: oxigraph
+    spec:
+      containers:
+        - name: oxigraph
+          image: ghcr.io/oxigraph/oxigraph:latest
+          args: ["serve", "--location", "/data", "--bind", "0.0.0.0:7878"]
+          ports:
+            - containerPort: 7878
+              name: http
+          volumeMounts:
+            - name: oxigraph-data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /query?query=ASK%7B%7D
+              port: 7878
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /query?query=ASK%7B%7D
+              port: 7878
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+  volumeClaimTemplates:
+    - metadata:
+        name: oxigraph-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oxigraph
+  namespace: agent-setup
+spec:
+  type: ClusterIP
+  ports:
+    - port: 7878
+      targetPort: 7878
+      name: http
+  selector:
+    app: oxigraph

@@ -17,9 +17,6 @@ Quick start::
     tools = get_cognee_tools(session_id="user_123")
     agent = create_react_agent(get_llm(), tools)
 
-    # As a LangGraph node (RAG-over-knowledge-graph)
-    builder.add_node("process", create_cognee_enriched_llm_node())
-
 Dependencies:
     Requires ``pip install -e '.[cognee]'``.  All imports are lazy --
     ``ImportError`` is raised only when a function is actually called.
@@ -44,11 +41,6 @@ __all__ = [
     # Tools
     "get_cognee_tools",
     "get_cognee_memory_tools",
-    # Nodes
-    "create_cognee_add_node",
-    "create_cognee_search_node",
-    "create_cognee_cognify_node",
-    "create_cognee_enriched_llm_node",
     # Search
     "CogneeSearchType",
     "CONVERSATIONAL_TYPES",
@@ -82,37 +74,6 @@ def get_cognee_memory_tools(settings=None, session_id=None):
     from src.shared.cognee_toolkit.tools import get_cognee_memory_tools as _factory
 
     return _factory(settings=settings, session_id=session_id)
-
-
-# ── Lazy re-exports for nodes ────────────────────────────────────────
-
-
-def create_cognee_add_node(**kwargs):
-    """Create a node that ingests data into the knowledge graph."""
-    from src.shared.cognee_toolkit.nodes import create_cognee_add_node as _factory
-
-    return _factory(**kwargs)
-
-
-def create_cognee_search_node(**kwargs):
-    """Create a node that searches the knowledge graph."""
-    from src.shared.cognee_toolkit.nodes import create_cognee_search_node as _factory
-
-    return _factory(**kwargs)
-
-
-def create_cognee_cognify_node(**kwargs):
-    """Create a node that triggers knowledge graph construction."""
-    from src.shared.cognee_toolkit.nodes import create_cognee_cognify_node as _factory
-
-    return _factory(**kwargs)
-
-
-def create_cognee_enriched_llm_node(**kwargs):
-    """Create a node combining KG search + LLM call (RAG-over-KG pattern)."""
-    from src.shared.cognee_toolkit.nodes import create_cognee_enriched_llm_node as _factory
-
-    return _factory(**kwargs)
 
 
 # ── Lazy re-exports for search utilities ─────────────────────────────

@@ -23,8 +23,8 @@ MOD_VECTORDB      = -f $(PARTS_DIR)/vectordb.yml
 MOD_DATABASE      = -f $(PARTS_DIR)/database.yml
 MOD_OBSERVABILITY = -f $(PARTS_DIR)/observability.yml
 MOD_GRAPHDB       = -f $(PARTS_DIR)/graphdb.yml
-MOD_RDF           = -f $(PARTS_DIR)/rdf.yml
-MOD_ALL           = $(MOD_LLM) $(MOD_VECTORDB) $(MOD_DATABASE) $(MOD_OBSERVABILITY) $(MOD_GRAPHDB) $(MOD_RDF)
+MOD_OXIGRAPH      = -f $(PARTS_DIR)/oxigraph.yml
+MOD_ALL           = $(MOD_LLM) $(MOD_VECTORDB) $(MOD_DATABASE) $(MOD_OBSERVABILITY) $(MOD_GRAPHDB) $(MOD_OXIGRAPH)
 
 # Dipendenze (auto-incluse dal Makefile)
 DEPS_OBSERVABILITY = $(MOD_DATABASE)
@@ -59,7 +59,7 @@ llm-proxy-restart:
 # ==========================================
 # LLM e il gateway obbligatorio per tutti i workflow agentici.
 # I target individuali avviano SOLO il servizio richiesto.
-# Per aggregare piu moduli: make modules-up m="llm vectordb rdf"
+# Per aggregare piu moduli: make modules-up m="llm vectordb observability graphdb"
 
 # --- LLM Proxy (litellm-proxy) ---
 llm-up:
@@ -101,23 +101,31 @@ graphdb-down:
 graphdb-logs:
 	$(COMPOSE_MOD) $(MOD_GRAPHDB) logs -f
 
+# --- Oxigraph Triple Store (RDF/SPARQL) ---
+oxigraph-up:
+	$(COMPOSE_MOD) $(MOD_OXIGRAPH) up -d
+oxigraph-down:
+	$(COMPOSE_MOD) $(MOD_OXIGRAPH) down
+oxigraph-logs:
+	$(COMPOSE_MOD) $(MOD_OXIGRAPH) logs -f
+
 # --- Multi-modulo (composizione libera) ---
 # Usage: make modules-up m="llm vectordb database"
 modules-up:
 ifndef m
-	$(error Usage: make modules-up m="llm vectordb database observability graphdb rdf")
+	$(error Usage: make modules-up m="llm vectordb database observability graphdb ")
 endif
 	$(COMPOSE_MOD) $(foreach mod,$(m),-f $(PARTS_DIR)/$(mod).yml) up -d
 
 modules-down:
 ifndef m
-	$(error Usage: make modules-down m="llm vectordb database observability graphdb rdf")
+	$(error Usage: make modules-down m="llm vectordb database observability graphdb ")
 endif
 	$(COMPOSE_MOD) $(foreach mod,$(m),-f $(PARTS_DIR)/$(mod).yml) down
 
 modules-ps:
 ifndef m
-	$(error Usage: make modules-ps m="llm vectordb database observability graphdb rdf")
+	$(error Usage: make modules-ps m="llm vectordb database observability graphdb")
 endif
 	$(COMPOSE_MOD) $(foreach mod,$(m),-f $(PARTS_DIR)/$(mod).yml) ps
 
@@ -141,6 +149,7 @@ help-modules:
 	@echo "  database       PostgreSQL + pgvector"
 	@echo "  observability  Arize Phoenix tracing (richiede: database)"
 	@echo "  graphdb        Neo4j graph database"
+	@echo "  oxigraph       Oxigraph triple store (RDF/SPARQL)"
 	@echo ""
 	@echo "Comandi per singolo modulo:"
 	@echo "  make <modulo>-up      Avvia un modulo"
@@ -374,7 +383,7 @@ test-agents:
 		python -m pytest $$agent/tests/ -v || true; \
 	done
 
-# Test completo di tutti i moduli (db + llm + agents + app + phoenix + rdf)
+# Test completo di tutti i moduli (db + llm + agents + app + phoenix)
 test-modules: test-db llm-proxy-health test-all test-agents test-app test-phoenix
 	@echo "\n--- Test di tutti i moduli completato ---"
 
