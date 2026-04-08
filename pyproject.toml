@@ -76,11 +76,18 @@ sandbox = [
 guidance = [
     "guidance>=0.1",
 ]
+deepconf = [
+    "deepconf>=0.1",
+    "vllm>=0.6",
+]
 rdf = [
     "rdflib>=7.0",
     "pyshacl>=0.25",
     "spacy>=3.7",
     "pyyaml>=6.0",
+]
+rlm = [
+    "rlms>=0.1",
 ]
 
 [build-system]
