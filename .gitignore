@@ -31,3 +31,4 @@ __pycache__/
 # External repos (cloned via Makefile)
 external/docs/
 external/langchain-skills/
+.gitnexus
