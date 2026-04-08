@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.agents.rlm_agent.agent import get_agent
+from src.agents.rlm_agent import graph
 from src.agents.rlm_agent.states import RLMAgentState
 
 
@@ -39,14 +39,27 @@ async def test_rlm_agent_finds_secret(mock_rlm_completion):
     secret = "MAGIC_42_FOUND"
     haystack, insert_idx = generate_haystack(5000, secret)
 
-    # Mock RLM completion result
+    # Mock RLM completion result with realistic code execution details
     mock_rlm_completion.return_value = {
         "response": f"Found: {secret}",
         "execution_time": 2.5,
         "metadata": {
             "iterations": [
-                {"step": 1, "action": "sample"},
-                {"step": 2, "action": "regex_search"},
+                {
+                    "code_blocks": [
+                        {
+                            "code": "lines = haystack.split('\\n')\nprint(f'Total lines: {len(lines)}')",
+                            "result": {
+                                "stdout": "Total lines: 5001",
+                                "stderr": "",
+                                "execution_time": 0.0012,
+                                "locals": {"lines": []},
+                                "rlm_calls": [],
+                            },
+                        }
+                    ],
+                    "iteration_time": 0.05,
+                }
             ],
             "rlm_calls": [],
         },
@@ -55,7 +68,7 @@ async def test_rlm_agent_finds_secret(mock_rlm_completion):
     }
 
     # Create agent
-    agent = get_agent()
+    agent = graph
 
     # Build input state
     initial_state: RLMAgentState = {
@@ -91,6 +104,20 @@ async def test_rlm_agent_finds_secret(mock_rlm_completion):
     for i, msg in enumerate(messages):
         print(f"  Message {i}: {msg.__class__.__name__}")
 
+    # Display code execution details from AI message metadata
+    ai_msg = messages[-1]
+    if hasattr(ai_msg, "metadata") and ai_msg.metadata:
+        iteration_details = ai_msg.metadata.get("iteration_details", [])
+        if iteration_details:
+            print(f"\n✓ RLM Code Execution Details:")
+            for detail in iteration_details:
+                print(f"\n  Iteration {detail['iteration']}:")
+                print(f"    Code executed: {detail['code_executed'][:80]}...")
+                print(f"    Output: {detail['exec_response']}")
+                print(f"    Time: {detail['execution_time']:.4f}s")
+                if detail["stderr"]:
+                    print(f"    Stderr: {detail['stderr']}")
+
 
 @pytest.mark.asyncio
 @patch("src.agents.rlm_agent.nodes.search.rlm_completion")
@@ -98,14 +125,27 @@ async def test_rlm_agent_message_chain(mock_rlm_completion):
     """Test that message chain is properly tracked for Phoenix."""
     haystack, _ = generate_haystack(1000, "TEST_123")
 
-    # Mock RLM response
+    # Mock RLM response with realistic code execution details
     mock_rlm_completion.return_value = {
         "response": "TEST_123 found successfully",
         "execution_time": 1.8,
         "metadata": {
             "iterations": [
-                {"step": 1, "action": "read_lines"},
-                {"step": 2, "action": "pattern_match"},
+                {
+                    "code_blocks": [
+                        {
+                            "code": "# Search for TEST_123 in the text\nfor i, line in enumerate(context.split('\\n')):\n    if 'TEST_123' in line:\n        print(f'Found at line {i}: {line}')\n        break",
+                            "result": {
+                                "stdout": "Found at line 532: >>> TEST_123 <<<",
+                                "stderr": "",
+                                "execution_time": 0.0018,
+                                "locals": {},
+                                "rlm_calls": [],
+                            },
+                        }
+                    ],
+                    "iteration_time": 0.08,
+                }
             ],
             "rlm_calls": [],
         },
@@ -113,7 +153,7 @@ async def test_rlm_agent_message_chain(mock_rlm_completion):
         "error": None,
     }
 
-    agent = get_agent()
+    agent = graph
 
     initial_state: RLMAgentState = {
         "prompt": "Find TEST_123 in the text.",
@@ -144,6 +184,16 @@ async def test_rlm_agent_message_chain(mock_rlm_completion):
             print(f"✓ Execution time: {ai_msg.metadata['execution_time']:.2f}s")
         if "total_iterations" in ai_msg.metadata:
             print(f"✓ Total iterations: {ai_msg.metadata['total_iterations']}")
+
+        # Display code execution details
+        iteration_details = ai_msg.metadata.get("iteration_details", [])
+        if iteration_details:
+            print(f"\n✓ Code Execution Details:")
+            for detail in iteration_details:
+                print(f"  Iteration {detail['iteration']}:")
+                print(f"    Code: {detail['code_executed'][:100]}...")
+                print(f"    Output: {detail['exec_response'][:100]}...")
+                print(f"    Time: {detail['execution_time']:.4f}s")
 
 
 if __name__ == "__main__":

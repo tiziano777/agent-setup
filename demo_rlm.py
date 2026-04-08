@@ -93,6 +93,24 @@ async def demo_rlm_agent():
     for i, msg in enumerate(messages, 1):
         print(f"    [{i}] {msg.__class__.__name__}")
 
+    # Display code execution details if available
+    if messages:
+        ai_msg = messages[-1]
+        if hasattr(ai_msg, "metadata") and ai_msg.metadata:
+            iteration_details = ai_msg.metadata.get("iteration_details", [])
+            if iteration_details:
+                print("\n[8] RLM Code Execution Details:")
+                for detail in iteration_details:
+                    print(f"\n  Iteration {detail['iteration']}:")
+                    code = detail["code_executed"]
+                    if len(code) > 100:
+                        code = code[:100] + "..."
+                    print(f"    Code:\n      {code}")
+                    print(f"    Output: {detail['exec_response']}")
+                    print(f"    Execution time: {detail['execution_time']:.4f}s")
+                    if detail["stderr"]:
+                        print(f"    Stderr: {detail['stderr']}")
+
     print("\n" + "=" * 80)
     print(f"✅ Demo completed successfully!")
     print("=" * 80 + "\n")
