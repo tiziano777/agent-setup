@@ -89,6 +89,10 @@ rdf = [
 rlm = [
     "rlms>=0.1",
 ]
+sql = [
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.0",
+]
 
 [build-system]
 requires = ["setuptools>=75.0"]

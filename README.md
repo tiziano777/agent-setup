@@ -92,7 +92,6 @@ agent-setup/
 │   │
 │   ├── agents/
 │   │   ├── _template/         # Skeleton per nuovi agenti
-│   │   ├── agent1/            # Primo agente (generato da template)
 │   │   │   ├── __init__.py    # Exports + setup_tracing() automatico
 │   │   │   ├── agent.py       # Graph API entry point
 │   │   │   ├── config/        # Configurazione agente
@@ -106,19 +105,6 @@ agent-setup/
 │   │   │   ├── memory/        # Namespace long-term memory
 │   │   │   ├── image/         # Diagrammi e visualizzazioni
 │   │   │   └── tests/         # Test unitari
-│   │   └── rlm_agent/         # RLM-based problem solver con decomposizione ricorsiva
-│   │       ├── __init__.py    # Exports + setup_tracing() automatico
-│   │       ├── agent.py       # Graph API: single-node StateGraph
-│   │       ├── config/        # Configurazione RLM
-│   │       ├── nodes/         # Nodi: search_node (esecuzione RLM)
-│   │       ├── tools/         # Tool sandbox
-│   │       ├── prompts/       # System prompt per RLM
-│   │       ├── states/        # RLMAgentState (TypedDict)
-│   │       ├── schemas/       # RLMAgentInput/Output (Pydantic)
-│   │       ├── pipelines/     # Functional API (@entrypoint/@task)
-│   │       ├── memory/        # Long-term memory config
-│   │       └── tests/         # Test con mock RLM
-│   │
 │   └── app/                   # Applicazione (Streamlit/FastAPI)
 │
 ├── deploy/
@@ -141,6 +127,7 @@ agent-setup/
 │   ├── api-reference.md       # Reference modulo shared
 │   ├── deployment.md          # Guida deployment (Docker, K8s, Cloud)
 │   ├── makefile.md            # Reference comandi Makefile
+│   ├── guidance.md            # Reference comandi Makefile
 │   └── update-external-repos.md  # Gestione repo esterni
 ```
 
@@ -249,11 +236,6 @@ Tutti i provider ruotano automaticamente sotto il nome unificato `model="llm"` c
 - [Guida Deployment](docs/deployment.md)
 - [Comandi Makefile](docs/makefile.md)
 - [Gestione Repository Esterni](docs/update-external-repos.md)
-
-### Recursive Language Models & Configuration
-
-- [Recursive Language Models (RLM)](docs/rlm.md)
-- [DeepConf - Agent Configuration & Composition](docs/deepconf.md)
 
 ### Retrieval e Knowledge Graph
 
