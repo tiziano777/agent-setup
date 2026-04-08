@@ -8,6 +8,8 @@ Ambiente modulare per lo sviluppo di agenti LangGraph con rotazione automatica t
 - **Dual API** - Supporto sia Graph API (StateGraph) che Functional API (@entrypoint/@task)
 - **Multi-Agent** - Pattern predefiniti: supervisor, swarm/p2p, indipendente
 - **LLM Rotation** - 12 provider LLM configurati con fallback automatico e retry
+- **RLM (Recursive Language Models)** - Decomposizione ricorsiva per analisi su testi ultra-lunghi (50k+ linee)
+- **DeepConf** - Configurazione gerarchica e composizione tra agenti con type-safety
 - **Retrieval (RAG)** - Pipeline ibrida con vector DB (Qdrant, pgvector), BM25, RRF fusion e reranking
 - **Multimodal RAG** - Pipeline RAG-Anything per PDF, immagini, tabelle, equazioni con GLM-OCR
 - **Knowledge Graph** - Cognee per grafi di conoscenza con 14 tipi di ricerca (Qdrant + Neo4j)
@@ -68,6 +70,8 @@ agent-setup/
 │   │   ├── memory.py          # Factory checkpointer + store
 │   │   ├── registry.py        # Auto-discovery agenti
 │   │   ├── orchestration.py   # Factory multi-agent
+│   │   ├── deepconf/          # Configurazione gerarchica e composizione agenti
+│   │   ├── rlm/               # Recursive Language Models (RLM) con provider rotation
 │   │   ├── retrieval/         # Pipeline RAG modulare
 │   │   │   ├── embeddings/    # BaseEmbedding, SentenceTransformer, OpenAI
 │   │   │   ├── vectorstores/  # BaseVectorStore, Qdrant, pgvector
@@ -88,20 +92,32 @@ agent-setup/
 │   │
 │   ├── agents/
 │   │   ├── _template/         # Skeleton per nuovi agenti
-│   │   └── agent1/            # Primo agente (generato da template)
+│   │   ├── agent1/            # Primo agente (generato da template)
+│   │   │   ├── __init__.py    # Exports + setup_tracing() automatico
+│   │   │   ├── agent.py       # Graph API entry point
+│   │   │   ├── config/        # Configurazione agente
+│   │   │   ├── nodes/         # Nodi del grafo
+│   │   │   ├── tools/         # Tool LangChain
+│   │   │   ├── prompts/       # System prompt e template
+│   │   │   ├── states/        # Definizione stato (TypedDict)
+│   │   │   ├── schemas/       # Pydantic models I/O
+│   │   │   ├── pipelines/     # Functional API entry point
+│   │   │   ├── scorers/       # Scorer per valutazione
+│   │   │   ├── memory/        # Namespace long-term memory
+│   │   │   ├── image/         # Diagrammi e visualizzazioni
+│   │   │   └── tests/         # Test unitari
+│   │   └── rlm_agent/         # RLM-based problem solver con decomposizione ricorsiva
 │   │       ├── __init__.py    # Exports + setup_tracing() automatico
-│   │       ├── agent.py       # Graph API entry point
-│   │       ├── config/        # Configurazione agente
-│   │       ├── nodes/         # Nodi del grafo
-│   │       ├── tools/         # Tool LangChain
-│   │       ├── prompts/       # System prompt e template
-│   │       ├── states/        # Definizione stato (TypedDict)
-│   │       ├── schemas/       # Pydantic models I/O
-│   │       ├── pipelines/     # Functional API entry point
-│   │       ├── scorers/       # Scorer per valutazione
-│   │       ├── memory/        # Namespace long-term memory
-│   │       ├── image/         # Diagrammi e visualizzazioni
-│   │       └── tests/         # Test unitari
+│   │       ├── agent.py       # Graph API: single-node StateGraph
+│   │       ├── config/        # Configurazione RLM
+│   │       ├── nodes/         # Nodi: search_node (esecuzione RLM)
+│   │       ├── tools/         # Tool sandbox
+│   │       ├── prompts/       # System prompt per RLM
+│   │       ├── states/        # RLMAgentState (TypedDict)
+│   │       ├── schemas/       # RLMAgentInput/Output (Pydantic)
+│   │       ├── pipelines/     # Functional API (@entrypoint/@task)
+│   │       ├── memory/        # Long-term memory config
+│   │       └── tests/         # Test con mock RLM
 │   │
 │   └── app/                   # Applicazione (Streamlit/FastAPI)
 │
@@ -233,6 +249,11 @@ Tutti i provider ruotano automaticamente sotto il nome unificato `model="llm"` c
 - [Guida Deployment](docs/deployment.md)
 - [Comandi Makefile](docs/makefile.md)
 - [Gestione Repository Esterni](docs/update-external-repos.md)
+
+### Recursive Language Models & Configuration
+
+- [Recursive Language Models (RLM)](docs/rlm.md)
+- [DeepConf - Agent Configuration & Composition](docs/deepconf.md)
 
 ### Retrieval e Knowledge Graph
 
