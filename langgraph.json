@@ -1,7 +1,7 @@
 {
   "dependencies": [".", "langchain_openai"],
   "graphs": {
-    "agent1": "./src/agents/agent1/agent.py:graph"
+    "code_runner": "./src/agents/code_runner/agent.py:graph"
   },
   "env": "./.env"
 }

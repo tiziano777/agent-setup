@@ -11,7 +11,7 @@ Three-layer architecture, each layer depends only on layers above:
 ```
 src/shared/     Infrastructure: LLM client, memory, retrieval, registry, orchestration
 src/agents/     Agent modules: each is a standalone LangGraph StateGraph
-src/app/        Application layer: FastAPI REST API (serve.py)
+src/app/        Application layer (empty): FastAPI REST API ( use for now serve.py in root project)
 ```
 
 All agents use `get_llm()` from `src/shared/llm.py` which points at the LiteLLM proxy on localhost:4000. Never call LLM providers directly.
@@ -66,10 +66,12 @@ src/agents/<name>/
   __init__.py      # Exports graph + workflow; calls setup_tracing() for auto-instrumentation
   agent.py         # ReAct agent via create_react_agent() with execute_cmd tool
   config/          # AgentSettings dataclass
+  images/          # used to visualize langgraph pipeline
+  db/              # connector with DB in a dedicated schema 
   states/          # AgentState(TypedDict) with add_messages reducer
   nodes/           # Node functions: (state) -> partial update dict (for custom StateGraph flows)
   tools/           # Imports execute_cmd from src/shared/sandbox; add agent-specific tools here
-  prompts/         # SYSTEM_PROMPT constant
+  prompts/         # SYSTEM_PROMPT constant if multiple behaviours, you can usepersonas/*
   schemas/         # Pydantic AgentInput/AgentOutput
   pipelines/       # @entrypoint/@task Functional API
   scorers/         # Scoring functions
@@ -174,7 +176,7 @@ Usage: `from src.shared.guidance_toolkit import structured_json, get_guidance_to
 
 ## Oxigraph Triple Store Toolkit (`src/shared/oxygraph/`)
 
-HTTP client and LangGraph tools for Oxigraph SPARQL endpoint. Used by the `rdf_extractor` agent for triple store operations.
+HTTP client and LangGraph tools for Oxigraph SPARQL endpoint. Used by agents that operate on triple stores.
 
 Files:
 - `config.py` - `OxigraphSettings` dataclass with env var defaults (OXIGRAPH_URL, timeout, retries)
@@ -233,10 +235,6 @@ After running `make external-setup`, reference docs are available at:
 
 Most relevant skills for this project:
 - `langgraph-fundamentals` - StateGraph patterns (this project's core)
-- `langgraph-persistence` - Checkpointers and memory (used in memory.py)
-- `langgraph-human-in-the-loop` - Interrupt/resume patterns
-- `langchain-rag` - RAG patterns (used in src/shared/retrieval/)
-- `deep-agents-orchestration` - Multi-agent patterns (used in orchestration.py)
 
 ## Important Files
 
@@ -261,7 +259,6 @@ Most relevant skills for this project:
 - `deploy/kubernetes/configmap.yml` - K8s non-sensitive config (includes Phoenix + Oxigraph endpoints)
 - `src/shared/oxygraph/` - Oxigraph triple store client and SPARQL tools
 - `src/shared/rdf_validation/` - RDF syntax + SHACL validation toolkit
-- `src/agents/rdf_extractor/` - RDF extraction pipeline (LangGraph StateGraph with parallel workers)
 
 ## Do NOT
 

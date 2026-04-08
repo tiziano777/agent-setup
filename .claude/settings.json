@@ -12,5 +12,18 @@
       "Bash(rm -rf /)",
       "Bash(*> .env)"
     ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/T.Finizzi/.claude/hooks/rtk-rewrite.sh"
+          }
+        ]
+      }
+    ]
   }
 }

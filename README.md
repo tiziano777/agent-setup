@@ -11,7 +11,6 @@ Ambiente modulare per lo sviluppo di agenti LangGraph con rotazione automatica t
 - **Retrieval (RAG)** - Pipeline ibrida con vector DB (Qdrant, pgvector), BM25, RRF fusion e reranking
 - **Multimodal RAG** - Pipeline RAG-Anything per PDF, immagini, tabelle, equazioni con GLM-OCR
 - **Knowledge Graph** - Cognee per grafi di conoscenza con 14 tipi di ricerca (Qdrant + Neo4j)
-- **RDF Extraction** - Pipeline RDF da testo naturale con Oxigraph, validazione SHACL, human-in-the-loop
 - **Observability** - Tracing automatico con Arize Phoenix via OpenTelemetry (PostgreSQL backend)
 - **Evaluation (Phoenix)** - LLM-as-Judge, evaluator built-in, batch runner con annotazioni Phoenix
 - **Evaluation (DeepEval)** - Metriche RAG, safety, agent con BaseDeepEvaluator estensibile
