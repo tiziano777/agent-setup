@@ -1,370 +1,346 @@
-# Agent Setup - Claude Code Context
 
-## Project Overview
 
-Modular LangGraph agent development environment with LiteLLM proxy for automatic LLM provider rotation across 12+ free providers.
+<!-- GSD:project-start source:PROJECT.md -->
+## Project
 
+**Agent Setup**
+
+**agent-setup** is an incubator framework for building, testing, and deploying LangGraph-based agents at scale. It provides standardized templates, shared infrastructure (LLM routing, observability, evaluation, persistent memory), and multi-deployment targets (local, on-prem, Kubernetes, LangGraph Cloud) — enabling teams to focus on agent logic rather than infrastructure plumbing.
+
+**Core Value:** **Extensible agent patterns with reusable infrastructure** — every new agent should inherit shared modules (LLM access, retrieval, SQL, tracing) and follow a predictable structure, reducing cognitive load and accelerating iteration.
+
+### Constraints
+
+- **Python 3.11+** — Type hints, async/await, TypedDict
+- **LangGraph >= 0.1.0** — StateGraph, message routing, tool_calling
+- **PostgreSQL for production** — Dev uses in-memory, tests use isolated schemas
+- **Async-first agents** — Use ainvoke() in production; invoke() for synchronous testing
+- **Cloud-agnostic LLM setup** — LiteLLM proxy abstracts provider details; no OpenAI SDK direct calls
+<!-- GSD:project-end -->
+
+<!-- GSD:stack-start source:codebase/STACK.md -->
+## Technology Stack
+
+## Languages
+- Python 3.11+ - All application code, agents, and utilities
+## Runtime & Package Management
+- Python 3.11+ (specified in `pyproject.toml` as `requires-python = ">=3.11"`)
+- Virtual environment (`.venv`) - project uses pip with setuptools
+- pip (with `pyproject.toml` configuration)
+- Lockfile: No lockfile enforced; version ranges specified via `[N.M,<N+1.0)` pattern
+## Core Framework Dependencies
+- `langgraph>=0.4,<1.0` - Multi-agent workflow orchestration with StateGraph
+- `langgraph-checkpoint>=2.0,<3.0` - State persistence and replay
+- `langchain-core>=0.3,<1.0` - Core LLM chains and message types
+- `langchain-openai>=0.3,<1.0` - ChatOpenAI client (via LiteLLM proxy)
+- `pydantic>=2.0,<3.0` - Data validation and settings schemas
+- `python-dotenv>=1.0` - Environment variable loading from `.env` files
+## Optional Dependencies
+## Build & Development Tools
+- Tool: `ruff>=0.8`
+- Configuration: `pyproject.toml` lines 105-110
+- Tool: `mypy>=1.13`
+- Configuration: `pyproject.toml` lines 118-121
+- Runner: `pytest>=8.0`
+- Async support: `pytest-asyncio>=0.24`
+- Configuration: `pyproject.toml` lines 112-116
+- Backend: `setuptools>=75.0`
+- Configuration: `pyproject.toml` lines 97-103
+- Package discovery: `setuptools.find_packages()` with `src*` pattern
+## Configuration & Secrets
+- Template file: `.env.template` - API key configuration
+- Docker template: `.env.docker.template` - Production environment
+- Validation: `src/shared/env_validation.py` - Pre-startup checks
+- `pyproject.toml` - Dependencies, build, tool config
+- `proxy_config.yml` - LiteLLM provider routing (12+ models)
+- `Makefile` - Development, testing, infrastructure commands
+- `GROQ_API_KEY`, `CEREBRAS_API_KEY`, `GOOGLE_API_KEY`, `NVIDIA_API_KEY`, `MISTRAL_API_KEY`, `COHERE_API_KEY`, `GITHUB_TOKEN`, `CLOUDFLARE_API_KEY`, etc.
+- `QDRANT_URL` - Qdrant vector DB endpoint
+- `QDRANT_API_KEY` - Qdrant auth (optional)
+- `PGVECTOR_URI` - PostgreSQL pgvector connection string
+- `OPENAI_API_KEY` - OpenAI embeddings (optional)
+- `OPENAI_EMBEDDING_MODEL=text-embedding-3-small` (default)
+- `PHOENIX_COLLECTOR_ENDPOINT=http://localhost:6006` - Phoenix OTEL endpoint
+- `PHOENIX_PROJECT_NAME=agent-setup` - Tracing project name
+- `PHOENIX_TRACING_ENABLED=true` - Toggle tracing on/off
+- `SQL_HOST=localhost`, `SQL_PORT=5432`, `SQL_DATABASE=agent_db`, `SQL_USERNAME=postgres`, `SQL_PASSWORD=postgres`
+- `SQL_POOL_SIZE=5`, `SQL_MAX_OVERFLOW=10`, `SQL_POOL_TIMEOUT=30`, `SQL_QUERY_TIMEOUT=30`
+- `SQL_SCHEMA=public`, `SQL_ECHO=false`
+- `SANDBOX_IMAGE=python:3.11-slim` - Container image
+- `SANDBOX_TIMEOUT=30` - Execution timeout (seconds)
+- `SANDBOX_MEM_LIMIT=256m` - Memory limit
+- `SANDBOX_CPU_LIMIT=0.5` - CPU limit (cores)
+- `SANDBOX_WORKSPACE_SIZE=128M` - tmpfs workspace size
+- `SANDBOX_NETWORK=none` - Network isolation mode
+- `LITELLM_BASE_URL=http://localhost:4000/v1` - Proxy endpoint (default)
+- `DEFAULT_MODEL=llm` - Rotation pool identifier (default)
+## Settings Dataclasses
+- `SQLSettings` - PostgreSQL connection pooling and execution parameters
+- Reads: `SQL_*` environment variables
+- `RetrievalSettings` - Embeddings, vector store, search parameters
+- Supports: Qdrant or pgvector backends
+- Embedding providers: sentence-transformer or OpenAI
+- `SandboxSettings` - Docker container resource limits and isolation
+- Reads: `SANDBOX_*` environment variables
+- `DeepConf` - Reasoning model wrapper (DeepThinkLLM or fallback)
+- `DeepConfOutput` - Structured reasoning output with voting strategies
+## Deployment & Containerization
+- `docker-compose.yml` - Root compose (all services)
+- `Makefile` - Orchestration commands (`make build`, `make down`, etc.)
+- `docker-compose.prod.yml` - Production stack
+- `llm.yml` - LiteLLM proxy gateway (prerequisite)
+- `vectordb.yml` - Qdrant vector database
+- `database.yml` - PostgreSQL + pgvector
+- `observability.yml` - Arize Phoenix tracing
+- `graphdb.yml` - Neo4j graph database
+- `oxigraph.yml` - Oxigraph RDF triple store
+- Docker Compose (development & on-prem production)
+- Kubernetes manifests available: `deploy/kubernetes/`
+## Platform Requirements
+- Docker & Docker Compose (for infrastructure)
+- Python 3.11+
+- pip & virtualenv
+- Optional: PostgreSQL 16+, Qdrant, Neo4j, Phoenix (via Docker)
+- Docker & Docker Compose OR Kubernetes 1.20+
+- PostgreSQL 16+ (persistent)
+- ~2GB disk for vector embeddings (depends on collection size)
+- 2+ CPU cores, 4GB RAM minimum
+## Installation & Project Setup
+<!-- GSD:stack-end -->
+
+<!-- GSD:conventions-start source:CONVENTIONS.md -->
+## Conventions
+
+## Code Style
+- Line length: **100 characters max** - Enforced across entire codebase
+- Error codes enabled: `E` (PEP8), `F` (PyFlakes), `I` (import sorting), `W` (warnings)
+- Target: Python 3.11+
+- Auto-formatting: `make fmt` runs ruff format + ruff check --fix
+- Run via Makefile: `make fmt` (auto-formats), `make lint` (check only)
+- Applied to `src/` directory only
+- Comments aligned to conventions visible in docstrings (see below)
+## Naming Patterns
+- Modules: `snake_case` (e.g., `llm.py`, `client.py`, `config.py`)
+- Classes: Organized in package `__init__.py` files with `__all__` exports
+- Test files: `test_*.py` prefix (e.g., `test_agent.py`, `test_text2sql.py`)
+- Function names: `snake_case` (e.g., `get_llm()`, `execute_query()`, `_execute_tool_call()`)
+- Private/internal helpers: `_leading_underscore()` (e.g., `_execute_tool_call()`, `_run_llm_with_tools()`)
+- Factory functions: `get_*()` pattern (e.g., `get_llm()`, `get_tracer()`, `get_sql_tools()`)
+- Local variables: `snake_case` (e.g., `schema_name`, `connection_string`, `final_query`)
+- Constants: `UPPER_CASE` (e.g., `LITELLM_BASE_URL`, `DEFAULT_MODEL`)
+- Type hints: Use inline for clarity (e.g., `state: Text2SQLState`, `tools: list`)
+- Dictionary keys: `snake_case` (e.g., `prompt`, `selected_tables`, `generated_query`, `final_result`)
+- State fields: Documented with docstring comments above each field
+- Required vs optional: Indicated via type hints (`str | None`, `list[str]`)
+- Class names: `PascalCase` (e.g., `SQLClient`, `Text2SQLState`)
+- Dataclasses with settings: `SQLSettings`, `AgentState` pattern
+- Abstract/base classes: Prefixed with descriptive name (e.g., `SQLClient`)
+## Import Organization
+- All imports use **absolute paths from project root** `src.`
+- No relative imports (no `from . import`, no `from .. import`)
+- Consistent across all files (see `src/agents/text2sql_agent/nodes/__init__.py` lines 12-16)
+- Used in conditional/error handling paths (e.g., `from src.shared.sql.config import SQLSettings` inside function at line 118)
+- Prevents circular dependencies and defers expensive imports
+- Each agent exports main graph via `__init__.py` (e.g., `src/agents/text2sql_agent/__init__.py` line 43-45)
+- Pattern: `from src.agents.text2sql_agent.agent import graph` then `__all__ = ["graph"]`
+- Shared modules export factories: `get_llm()`, `get_tracer()`, `get_sql_tools()`
+## Type Hints
+- Use `|` for unions (not `Union[A, B]`) - Python 3.10+ style
+- Use `dict[str, Any]` instead of `Dict[str, Any]`
+- Use `list[str]` instead of `List[str]`
+- Optional values: `str | None` (not `Optional[str]`)
+- Annotated types for state reducer fields: `Annotated[list[AnyMessage], add_messages]`
+- `mypy` enabled in `pyproject.toml` (lines 118-121):
+- Recommended but not enforced in CI
+## State Management
+- Message field uses `add_messages` reducer for automatic message list merging
+- All fields documented with docstring comments (lines 15-21)
+- Status field tracks pipeline stage: `"pending" | "catalog" | "selection" | "expansion" | "context" | "generation" | "feedback" | "complete"`
+- Error field stores exception messages for debugging
+- Descriptive names: `selected_tables` (not `tables`), `expanded_tables` (intermediate state), `final_query` (output)
+- Intermediate state fields grouped with comments
+- Related fields co-located (e.g., all iteration tracking: `query_iterations`, `generated_query`, `final_query`)
+## Error Handling
+- Log at appropriate level: `logger.info()` for successes, `logger.error()` for failures, `logger.warning()` for retries
+- Return partial state (dict) updating only failed fields + `status` + `error` + `messages`
+- Never raise exceptions in nodes — always catch and return error state
+- Include context in error messages: `f"Tool execution failed: {tool_name} with input {tool_input}: {e}"`
+- Use built-in Python exceptions (`ImportError`, `ValueError`, etc.)
+- Wrap with context message for debugging
+- Always include `type(e).__name__` in JSON error responses for client debugging
+## Docstrings
+- One-line summary
+- Optional extended description (blank line, then details)
+- Always document Args and Returns
+- Use triple quotes `"""`
+- No type hints in docstring (already in signature)
+- Include examples for public APIs (Quick start section)
+## Constants & Configuration
+- Use `@dataclass` for multi-field config objects
+- Use `field(default_factory=...)` for env var lookups with defaults
+- Constants defined at module level (UPPER_CASE)
+- All configuration reads from `os.getenv()` with sensible defaults
+- `@property` methods for derived values (connection strings, etc.)
+- No secrets in code — all via env vars (see forbidden files: `.env` never read)
+## Factory Functions
+- Use `@lru_cache` for expensive initialization (LLM clients)
+- Graceful fallback for optional dependencies (OpenTelemetry)
+- Default parameters for common use cases
+- Factory returns fully-configured, ready-to-use instance
+- All factories accessed via `get_*()` function name
+## Logging
+- Use `logger = logging.getLogger(__name__)` at module level
+- Include context: `f"Extracted {len(tables)} tables from {schema_name}"`
+- Log at `debug` level for iteration details (LLM loops)
+- Log at `info` level for successful milestones
+- Log at `warning` level for retries or fallbacks
+- Log at `error` level for exceptions (with full traceback if needed)
+- All logs are auto-instrumented to Phoenix (OpenTelemetry) when tracing enabled
+## Spans & Tracing
+<!-- GSD:conventions-end -->
+
+<!-- GSD:architecture-start source:ARCHITECTURE.md -->
 ## Architecture
 
-Three-layer architecture, each layer depends only on layers above:
-
+## Pattern Overview
+- Multi-agent capability with supervisor, network (p2p), and independent patterns
+- Deterministic + LLM nodes with tool-binding agentic loops
+- Message-based state accumulation (add_messages reducer)
+- Centralized LLM proxy access via LiteLLM (localhost:4000)
+- Phoenix OpenTelemetry auto-instrumentation
+- Pluggable memory (checkpointer) and long-term stores
+## Layers
+- Purpose: Shared utilities for all agents—LLM access, memory, tool factories, retrieval, SQL, tracing
+- Location: `src/shared/`
+- Contains: Type definitions, registry, factories, multi-agent orchestrators, evaluation toolkits
+- Depends on: LangChain, LangGraph, external SDKs (OpenAI, Qdrant, PostgreSQL, etc.)
+- Used by: All agents and app layer
+- Purpose: Autonomous LangGraph StateGraph implementations with standardized structure
+- Location: `src/agents/{agent_name}/`
+- Contains: Graph definition, nodes, state, schemas, tools, prompts, config, tests
+- Depends on: `src/shared/` infrastructure, LangGraph, LLM via `get_llm()`
+- Used by: Registry (discovery), app layer (exposure)
+- Purpose: REST API entry point and deployment infrastructure
+- Location: `serve.py`, `src/app/`
+- Contains: FastAPI router, request/response schemas, health checks
+- Depends on: Agent graphs from registry, LangGraph
+- Used by: External clients (HTTP calls)
+## Data Flow
 ```
-src/shared/     Infrastructure: LLM client, memory, retrieval, registry, orchestration
-src/agents/     Agent modules: each is a standalone LangGraph StateGraph
-src/app/        Application layer (empty): FastAPI REST API ( use for now serve.py in root project)
 ```
+- **Short-term (per-thread):** `InMemorySaver()` checkpointer tracks conversation state and enables interrupts/resume
+- **Long-term (cross-thread):** `InMemoryStore()` for persistent knowledge
+## Key Abstractions
+- Purpose: Standard TypedDict base for all agent states
+- Location: `src/shared/types.py`
+- Pattern: `class AgentState(BaseAgentState): ...` extends with agent-specific keys
+- Usage: All agent state definitions inherit to get `messages: Annotated[list[AnyMessage], add_messages]`
+- Purpose: Multi-agent handoff metadata
+- Location: `src/shared/types.py`
+- Pattern: `{"target_agent": "name", "messages": [...], "metadata": {...}}`
+- Usage: `build_supervisor()`, `build_network()` handoff tools
+- Purpose: Dynamic agent discovery and loading
+- Location: `src/shared/registry.py`
+- Pattern: `registry.discover("src.agents")` scans for subpackages, loads `graph` and `workflow` attributes
+- Methods:
+- Purpose: Multi-index search orchestration with Reciprocal Rank Fusion
+- Location: `src/shared/retrieval/pipeline.py`
+- Pattern: Composes BM25Index + VectorIndex + optional Reranker
+- Usage: Hybrid retrieval for RAG agents (BM25 for keyword, Vector for semantic, RRF to merge)
+- Purpose: PostgreSQL connection pooling + schema introspection + tracing
+- Location: `src/shared/sql/client.py`
+- Methods: `execute_query()`, `execute_update()`, `get_table_schema()`, `get_full_catalog()`, `get_table_statistics()`
+- Usage: Deterministic data access nodes in text2sql_agent
+## Entry Points
+- Location: `serve.py`
+- Endpoint: `POST /code_runner` with `InvokeRequest(messages=[])`
+- Tracing: Initializes via `setup_tracing()` before app creation
+- Response: `InvokeResponse(messages=[{"role": str, "content": str}, ...])`
+- Location: `from src.agents.{agent_name} import graph`
+- Invocation: `graph.invoke({"messages": [...]})` or `await graph.ainvoke(...)`
+- Config: Optional `config=RunnableConfig(configurable={...})` for thread/namespace isolation
+- Returns: Final state dict with all accumulated values
+- Location: `from src.agents.{agent_name} import workflow`
+- Invocation: `workflow({"messages": [...]})` (automatically checkpointed)
+- Pattern: `@entrypoint(checkpointer=...) def workflow(inputs): ...`
+- Composed of `@task` decorated functions
+- Location: `from src.shared import AgentRegistry`
+- Pattern:
+## Multi-Agent Patterns
+- Implementation: `src/shared/p2p_orchestration.build_supervisor()`
+- Flow: START → Supervisor (ReAct) → handoff tools route to workers → worker executes → result back to supervisor
+- Use case: Centralized LLM routing (e.g., "Should I use RAG or SQL?")
+- Code:
+- Implementation: `src/shared/p2p_orchestration.build_network()`
+- Flow: Any agent can hand off to any other via transfer tools
+- Use case: Decentralized agent collaboration
+- Each agent gets handoff tools for all peers
+- Implementation: `src/shared/p2p_orchestration.build_independent()`
+- Flow: All agents run in parallel from START, results merged at END
+- Use case: Ensemble approaches, competitive ranking
+## Message Flow
+- All communication uses `BaseMessage` subclasses: `HumanMessage`, `AIMessage`, `ToolMessage`, `SystemMessage`
+- Chain stored in state["messages"] → deterministic via `add_messages` reducer
+- Signature: `Annotated[list[AnyMessage], add_messages]`
+- Behavior: Intelligently merges new messages (dedups consecutive AIMessages, appends ToolMessages)
+- Location: `src/shared/types.BaseAgentState`
+- Benefit: Prevents conversation corruption on parallel/conditional edges
+- Pattern (in LLM nodes):
+- Examples: `text2sql_agent` table_selection_node, sql_generator_node, feedback_loop_node
+## State Management Detailed
+- Default: `InMemorySaver()` from `src/shared/memory.get_checkpointer()`
+- Tracks: Message history, interrupt points, retry context within a conversation thread
+- Config: `RunnableConfig(configurable={"thread_id": "user_123"})`
+- Lifecycle: Per user session or per conversation ID
+- Production: Replace with `PostgresSaver(conn_string=...)`
+- Default: `InMemoryStore()` from `src/shared/memory.get_store()`
+- Tracks: Cross-conversation knowledge (facts, embeddings, summaries)
+- Namespace: Isolated by `namespace=["user_id", "doc_id"]` or `store.put(key, value, namespace=[...])`
+- Lookup: `store.search(key, namespace=[...])`
+- Optional: Semantic search if `embed_fn` provided
+- Pattern: `config=RunnableConfig(configurable={"namespace": ["org_id", "user_id"]})`
+- Benefit: Multi-tenant safety, state isolation between projects/users
+## Cross-Cutting Concerns
+- Approach: Python stdlib `logging`
+- Convention: Each module defines `logger = logging.getLogger(__name__)`
+- Usage: `logger.info()`, `logger.warning()`, `logger.error()` with structured context
+- Examples: `src/agents/text2sql_agent/nodes/__init__.py` logs query iterations
+- Env validation: `src/shared/env_validation.validate_env()` runs at startup (serve.py)
+- State validation: TypedDict enforces structure, pydantic for API schemas
+- Tool input validation: `_execute_tool_call()` handles JSON parsing errors gracefully
+- Approach: None in core (infrastructure detail)
+- LiteLLM proxy auth: Configured via `proxy_config.yml` (external)
+- API auth: FastAPI can layer middleware (not yet implemented)
+- Node-level: Try/except returns `dict(status="complete", error="...", messages=[...])`
+- Tool-level: `_execute_tool_call()` catches exceptions, returns JSON `{"error": "..."}`
+- LLM-level: Tool binding retries up to `max_iterations` (default 3)
+- API-level: FastAPI raises HTTPException(500, detail=str(e))
+<!-- GSD:architecture-end -->
+
+<!-- GSD:skills-start source:skills/ -->
+## Project Skills
+
+| Skill | Description | Path |
+|-------|-------------|------|
+| skypilot | "Use when launching cloud VMs, Kubernetes pods, or Slurm jobs for GPU/TPU/CPU workloads, training or fine-tuning models on cloud GPUs, deploying inference servers (vllm, TGI, etc.) with autoscaling, writing or debugging SkyPilot task YAML files, using spot/preemptible instances for cost savings, comparing GPU prices across clouds, managing compute across 25+ clouds, Kubernetes, Slurm, and on-prem clusters with failover between them, troubleshooting resource availability or SkyPilot errors, or optimizing cost and GPU availability." | `.claude/skills/skypilot/SKILL.md` |
+<!-- GSD:skills-end -->
+
+<!-- GSD:workflow-start source:GSD defaults -->
+## GSD Workflow Enforcement
+
+Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
 
-All agents use `get_llm()` from `src/shared/llm.py` which points at the LiteLLM proxy on localhost:4000. Never call LLM providers directly.
+Use these entry points:
+- `/gsd-quick` for small fixes, doc updates, and ad-hoc tasks
+- `/gsd-debug` for investigation and bug fixing
+- `/gsd-execute-phase` for planned phase work
 
-## Key Commands
+Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
+<!-- GSD:workflow-end -->
 
-```bash
-make build              # Start full dev ecosystem (all services)
-make down               # Stop full dev ecosystem
-make test               # Run all tests
-make new-agent name=X   # Create new agent from template
-make list-agents        # List available agents
-make env-check          # Validate .env configuration
-make external-setup     # Clone external docs and skills
-make external-update    # Update external repos to latest
-make external-status    # Show external repos commit info
-make lint               # Ruff lint
-make fmt                # Ruff auto-format
-make phoenix-logs       # Phoenix container logs
-make test-phoenix       # Phoenix healthcheck
-make sandbox-pull       # Pre-pull sandbox Docker image
-make sandbox-ps         # List running sandbox containers
-make sandbox-clean      # Clean up orphaned sandbox containers
-make test-sandbox       # Run sandbox integration tests
-make k8s-apply-all      # Deploy everything to Kubernetes via Kustomize
-make k8s-logs-phoenix   # Phoenix logs in Kubernetes
-make k8s-port-forward-phoenix  # Access Phoenix UI on localhost:6006 via K8s
+<!-- GSD:profile-start -->
+## Developer Profile
 
-# Modular infrastructure (docker-parts/) — selective startup
-make help-modules                        # Show all modules + dependency matrix
-make llm-up                              # Start LLM proxy module only
-make database-up                         # Start PostgreSQL + pgvector only
-make observability-up                    # Start Phoenix + PostgreSQL (auto-included)
-make up-all / down-all                   # All modules via docker-parts/
-```
-
-## Code Conventions
-
-- **Python 3.11+** with type annotations
-- **Ruff** for linting and formatting (line-length 100)
-- **Pydantic v2** for I/O schemas
-- **TypedDict** with `Annotated[list[AnyMessage], add_messages]` for agent state
-- **Graph API** (`agent.py`) as primary (uses `create_react_agent` with `execute_cmd` tool by default), **Functional API** (`pipelines/pipeline.py`) as alternative
-- Tests in each agent's `tests/` directory, run via pytest
-- System prompts in `prompts/system.py`, not inline
-- One agent = one self-contained Python sub-package under `src/agents/`
-
-## Agent Structure (follow this for new agents)
-
-```
-src/agents/<name>/
-  __init__.py      # Exports graph + workflow; calls setup_tracing() for auto-instrumentation
-  agent.py         # ReAct agent via create_react_agent() with execute_cmd tool
-  config/          # AgentSettings dataclass
-  images/          # used to visualize langgraph pipeline
-  db/              # connector with DB in a dedicated schema 
-  states/          # AgentState(TypedDict) with add_messages reducer
-  nodes/           # Node functions: (state) -> partial update dict (for custom StateGraph flows)
-  tools/           # Imports execute_cmd from src/shared/sandbox; add agent-specific tools here
-  prompts/         # SYSTEM_PROMPT constant if multiple behaviours, you can usepersonas/*
-  schemas/         # Pydantic AgentInput/AgentOutput
-  pipelines/       # @entrypoint/@task Functional API
-  scorers/         # Scoring functions
-  memory/          # Long-term memory namespace config
-  tests/           # pytest tests
-```
-
-## Observability - Arize Phoenix
-
-Phoenix provides full LLM observability via OpenTelemetry. Tracing is **automatic**:
-
-- Each agent's `__init__.py` calls `setup_tracing()` before graph compilation
-- `phoenix.otel.register(auto_instrument=True)` instruments all LangChain/LangGraph
-  operations at the framework level (LLM calls, node executions, tool invocations, chains)
-- No per-node or per-tool hooks are needed; the auto-instrumentor handles everything
-- `setup_tracing()` is idempotent — safe to call from multiple modules
-- Phoenix UI: http://localhost:6006 (dev) or via `make k8s-port-forward-phoenix` (K8s)
-- Backend: PostgreSQL (database `phoenix`), not SQLite
-
-Key files:
-- `src/shared/tracing.py` - `setup_tracing()` and `get_tracer()` utilities
-- `src/shared/phoenix_eval/` - Evaluation toolkit (LLM-as-Judge, RAG evals, tool evals, batch runner)
-- `deploy/docker/init-db.sql` - Creates `phoenix` database in PostgreSQL
-- `docs/arize-phoenix-llms.txt` - Arize AX documentation reference index
-
-### Evaluation Toolkit (`src/shared/phoenix_eval/`)
-
-Modular evaluation toolkit built on `arize-phoenix-evals`. All evaluators use the LiteLLM proxy.
-
-Files:
-- `llm_bridge.py` - `get_eval_llm()` creates Phoenix LLM via proxy (foundation for all LLM evaluators)
-- `builtin.py` - Factory functions for built-in evaluators (conciseness, correctness, faithfulness, etc.)
-- `custom.py` - `create_llm_judge()` for custom LLM-as-Judge, `create_code_evaluator()` for deterministic evals
-- `runner.py` - `evaluate_batch()` / `async_evaluate_batch()` for running evaluators on data
-- `annotations.py` - `to_phoenix_annotations()` for logging results to Phoenix traces
-
-Usage: `from src.shared.phoenix_eval import correctness_evaluator, evaluate_batch`
-
-### DeepEval Toolkit (`src/shared/deep_eval/`)
-
-Extensible evaluation toolkit built on `deepeval`. All evaluators use the LiteLLM proxy via `LiteLLMModel`. Provides a `BaseDeepEvaluator` ABC for custom evaluators, factory functions for all built-in metrics, and specialized RAG evaluators for Cognee, Qdrant, and PGVector.
-
-Files:
-- `config.py` - `DeepEvalSettings` dataclass + `configure_deepeval()` with env var defaults
-- `llm_bridge.py` - `get_deepeval_model()` creates `LiteLLMModel` via proxy (foundation for all metrics)
-- `base.py` - `BaseDeepEvaluator` ABC: extend `_setup_metrics()` + `create_test_case()` for custom evaluators
-- `metrics.py` - Factory functions: `answer_relevancy_metric()`, `faithfulness_metric()`, `hallucination_metric()`, `contextual_recall_metric()`, `contextual_precision_metric()`, `contextual_relevancy_metric()`, `toxicity_metric()`, `bias_metric()`, `task_completion_metric()`, `geval_metric()`
-- `rag_evaluators.py` - `CogneeRAGEvaluator`, `QdrantRAGEvaluator`, `PGVectorRAGEvaluator` with `retrieve_context()` + RAG metrics
-- `agent_evaluators.py` - `AgentEvaluator` for end-to-end LangGraph evaluation (sync + async), `evaluate_langgraph_agent()` / `aevaluate_langgraph_agent()` convenience functions
-- `runner.py` - `evaluate()` / `evaluate_dataset()` batch runners wrapping `deepeval.evaluate()`
-- `test_cases.py` - `create_test_case()`, `create_rag_test_case()`, `create_test_cases_from_dicts()` helpers
-
-Usage: `from src.shared.deep_eval import get_deepeval_model, answer_relevancy_metric, evaluate`
-
-## Cognee Knowledge Graph Memory (`src/shared/cognee_toolkit/`)
-
-Knowledge graph memory toolkit powered by Cognee. Transforms text into structured knowledge graphs with entities, relationships, and semantic search. Routes all LLM calls through the LiteLLM proxy, uses PGVector (existing PostgreSQL) for vectors (LanceDB as optional fallback), and Neo4j for the graph database.
-
-Files:
-- `config.py` - `CogneeSettings` dataclass + `setup_cognee()` infrastructure wiring (LiteLLM proxy, PGVector, Neo4j)
-- `memory.py` - `CogneeMemory` class wrapping add/cognify/search/memify with async + sync interfaces
-- `tools.py` - `get_cognee_tools()` and `get_cognee_memory_tools()` factories for LangGraph @tool functions
-- `search.py` - `CogneeSearchType` enum (14 search types), `search_with_fallback()`, `multi_search()`
-
-Usage: `from src.shared.cognee_toolkit import get_cognee_memory, get_cognee_tools`
-
-Infrastructure: Neo4j Browser UI at http://localhost:7474, Bolt at localhost:7687
-
-## Sandbox Toolkit (`src/shared/sandbox/`)
-
-Docker-based sandboxed shell execution for LangGraph agents. Every agent created via `make new-agent` ships with `execute_cmd` as its default tool. Philosophy: one powerful shell tool instead of many specialized tools, reducing context length and covering 90%+ of use cases (code execution, file I/O, data processing).
-
-The sandbox container runs with: read-only root filesystem, writable `/workspace` tmpfs, no network access, memory/CPU/PID limits, all capabilities dropped, `no-new-privileges`, runs as `nobody`.
-
-Files:
-- `config.py` - `SandboxSettings` dataclass with env var defaults (image, timeout, memory, CPU, network, workspace size)
-- `engine.py` - `DockerSandbox` class managing container lifecycle (warm container strategy, thread-safe, auto-recovery)
-- `tools.py` - `get_sandbox_tools()` factory returning `[execute_cmd]` tool with `atexit` cleanup
-
-Usage: `from src.shared.sandbox import get_sandbox_tools`
-
-Env vars (all optional, have defaults):
-- `SANDBOX_IMAGE` (default: python:3.11-slim)
-- `SANDBOX_TIMEOUT` (default: 30)
-- `SANDBOX_MEM_LIMIT` (default: 256m)
-- `SANDBOX_CPU_LIMIT` (default: 0.5)
-- `SANDBOX_WORKSPACE_SIZE` (default: 128M)
-- `SANDBOX_NETWORK` (default: none)
-
-## Guidance Structured Generation Toolkit (`src/shared/guidance_toolkit/`)
-
-Constrained text generation powered by guidance-ai. Forces LLM outputs to match JSON schemas, regex patterns, or fixed option sets via grammar-based decoding. Routes all LLM calls through the LiteLLM proxy using `guidance.models.OpenAI`.
-
-Files:
-- `config.py` - `GuidanceSettings` dataclass + `setup_guidance()` with env var defaults
-- `llm_bridge.py` - `get_guidance_model()` creates `guidance.models.OpenAI` via proxy (cached)
-- `programs.py` - Built-in programs: `structured_json()`, `constrained_select()`, `regex_generate()`, `grammar_generate()`, `cfg_generate()`, `build_cfg_grammar()`
-- `tools.py` - `get_guidance_tools()` factory for LangGraph @tool functions
-- `nodes.py` - Node factories: `create_guidance_structured_node()`, `create_guidance_select_node()`
-
-Usage: `from src.shared.guidance_toolkit import structured_json, get_guidance_tools`
-
-## Oxigraph Triple Store Toolkit (`src/shared/oxygraph/`)
-
-HTTP client and LangGraph tools for Oxigraph SPARQL endpoint. Used by agents that operate on triple stores.
-
-Files:
-- `config.py` - `OxigraphSettings` dataclass with env var defaults (OXIGRAPH_URL, timeout, retries)
-- `client.py` - `OxigraphClient` with query/update/load_triples/health_check methods
-- `tools.py` - `get_oxigraph_tools()` factory returning `[execute_sparql, load_turtle]`
-
-Usage: `from src.shared.oxygraph import OxigraphClient, get_oxigraph_tools`
-
-Infrastructure: Oxigraph SPARQL UI at http://localhost:7878
-
-## RDF Validation Toolkit (`src/shared/rdf_validation/`)
-
-Reusable RDF validation (syntax + SHACL) for any agent working with RDF triples.
-
-Files:
-- `syntax.py` - `check_syntax(triples)` validates Turtle syntax via rdflib
-- `shacl.py` - `check_shacl(triples, shapes_path)` validates against SHACL shapes via pyshacl
-- `validator.py` - `validate_rdf(triples, shapes_path)` combines both phases
-
-Usage: `from src.shared.rdf_validation import check_syntax, check_shacl, validate_rdf`
-
-## Environment Variables
-
-All LLM API keys go in `.env` (never committed). Copy from `.env.template`.
-At least one provider key must be set. The proxy rotates among all configured providers.
-
-Key infrastructure vars (all have defaults):
-- `LITELLM_BASE_URL` (default: http://localhost:4000/v1)
-- `DEFAULT_MODEL` (default: llm)
-- `QDRANT_URL` (default: http://localhost:6333)
-- `PGVECTOR_URI` (default: postgresql://postgres:postgres@localhost:5433/vectors)
-- `PHOENIX_COLLECTOR_ENDPOINT` (default: http://localhost:6006)
-- `PHOENIX_PROJECT_NAME` (default: agent-setup)
-- `PHOENIX_TRACING_ENABLED` (default: true, set false to disable)
-- `NEO4J_URL` (default: bolt://localhost:7687)
-- `NEO4J_USERNAME` (default: neo4j)
-- `NEO4J_PASSWORD` (default: password)
-- `COGNEE_VECTOR_DB_HOST` (default: localhost)
-- `COGNEE_VECTOR_DB_PORT` (default: 5433)
-- `COGNEE_VECTOR_DB_NAME` (default: vectors)
-- `COGNEE_VECTOR_DB_USERNAME` (default: postgres)
-- `COGNEE_VECTOR_DB_PASSWORD` (default: postgres)
-- `OXIGRAPH_URL` (default: http://localhost:7878)
-
-Run `make env-check` to validate configuration.
-
-## External Documentation (reference, not part of this project)
-
-After running `make external-setup`, reference docs are available at:
-
-- `external/docs/src/oss/langgraph/` - LangGraph official docs (StateGraph, persistence, streaming, etc.)
-- `external/docs/src/oss/langchain/` - LangChain official docs (agents, tools, middleware)
-- `external/docs/src/oss/deepagents/` - Deep Agents docs (harness, memory, orchestration)
-- `external/docs/src/oss/concepts/` - Conceptual docs (memory, context, product comparison)
-- `external/langchain-skills/config/skills/` - 11 SKILL.md files with patterns and working code
-
-Most relevant skills for this project:
-- `langgraph-fundamentals` - StateGraph patterns (this project's core)
-
-## Important Files
-
-- `proxy_config.yml` - LiteLLM config for all 12 LLM providers
-- `Makefile` - All project commands (run `make help-modules` for modular infra guide)
-- `serve.py` - FastAPI server wrapping agent1's graph
-- `docker-compose.yml` - Dev infrastructure, full ecosystem (proxy + Qdrant + PostgreSQL + Phoenix + Neo4j + Oxigraph)
-- `docker-compose.prod.yml` - Full production stack (app + all infrastructure)
-- `docker-parts/` - Modular compose files for selective startup (llm, vectordb, database, observability, graphdb, oxigraph)
-- `src/shared/llm.py` - Central LLM client factory
-- `src/shared/registry.py` - Agent auto-discovery
-- `src/shared/orchestration.py` - Multi-agent composition factories
-- `src/shared/retrieval/pipeline.py` - RAG pipeline with RRF fusion
-- `src/shared/env_validation.py` - Environment variable validation
-- `src/shared/tracing.py` - Phoenix OTEL tracing setup (call `setup_tracing()` at startup)
-- `src/shared/phoenix_eval/` - Phoenix evaluation toolkit (see Evaluation Toolkit section above)
-- `src/shared/deep_eval/` - DeepEval evaluation toolkit (see DeepEval Toolkit section above)
-- `src/shared/cognee_toolkit/` - Cognee knowledge graph memory (see Cognee section above)
-- `src/shared/sandbox/` - Docker sandboxed shell execution (see Sandbox Toolkit section above)
-- `deploy/docker/init-db.sql` - Phoenix database init for PostgreSQL
-- `deploy/kubernetes/infra.yml` - K8s infrastructure (LiteLLM + Qdrant + PostgreSQL + Phoenix + Oxigraph)
-- `deploy/kubernetes/configmap.yml` - K8s non-sensitive config (includes Phoenix + Oxigraph endpoints)
-- `src/shared/oxygraph/` - Oxigraph triple store client and SPARQL tools
-- `src/shared/rdf_validation/` - RDF syntax + SHACL validation toolkit
-
-## Do NOT
-
-- Modify `.env` files (they contain user secrets)
-- Call LLM providers directly (always use get_llm() via the proxy)
-- Edit `src/agents/_template/` unless changing the scaffold for all future agents
-- Add dependencies without updating pyproject.toml
-
-<!-- gitnexus:start -->
-# GitNexus — Code Intelligence
-
-This project is indexed by GitNexus as **agent-setup** (3190 symbols, 6723 relationships, 252 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
-
-> If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
-
-## Always Do
-
-- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
-- **MUST run `gitnexus_detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows.
-- **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
-- When exploring unfamiliar code, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
-- When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use `gitnexus_context({name: "symbolName"})`.
-
-## When Debugging
-
-1. `gitnexus_query({query: "<error or symptom>"})` — find execution flows related to the issue
-2. `gitnexus_context({name: "<suspect function>"})` — see all callers, callees, and process participation
-3. `READ gitnexus://repo/agent-setup/process/{processName}` — trace the full execution flow step by step
-4. For regressions: `gitnexus_detect_changes({scope: "compare", base_ref: "main"})` — see what your branch changed
-
-## When Refactoring
-
-- **Renaming**: MUST use `gitnexus_rename({symbol_name: "old", new_name: "new", dry_run: true})` first. Review the preview — graph edits are safe, text_search edits need manual review. Then run with `dry_run: false`.
-- **Extracting/Splitting**: MUST run `gitnexus_context({name: "target"})` to see all incoming/outgoing refs, then `gitnexus_impact({target: "target", direction: "upstream"})` to find all external callers before moving code.
-- After any refactor: run `gitnexus_detect_changes({scope: "all"})` to verify only expected files changed.
-
-## Never Do
-
-- NEVER edit a function, class, or method without first running `gitnexus_impact` on it.
-- NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
-- NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
-- NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope.
-
-## Tools Quick Reference
-
-| Tool | When to use | Command |
-|------|-------------|---------|
-| `query` | Find code by concept | `gitnexus_query({query: "auth validation"})` |
-| `context` | 360-degree view of one symbol | `gitnexus_context({name: "validateUser"})` |
-| `impact` | Blast radius before editing | `gitnexus_impact({target: "X", direction: "upstream"})` |
-| `detect_changes` | Pre-commit scope check | `gitnexus_detect_changes({scope: "staged"})` |
-| `rename` | Safe multi-file rename | `gitnexus_rename({symbol_name: "old", new_name: "new", dry_run: true})` |
-| `cypher` | Custom graph queries | `gitnexus_cypher({query: "MATCH ..."})` |
-
-## Impact Risk Levels
-
-| Depth | Meaning | Action |
-|-------|---------|--------|
-| d=1 | WILL BREAK — direct callers/importers | MUST update these |
-| d=2 | LIKELY AFFECTED — indirect deps | Should test |
-| d=3 | MAY NEED TESTING — transitive | Test if critical path |
-
-## Resources
-
-| Resource | Use for |
-|----------|---------|
-| `gitnexus://repo/agent-setup/context` | Codebase overview, check index freshness |
-| `gitnexus://repo/agent-setup/clusters` | All functional areas |
-| `gitnexus://repo/agent-setup/processes` | All execution flows |
-| `gitnexus://repo/agent-setup/process/{name}` | Step-by-step execution trace |
-
-## Self-Check Before Finishing
-
-Before completing any code modification task, verify:
-1. `gitnexus_impact` was run for all modified symbols
-2. No HIGH/CRITICAL risk warnings were ignored
-3. `gitnexus_detect_changes()` confirms changes match expected scope
-4. All d=1 (WILL BREAK) dependents were updated
-
-## Keeping the Index Fresh
-
-After committing code changes, the GitNexus index becomes stale. Re-run analyze to update it:
-
-```bash
-npx gitnexus analyze
-```
-
-If the index previously included embeddings, preserve them by adding `--embeddings`:
-
-```bash
-npx gitnexus analyze --embeddings
-```
-
-To check whether embeddings exist, inspect `.gitnexus/meta.json` — the `stats.embeddings` field shows the count (0 means no embeddings). **Running analyze without `--embeddings` will delete any previously generated embeddings.**
-
-> Claude Code users: A PostToolUse hook handles this automatically after `git commit` and `git merge`.
-
-## CLI
-
-| Task | Read this skill file |
-|------|---------------------|
-| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
-| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
-| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
-| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
-| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
-| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
-
-<!-- gitnexus:end -->
+> Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.
+> This section is managed by `generate-claude-profile` -- do not edit manually.
+<!-- GSD:profile-end -->
