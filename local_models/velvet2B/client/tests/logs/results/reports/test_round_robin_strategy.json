@@ -1,0 +1,27 @@
+{
+  "test": "test_round_robin_strategy",
+  "passed": true,
+  "duration_s": 0.0002,
+  "steps": [
+    {
+      "step": "row_idx=0",
+      "elapsed_s": 0.0001,
+      "output": "sys_v1"
+    },
+    {
+      "step": "row_idx=1",
+      "elapsed_s": 0.0001,
+      "output": "sys_v2"
+    },
+    {
+      "step": "row_idx=2",
+      "elapsed_s": 0.0001,
+      "output": "sys_v1"
+    },
+    {
+      "step": "row_idx=3",
+      "elapsed_s": 0.0001,
+      "output": "sys_v2"
+    }
+  ]
+}

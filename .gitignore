@@ -1,7 +1,7 @@
 # Python
 __pycache__/
 *.egg-info/
-
+local_models/velvet2B/.inference_venv/
 # Virtual environment
 .venv/
 

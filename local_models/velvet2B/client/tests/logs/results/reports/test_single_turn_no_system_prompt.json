@@ -1,0 +1,33 @@
+{
+  "test": "test_single_turn_no_system_prompt",
+  "passed": true,
+  "duration_s": 0.0003,
+  "steps": [
+    {
+      "step": "input",
+      "elapsed_s": 0.0001,
+      "input": {
+        "_id_hash": "96950cff6c312723f9666666c7bcf29916d6865733df948171e92058cd266ecc",
+        "messages": [
+          {
+            "role": "USER",
+            "content": "Qual \u00e8 la capitale d'Italia?"
+          },
+          {
+            "role": "ASSISTANT"
+          }
+        ]
+      }
+    },
+    {
+      "step": "output",
+      "elapsed_s": 0.0001,
+      "output": [
+        {
+          "role": "user",
+          "content": "Qual \u00e8 la capitale d'Italia?"
+        }
+      ]
+    }
+  ]
+}

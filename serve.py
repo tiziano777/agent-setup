@@ -9,8 +9,6 @@ Endpoints:
 """
 
 import logging
-import os
-import uuid
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -80,7 +78,4 @@ async def invoke(req: InvokeRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-# add other endpoints when are ready to be exposed
-# include also a call example in the docstring for each endpoint, to make it easier to test with curl 
 

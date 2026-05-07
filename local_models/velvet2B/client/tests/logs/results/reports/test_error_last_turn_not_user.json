@@ -1,0 +1,29 @@
+{
+  "test": "test_error_last_turn_not_user",
+  "passed": true,
+  "duration_s": 0.0002,
+  "steps": [
+    {
+      "step": "input",
+      "elapsed_s": 0.0001,
+      "input": {
+        "_id_hash": "a6f1b9fa2fc29888dcdf341994981fdcc6a2ea85fc2485a2f88c2a60d47c8f34",
+        "messages": [
+          {
+            "role": "USER",
+            "content": "Ciao"
+          },
+          {
+            "role": "ASSISTANT",
+            "content": "Ciao a te!"
+          }
+        ]
+      }
+    },
+    {
+      "step": "output",
+      "elapsed_s": 0.0001,
+      "output": "ValueError raised as expected"
+    }
+  ]
+}

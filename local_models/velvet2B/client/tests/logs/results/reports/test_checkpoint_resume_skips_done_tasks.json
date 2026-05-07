@@ -1,0 +1,27 @@
+{
+  "test": "test_checkpoint_resume_skips_done_tasks",
+  "passed": true,
+  "duration_s": 0.0403,
+  "steps": [
+    {
+      "step": "run1_start",
+      "elapsed_s": 0.0018,
+      "note": "expecting 2 HTTP calls"
+    },
+    {
+      "step": "run1_calls",
+      "elapsed_s": 0.0308,
+      "output": 2
+    },
+    {
+      "step": "run2_start",
+      "elapsed_s": 0.0308,
+      "note": "all tasks already checkpointed \u2014 expect 0 HTTP calls"
+    },
+    {
+      "step": "run2_calls",
+      "elapsed_s": 0.0399,
+      "output": 0
+    }
+  ]
+}

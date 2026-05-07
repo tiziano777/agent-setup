@@ -1,0 +1,33 @@
+{
+  "test": "test_payload_is_openai_format",
+  "passed": true,
+  "duration_s": 0.001,
+  "steps": [
+    {
+      "step": "task_messages",
+      "elapsed_s": 0.0004,
+      "input": [
+        {
+          "role": "user",
+          "content": "Qual \u00e8 la capitale d'Italia?"
+        }
+      ]
+    },
+    {
+      "step": "payload_sent",
+      "elapsed_s": 0.0006,
+      "output": {
+        "model": "velvet-2b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Qual \u00e8 la capitale d'Italia?"
+          }
+        ],
+        "temperature": 0.3,
+        "max_tokens": 512,
+        "top_p": 0.95
+      }
+    }
+  ]
+}

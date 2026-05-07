@@ -1,0 +1,31 @@
+{
+  "test": "test_checkpoint_round_trip",
+  "passed": true,
+  "duration_s": 0.0089,
+  "steps": [
+    {
+      "step": "checkpoint_keys",
+      "elapsed_s": 0.0085,
+      "output": [
+        [
+          "40fe6ce2",
+          0.0,
+          "sys_v2",
+          1
+        ],
+        [
+          "9fb555c0",
+          0.7,
+          "sys_v1",
+          0
+        ],
+        [
+          "9fb555c0",
+          0.0,
+          "sys_v1",
+          0
+        ]
+      ]
+    }
+  ]
+}

@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import logging
 
-from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, StateGraph
 
 from src.shared.tracing import setup_tracing

@@ -1,0 +1,68 @@
+{
+   "_id_hash": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{64}$"
+    },
+    "_distribution_name":{
+        "type":"string"
+    },
+    "candidate": {
+        "type": "object",
+        "required": [
+            "content",
+            "score",
+            "inference_params"
+        ],
+        "properties": {
+            "score": {
+                "type": "number",
+                "maximum": 1,
+                "minimum": 0
+            },
+            "think": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "content": {
+                "type": "string",
+                "minLength": 1
+            },
+            "context": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "inference_params": {
+                "type": [
+                    "object",
+                    "null"
+                ],
+                "properties": {
+                    "system_prompt_id":{
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "top_k": {
+                        "type": "number"
+                    },
+                    "top_p": {
+                        "type": "number"
+                    },
+                    "model_id": {
+                        "type": "string"
+                    },
+                    "temperature": {
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
+}

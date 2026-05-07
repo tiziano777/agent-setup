@@ -1,0 +1,19 @@
+{
+  "test": "test_writer_creates_jsonl_files",
+  "passed": true,
+  "duration_s": 0.0212,
+  "steps": [
+    {
+      "step": "files_created",
+      "elapsed_s": 0.0147,
+      "output": [
+        "inference_part1.jsonl"
+      ]
+    },
+    {
+      "step": "records_read_back",
+      "elapsed_s": 0.0206,
+      "output": 5
+    }
+  ]
+}

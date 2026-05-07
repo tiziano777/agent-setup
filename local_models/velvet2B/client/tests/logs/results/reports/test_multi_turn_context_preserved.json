@@ -1,0 +1,49 @@
+{
+  "test": "test_multi_turn_context_preserved",
+  "passed": true,
+  "duration_s": 0.0002,
+  "steps": [
+    {
+      "step": "input",
+      "elapsed_s": 0.0001,
+      "input": {
+        "_id_hash": "28914b4a04fba6bf0fa9fbb77fe7b457f63c6581c30945798396e0527ccfe2f0",
+        "messages": [
+          {
+            "role": "USER",
+            "content": "Ciao!"
+          },
+          {
+            "role": "ASSISTANT",
+            "content": "Roma \u00e8 la capitale d'Italia."
+          },
+          {
+            "role": "USER",
+            "content": "E la capitale della Germania?"
+          },
+          {
+            "role": "ASSISTANT"
+          }
+        ]
+      }
+    },
+    {
+      "step": "output",
+      "elapsed_s": 0.0001,
+      "output": [
+        {
+          "role": "user",
+          "content": "Ciao!"
+        },
+        {
+          "role": "assistant",
+          "content": "Roma \u00e8 la capitale d'Italia."
+        },
+        {
+          "role": "user",
+          "content": "E la capitale della Germania?"
+        }
+      ]
+    }
+  ]
+}

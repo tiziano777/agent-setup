@@ -1,0 +1,33 @@
+{
+  "test": "test_assistant_target_excluded",
+  "passed": true,
+  "duration_s": 0.0003,
+  "steps": [
+    {
+      "step": "input",
+      "elapsed_s": 0.0001,
+      "input": {
+        "_id_hash": "7332e354cdb6c834bd789277f5417b5a7205ea9f623816f9918f1c37469c3b68",
+        "messages": [
+          {
+            "role": "USER",
+            "content": "Chi ha scritto la Divina Commedia?"
+          },
+          {
+            "role": "ASSISTANT"
+          }
+        ]
+      }
+    },
+    {
+      "step": "output",
+      "elapsed_s": 0.0001,
+      "output": [
+        {
+          "role": "user",
+          "content": "Chi ha scritto la Divina Commedia?"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "test": "test_unparseable_response_returns_none",
+  "passed": true,
+  "duration_s": 0.0015,
+  "steps": [
+    {
+      "step": "setup",
+      "elapsed_s": 0.0007,
+      "note": "response body has no known text field"
+    },
+    {
+      "step": "result",
+      "elapsed_s": 0.0009
+    }
+  ]
+}

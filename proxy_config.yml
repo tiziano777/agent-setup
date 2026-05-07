@@ -139,6 +139,32 @@ model_list:
       name: llama-3.1-8b-instruct
       provider: cloudflare
 
+  # --- LLM LOCAL (vLLM on localhost:8001) ---
+  # Fallback to local models for cost saving / offline mode
+  # Priority: order: 4 (lowest) = used only when all remote providers fail
+  # Manual launch: bash local_models/velvet2B/run_server.sh
+  - model_name: llm
+    litellm_params:
+      model: openai/velvet-2b-1.5_ba34086_t0.0
+      api_key: "not-needed"
+      api_base: "http://localhost:8001/v1"
+      order: 4
+    model_info:
+      id: local/velvet-2b-1.5
+      name: velvet-2b-1.5
+      provider: local-vllm
+
+  # Alternative: local model alias for explicit routing
+  - model_name: local
+    litellm_params:
+      model: openai/velvet-2b-1.5_ba34086_t0.0
+      api_key: "not-needed"
+      api_base: "http://localhost:8001/v1"
+    model_info:
+      id: local/velvet-2b-1.5
+      name: velvet-2b-1.5-local
+      provider: local-vllm
+
   # --- Vercel AI Gateway ---
   # DISABLED: Free credits exhausted (403). Re-enable after purchasing credits.
   # - model_name: llm

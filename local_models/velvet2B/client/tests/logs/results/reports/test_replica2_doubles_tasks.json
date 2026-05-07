@@ -1,0 +1,25 @@
+{
+  "test": "test_replica2_doubles_tasks",
+  "passed": true,
+  "duration_s": 0.0008,
+  "steps": [
+    {
+      "step": "expansion",
+      "elapsed_s": 0.0007,
+      "input": {
+        "samples": 1,
+        "replica": 2,
+        "temps": 2
+      },
+      "output": {
+        "n_tasks": 4,
+        "replica_indices": [
+          0,
+          0,
+          1,
+          1
+        ]
+      }
+    }
+  ]
+}

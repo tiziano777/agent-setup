@@ -1,0 +1,19 @@
+{
+  "test": "test_replica1_expansion",
+  "passed": true,
+  "duration_s": 0.0089,
+  "steps": [
+    {
+      "step": "expansion",
+      "elapsed_s": 0.0088,
+      "input": {
+        "samples": 1,
+        "replica": 1,
+        "temps": 2
+      },
+      "output": {
+        "n_tasks": 2
+      }
+    }
+  ]
+}

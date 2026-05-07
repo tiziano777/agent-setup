@@ -1,0 +1,29 @@
+{
+  "test": "test_aggregates_variants_into_list",
+  "passed": true,
+  "duration_s": 0.2893,
+  "steps": [
+    {
+      "step": "raw_records",
+      "elapsed_s": 0.0016,
+      "input": 3
+    },
+    {
+      "step": "parquet_files",
+      "elapsed_s": 0.043,
+      "output": [
+        "aggregated_part1.parquet"
+      ]
+    },
+    {
+      "step": "schema",
+      "elapsed_s": 0.2888,
+      "output": "_id_hash: string\n_distribution_name: string\nnegatives: list<element: struct<content: string, context: null, inference_params: struct<model_id: string, syst (... 102 chars omitted)\n  child 0, element: struct<content: string, context: null, inference_params: struct<model_id: string, system_prompt_id:  (... 87 chars omitted)\n      child 0, content: string\n      child 1, context: null\n      child 2, inference_params: struct<model_id: string, system_prompt_id: string, temperature: double, top_k: double, top_p: double (... 1 chars omitted)\n          child 0, model_id: string\n          child 1, system_prompt_id: string\n          child 2, temperature: double\n          child 3, top_k: double\n          child 4, top_p: double\n      child 3, score: double\n      child 4, think: null"
+    },
+    {
+      "step": "aggregated_rows",
+      "elapsed_s": 0.2888,
+      "output": 1
+    }
+  ]
+}

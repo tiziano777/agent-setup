@@ -1,0 +1,22 @@
+{
+  "test": "test_random_strategy_returns_one",
+  "passed": true,
+  "duration_s": 0.0002,
+  "steps": [
+    {
+      "step": "input",
+      "elapsed_s": 0.0001,
+      "input": {
+        "prompts": [
+          "sys_v1",
+          "sys_v2"
+        ]
+      }
+    },
+    {
+      "step": "output",
+      "elapsed_s": 0.0001,
+      "output": "sys_v1"
+    }
+  ]
+}

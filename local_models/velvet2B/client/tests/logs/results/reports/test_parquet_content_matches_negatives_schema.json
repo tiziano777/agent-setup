@@ -1,0 +1,24 @@
+{
+  "test": "test_parquet_content_matches_negatives_schema",
+  "passed": true,
+  "duration_s": 0.0155,
+  "steps": [
+    {
+      "step": "negative_item",
+      "elapsed_s": 0.0152,
+      "output": {
+        "content": "Risposta di test.",
+        "context": null,
+        "inference_params": {
+          "model_id": "velvet-2b",
+          "system_prompt_id": "sys_v1",
+          "temperature": 0.5,
+          "top_k": 20.0,
+          "top_p": 0.95
+        },
+        "score": 0.0,
+        "think": null
+      }
+    }
+  ]
+}

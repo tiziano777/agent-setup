@@ -1,0 +1,20 @@
+{
+  "test": "test_error_empty_messages",
+  "passed": true,
+  "duration_s": 0.0002,
+  "steps": [
+    {
+      "step": "input",
+      "elapsed_s": 0.0001,
+      "input": {
+        "_id_hash": "1f3a5fde8bbe2d4e46b5219a95178c03427e04f671f5412271b02b9bb9459d03",
+        "messages": []
+      }
+    },
+    {
+      "step": "output",
+      "elapsed_s": 0.0001,
+      "output": "ValueError raised as expected"
+    }
+  ]
+}

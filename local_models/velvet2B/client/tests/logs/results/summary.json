@@ -1,0 +1,157 @@
+{
+  "total": 30,
+  "passed": 30,
+  "failed": 0,
+  "results": [
+    {
+      "test": "tests/test_pipeline.py::TestChatTemplate::test_single_turn_no_system_prompt",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestChatTemplate::test_single_turn_with_system_prompt",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestChatTemplate::test_multi_turn_context_preserved",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestChatTemplate::test_assistant_target_excluded",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestChatTemplate::test_error_empty_messages",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestChatTemplate::test_error_last_turn_not_user",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestPromptAssigner::test_all_strategy_cartesian",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestPromptAssigner::test_round_robin_strategy",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestPromptAssigner::test_random_strategy_returns_one",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestPromptAssigner::test_no_prompts_returns_none_tuple",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestTaskBuilder::test_replica1_expansion",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestTaskBuilder::test_replica2_doubles_tasks",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestTaskBuilder::test_system_prompt_id_propagated",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestTaskBuilder::test_no_system_prompt_id_is_none",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestInferMock::test_successful_inference_base_schema",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestInferMock::test_system_prompt_id_in_inference_params",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestInferMock::test_500_retries_then_succeeds",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestInferMock::test_all_retries_exhausted_returns_none",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestInferMock::test_unparseable_response_returns_none",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestInferMock::test_payload_is_openai_format",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestWriterCheckpoint::test_writer_creates_jsonl_files",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestWriterCheckpoint::test_checkpoint_round_trip",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestWriterCheckpoint::test_checkpoint_excludes_missing",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestAggregation::test_aggregates_variants_into_list",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestAggregation::test_agg_and_raw_dirs_are_separate",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestAggregation::test_parquet_content_matches_negatives_schema",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestFullPipeline::test_e2e_negative_mode_three_samples",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestFullPipeline::test_e2e_replica2_doubles_records",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestFullPipeline::test_checkpoint_resume_skips_done_tasks",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestFullPipeline::test_raw_and_aggregated_dirs_never_overlap",
+      "passed": true,
+      "failed": false
+    }
+  ]
+}

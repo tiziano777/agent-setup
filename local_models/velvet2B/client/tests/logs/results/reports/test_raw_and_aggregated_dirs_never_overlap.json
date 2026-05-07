@@ -1,0 +1,27 @@
+{
+  "test": "test_raw_and_aggregated_dirs_never_overlap",
+  "passed": true,
+  "duration_s": 0.0143,
+  "steps": [
+    {
+      "step": "dirs",
+      "elapsed_s": 0.0017,
+      "output": {
+        "raw": "/Users/T.Finizzi/repo/agent-setup/local_models/velvet2B/client/tests/logs/results/intermediate/e2e_dir_separation",
+        "agg": "/Users/T.Finizzi/repo/agent-setup/local_models/velvet2B/client/tests/logs/results/aggregated/e2e_dir_separation"
+      }
+    },
+    {
+      "step": "raw_parquets",
+      "elapsed_s": 0.0139,
+      "output": []
+    },
+    {
+      "step": "agg_parquets",
+      "elapsed_s": 0.0139,
+      "output": [
+        "aggregated_part1.parquet"
+      ]
+    }
+  ]
+}

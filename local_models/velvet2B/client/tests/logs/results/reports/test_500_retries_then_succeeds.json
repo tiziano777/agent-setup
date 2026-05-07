@@ -1,0 +1,34 @@
+{
+  "test": "test_500_retries_then_succeeds",
+  "passed": true,
+  "duration_s": 0.504,
+  "steps": [
+    {
+      "step": "setup",
+      "elapsed_s": 0.0002,
+      "note": "500 first call, 200 second call"
+    },
+    {
+      "step": "record",
+      "elapsed_s": 0.5029,
+      "output": {
+        "_id_hash": "69778c843182f874e57f9901beb55bc42be8c0147ef5730b2f3f7f80f752613a",
+        "_distribution_name": "test_dist",
+        "negative": {
+          "content": "Dopo retry: Roma.",
+          "score": 0.0,
+          "think": null,
+          "context": null,
+          "inference_params": {
+            "model_id": "velvet-2b",
+            "temperature": 0.5,
+            "top_p": 0.95,
+            "top_k": 20.0,
+            "system_prompt_id": "sys_v1"
+          }
+        },
+        "_replica_idx": 0
+      }
+    }
+  ]
+}

@@ -173,6 +173,27 @@ services:
     networks:
       - agent-net
 
+  # ==========================================
+  # vLLM Local Model Serving (Optional)
+  # ==========================================
+  # For cost savings / offline mode. Test on local GPU.
+  # Manual launch: bash local_models/velvet2B/run_server.sh
+  # Or uncomment below for docker-compose control:
+  # vllm-local:
+  #   image: vllm/vllm-openai:v0.10.2
+  #   container_name: vllm-local
+  #   ports:
+  #     - "8001:8001"   # OpenAI-compatible API
+  #   environment:
+  #     - MODEL_PATH=/models/velvet-2b
+  #     - GPU_MEMORY_UTILIZATION=0.85
+  #   volumes:
+  #     - /nfs/training-output/velvet-cycle2/Velvet-2B-1.5/ckpt_2B_v2/huggingface/ba34086:/models/velvet-2b:ro
+  #   runtime: nvidia  # Requires --gpus all
+  #   restart: unless-stopped
+  #   networks:
+  #     - agent-net
+
 # ==========================================
 # Rete condivisa tra tutti i servizi
 # ==========================================

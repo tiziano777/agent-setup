@@ -6,7 +6,6 @@
       "Bash(python -m src.shared.env_validation)",
       "Bash(ruff *)",
       "Bash(docker compose *)",
-      "Bash(npx gitnexus *)",
       "Bash(git *)"
     ],
     "deny": [
@@ -15,25 +14,92 @@
     ]
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/gsd-check-update.js"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/gsd-session-state.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit|Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/gsd-context-monitor.js",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/gsd-phase-boundary.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/gsd-prompt-guard.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/gsd-read-guard.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/gsd-workflow-guard.js",
+            "timeout": 5
+          }
+        ]
+      },
       {
         "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/T.Finizzi/.claude/hooks/rtk-rewrite.sh"
+            "command": "bash .claude/hooks/gsd-validate-commit.sh",
+            "timeout": 5
           }
         ]
       }
     ]
   },
-  "skills": [
-      "./.claude/skills/gitnexus-cli",
-      "./.claude/skills/gitnexus-debugging",
-      "./.claude/skills/gitnexus-exploring",
-      "./.claude/skills/gitnexus-guide",
-      "./.claude/skills/gitnexus-impact-analysis",
-      "./.claude/skills/gitnexus-refactoring",
-      "./.claude/skills/caveman"
-    ]
+  "skills": [],
+  "statusLine": {
+    "type": "command",
+    "command": "node .claude/hooks/gsd-statusline.js"
+  }
 }

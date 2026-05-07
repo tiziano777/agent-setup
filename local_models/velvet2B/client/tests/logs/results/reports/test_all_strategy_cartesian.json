@@ -1,0 +1,26 @@
+{
+  "test": "test_all_strategy_cartesian",
+  "passed": true,
+  "duration_s": 0.0002,
+  "steps": [
+    {
+      "step": "input",
+      "elapsed_s": 0.0001,
+      "input": {
+        "sample_id": "96950cff6c312723f9666666c7bcf29916d6865733df948171e92058cd266ecc",
+        "prompts": [
+          "sys_v1",
+          "sys_v2"
+        ]
+      }
+    },
+    {
+      "step": "output",
+      "elapsed_s": 0.0001,
+      "output": [
+        "sys_v1",
+        "sys_v2"
+      ]
+    }
+  ]
+}
