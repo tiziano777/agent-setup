@@ -72,7 +72,7 @@ PROMPT_STRATEGY: PromptAssignmentStrategy = PromptAssignmentStrategy(
 )
 CHAT_TYPE_MAPPING_PATH: str = _cfg.get(
     "CHAT_TYPE_MAPPING_PATH",
-    str(Path(__file__).parent / "modules/templates/dpo/chat_type_mapping.yml"),
+    str(Path(__file__).parent / "modules/templates/chat_type_mapping.yml"),
 )
 
 # --- Sampling extras (all optional; None = omit from payload) ---
