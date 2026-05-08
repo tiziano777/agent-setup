@@ -1,11 +1,11 @@
 {
   "test": "test_checkpoint_excludes_missing",
   "passed": true,
-  "duration_s": 0.0055,
+  "duration_s": 0.0054,
   "steps": [
     {
       "step": "done_keys",
-      "elapsed_s": 0.0052,
+      "elapsed_s": 0.0051,
       "output": [
         [
           "4d4c7eee2e28d03cb2dbf3df639c3290ade66e18755e83caade2d8f37bd8c044",
@@ -17,7 +17,7 @@
     },
     {
       "step": "missing_key",
-      "elapsed_s": 0.0052,
+      "elapsed_s": 0.0051,
       "output": [
         "5ad38304b535c2987dbd24657c1a11b884984ff600d9f389deb0d4e634fee792",
         0.0,

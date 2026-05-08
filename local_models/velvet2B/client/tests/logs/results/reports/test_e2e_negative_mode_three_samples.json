@@ -1,11 +1,11 @@
 {
   "test": "test_e2e_negative_mode_three_samples",
   "passed": true,
-  "duration_s": 0.0432,
+  "duration_s": 0.0368,
   "steps": [
     {
       "step": "entry",
-      "elapsed_s": 0.0021,
+      "elapsed_s": 0.0016,
       "input": {
         "dist_name": "e2e_three_samples",
         "n_samples": 3,
@@ -21,34 +21,36 @@
     },
     {
       "step": "raw_jsonl_files",
-      "elapsed_s": 0.0403,
+      "elapsed_s": 0.0308,
       "output": [
         "inference_part1.jsonl"
       ]
     },
     {
       "step": "parquet_files",
-      "elapsed_s": 0.0403,
+      "elapsed_s": 0.0308,
       "output": [
         "aggregated_part1.parquet"
       ]
     },
     {
       "step": "total_raw_records",
-      "elapsed_s": 0.0403,
+      "elapsed_s": 0.0308,
       "output": 6
     },
     {
       "step": "aggregated_rows",
-      "elapsed_s": 0.0423,
+      "elapsed_s": 0.0359,
       "output": 3
     },
     {
       "step": "sample_aggregated_row",
-      "elapsed_s": 0.0423,
+      "elapsed_s": 0.0359,
       "output": {
-        "_id_hash": "5f4cae401fea...",
-        "n_negatives": 2
+        "_id_hash": "b03c76451368...",
+        "n_negatives": 2,
+        "_distribution_id": "d710f7d9f7c35eea2f907212febfcf060c94c63efa6cbd454a5f6ed35ae088d7",
+        "_distribution_uri": "/private/var/folders/1j/ndgc87vs72q081r3w6lbf51r0000gn/T/pytest-of-T.Finizzi/pytest-11/test_e2e_negative_mode_three_s0/datasets/e2e_three_samples"
       }
     }
   ]

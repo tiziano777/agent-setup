@@ -20,8 +20,16 @@ class RecipeEntry(BaseModel):
 
 
 class RecipeConfig(BaseModel):
-    """Full recipe configuration — preserves all metadata fields from the YAML."""
+    """Full recipe configuration — preserves all metadata fields from the YAML.
 
+    Only 'entries' is required; all other metadata fields are optional and non-blocking.
+    The recipe will process successfully even if metadata is missing.
+    """
+
+    entries: dict[str, RecipeEntry] = Field(
+        ...,
+        description="Mapping of dataset paths to distribution metadata (REQUIRED)"
+    )
     recipe_id: str | None = Field(None, description="Recipe UUID")
     recipe_name: str | None = Field(None, description="Recipe short name")
     description: str | None = Field(None, description="Human-readable description")
@@ -29,7 +37,3 @@ class RecipeConfig(BaseModel):
     tasks: list[str] = Field(default_factory=list, description="Task categories covered")
     tags: list[str] = Field(default_factory=list, description="Free-form classification tags")
     derived_from: str | None = Field(None, description="Parent recipe UUID this was derived from")
-    entries: dict[str, RecipeEntry] = Field(
-        ...,
-        description="Mapping of dataset paths to distribution metadata"
-    )

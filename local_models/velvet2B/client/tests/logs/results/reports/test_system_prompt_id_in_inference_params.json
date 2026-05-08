@@ -10,7 +10,7 @@
         "model_id": "velvet-2b",
         "temperature": 0.5,
         "top_p": 0.95,
-        "top_k": 20.0,
+        "top_k": null,
         "system_prompt_id": "sys_v1"
       }
     },
@@ -21,7 +21,7 @@
         "model_id": "velvet-2b",
         "temperature": 0.5,
         "top_p": 0.95,
-        "top_k": 20.0,
+        "top_k": null,
         "system_prompt_id": "sys_v2"
       }
     },
@@ -32,7 +32,7 @@
         "model_id": "velvet-2b",
         "temperature": 0.5,
         "top_p": 0.95,
-        "top_k": 20.0,
+        "top_k": null,
         "system_prompt_id": null
       }
     }

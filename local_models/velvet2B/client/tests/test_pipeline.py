@@ -308,7 +308,8 @@ class TestInferMock:
         step_logger.log("task", input={"id_hash": task.id_hash[:8], "temp": task.temperature})
 
         sem = asyncio.Semaphore(1)
-        record = await _infer(sem, session, task)
+        records = await _infer(sem, session, task)
+        record = records[0] if records else None
         step_logger.log("record", output=record)
 
         assert record is not None
@@ -328,6 +329,7 @@ class TestInferMock:
             task = _make_task(seed=f"sp_{sys_id}", sys_id=sys_id)
             session = MockClientSession(openai_response("risposta"))
             record = await _infer(asyncio.Semaphore(1), session, task)
+            record = record[0] if record else None
             step_logger.log(f"sys_id={sys_id}", output=record["negative"]["inference_params"])
             assert record["negative"]["inference_params"]["system_prompt_id"] == sys_id
         step_logger.mark_passed()
@@ -344,7 +346,8 @@ class TestInferMock:
         step_logger.log("setup", note="500 first call, 200 second call")
 
         sem = asyncio.Semaphore(1)
-        record = await _infer(sem, session, task)
+        records = await _infer(sem, session, task)
+        record = records[0] if records else None
         step_logger.log("record", output=record)
 
         assert record is not None
@@ -400,12 +403,45 @@ class TestInferMock:
         assert payload["messages"] == task.messages
         step_logger.mark_passed()
 
+    @pytest.mark.asyncio
+    async def test_distribution_metadata_in_base_record(self, step_logger):
+        """_distribution_id and _distribution_uri must be included in record when provided."""
+        task = InferenceTask(
+            id_hash=_id_hash("dist_meta_001"),
+            messages=[{"role": "user", "content": "Test"}],
+            temperature=0.5,
+            system_prompt_id="sys_v1",
+            dist_name="test_dist",
+            mode=InferenceMode.negative,
+            dist_id="dist_12345",
+            dist_uri="s3://bucket/data.parquet",
+            replica_idx=0,
+        )
+        session = MockClientSession(openai_response("Risposta"))
+        step_logger.log("task_dist_metadata", input={
+            "dist_id": task.dist_id,
+            "dist_uri": task.dist_uri
+        })
+
+        sem = asyncio.Semaphore(1)
+        records = await _infer(sem, session, task)
+        record = records[0] if records else None
+        step_logger.log("record_metadata", output={
+            "_distribution_id": record.get("_distribution_id"),
+            "_distribution_uri": record.get("_distribution_uri"),
+        })
+
+        assert record is not None
+        assert record.get("_distribution_id") == "dist_12345"
+        assert record.get("_distribution_uri") == "s3://bucket/data.parquet"
+        step_logger.mark_passed()
+
 
 # ════════════════════════════════════════════════════════════════════════════
 # STEP 5 · RollingJsonlWriter + checkpoint
 # ════════════════════════════════════════════════════════════════════════════
 
-def _make_base_record(seed: str, temperature: float, sys_id: str | None, replica: int = 0) -> dict:
+def _make_base_record(seed: str, temperature: float, sys_id: str | None, replica: int = 0, dist_id: str | None = None, dist_uri: str | None = None) -> dict:
     item = ResponseItem(
         content="Risposta di test.",
         score=0.0,
@@ -417,7 +453,8 @@ def _make_base_record(seed: str, temperature: float, sys_id: str | None, replica
             system_prompt_id=sys_id,
         ),
     )
-    rec = make_base_record(_id_hash(seed), "test_dist", InferenceMode.negative, item)
+    rec = make_base_record(_id_hash(seed), "test_dist", InferenceMode.negative, item,
+                           dist_id=dist_id, dist_uri=dist_uri)
     rec["_replica_idx"] = replica
     return rec
 
@@ -513,7 +550,8 @@ class TestAggregation:
                     system_prompt_id="sys_v1",
                 ),
             )
-            rec = make_base_record(id_h, "test_dist", InferenceMode.negative, item)
+            rec = make_base_record(id_h, "test_dist", InferenceMode.negative, item,
+                                   dist_id="dist_agg_001", dist_uri="s3://bucket/agg.parquet")
             rec["_replica_idx"] = 0
             records.append(rec)
 
@@ -533,6 +571,9 @@ class TestAggregation:
 
         assert df["_id_hash"][0] == id_h
         assert len(df["negatives"][0]) == 3
+        # Verify distribution metadata is preserved in aggregated output
+        assert df["_distribution_id"][0] == "dist_agg_001"
+        assert df["_distribution_uri"][0] == "s3://bucket/agg.parquet"
         step_logger.mark_passed()
 
     def test_agg_and_raw_dirs_are_separate(self, step_logger, tmp_path):
@@ -660,6 +701,8 @@ class TestFullPipeline:
         for rec in all_raw:
             assert "_id_hash"             in rec
             assert "_distribution_name"   in rec
+            assert "_distribution_id"     in rec
+            assert "_distribution_uri"    in rec
             assert "_replica_idx"         in rec
             assert "negative"             in rec
             assert rec["negative"]["inference_params"]["system_prompt_id"] == "sys_v1"
@@ -673,6 +716,8 @@ class TestFullPipeline:
         step_logger.log("sample_aggregated_row", output={
             "_id_hash":    all_rows[0]["_id_hash"][:12] + "...",
             "n_negatives": len(all_rows[0]["negatives"]),
+            "_distribution_id": all_rows[0].get("_distribution_id"),
+            "_distribution_uri": all_rows[0].get("_distribution_uri"),
         })
 
         # Each unique id_hash produces exactly one aggregated row
@@ -681,6 +726,9 @@ class TestFullPipeline:
         # Each row has as many negatives as (prompts × temps)
         for row in all_rows:
             assert len(row["negatives"]) == 1 * len(async_client.TEMPERATURE_RANGE)
+            # Verify distribution metadata is present in aggregated Parquet
+            assert row.get("_distribution_id") is not None
+            assert row.get("_distribution_uri") is not None
 
         step_logger.mark_passed()
 
@@ -738,6 +786,9 @@ class TestFullPipeline:
         )
         # Use persistent dirs so both runs share the same JSONL directory
         raw_dir, agg_dir = self._persistent_dirs("e2e_ckpt_resume")
+        # Clear any leftover JSONL from previous test runs so run1 always starts fresh
+        for _f in raw_dir.glob("*.jsonl"):
+            _f.unlink()
 
         registry = ChatTypeRegistry(CHAT_TYPE_MAPPING)
         assigner = SystemPromptAssigner(PromptAssignmentStrategy.ALL)

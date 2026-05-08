@@ -1,11 +1,11 @@
 {
   "test": "test_no_system_prompt_id_is_none",
   "passed": true,
-  "duration_s": 0.0007,
+  "duration_s": 0.0011,
   "steps": [
     {
       "step": "sys_names",
-      "elapsed_s": 0.0006,
+      "elapsed_s": 0.0008,
       "output": [
         null,
         null

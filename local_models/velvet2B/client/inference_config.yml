@@ -3,16 +3,12 @@
 # Any key omitted falls back to the built-in default values.
 
 # --- Server ---
-# Use the native SGLang `/generate` endpoint by default to get explicit
-# sampling params control. If you prefer the OpenAI-compatible chat endpoint
-# set `API_URL` to `/v1/chat/completions` instead.
-API_URL: "http://localhost:30000/generate"
-# MODEL_ID should match the model exposed by the SGLang server. For local
-# Velvet installs a good default is the model directory name (e.g. velvet-2b).
+# SGLang OpenAI-compatible chat completions endpoint.
+API_URL: "http://localhost:30000/v1/chat/completions"
+# MODEL_ID should match the model exposed by the SGLang server.
 MODEL_ID: "velvet-2b"
 MAX_NEW_TOKENS: 512
 TOP_P: 0.95
-TOP_K: 20
 # Maximum times to retry a failing request (5xx or network errors)
 MAX_RETRIES: 3
 # Exponential backoff base in seconds (sleep = BACKOFF_FACTOR * 2**attempt)
@@ -30,6 +26,21 @@ MAX_FILE_SIZE_MB: 100
 
 # --- Inference ---
 TEMPERATURE_RANGE: [0.0, 0.2, 0.3, 0.4, 0.5]
+# Number of completions per request. n>1 → each choice stored as a separate record.
+N: 1
+# Stop sequences: string or list of up to 4 strings (null = disabled).
+# STOP: null
+# Token diversity penalties, range -2.0 to 2.0.
+PRESENCE_PENALTY: 0.0
+FREQUENCY_PENALTY: 0.0
+# Fixed seed for reproducibility (null = non-deterministic).
+# SEED: null
+# Return token log-probabilities stored in _logprobs record field.
+LOGPROBS: false
+# Top-N log-probs per token (0-20), only relevant when LOGPROBS: true.
+# TOP_LOGPROBS: null
+# Output format: "text" (default) or "json_object".
+RESPONSE_FORMAT: "text"
 # Lower default concurrency for safer local testing; increase if your server
 # and GPU can handle it.
 CONCURRENT_REQUESTS: 32
@@ -42,10 +53,3 @@ PROMPT_STRATEGY: "random"
 
 # --- Chat type mapping (default: modules/templates/dpo/chat_type_mapping.yml) ---
 # CHAT_TYPE_MAPPING_PATH: "/absolute/path/to/chat_type_mapping.yml"
-
-# --- Endpoint selection ---
-# false (default): POST to /generate with {"text": "..."} — native SGLang,
-#                  full sampling_params control (top_k, top_p, max_new_tokens).
-# true:            POST to /v1/chat/completions with {"messages": [...]} —
-#                  OpenAI-compatible, messages passed as-is (no text conversion).
-USE_CHAT_COMPLETIONS_API: false

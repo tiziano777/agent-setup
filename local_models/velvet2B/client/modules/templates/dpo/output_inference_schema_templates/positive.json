@@ -6,6 +6,12 @@
     "_distribution_name":{
         "type":"string"
     },
+    "_distribution_id":{
+        "type":"string"
+    },
+    "_distribution_uri":{
+        "type":"string"
+    },
     "positive": {
         "type": "object",
         "required": [

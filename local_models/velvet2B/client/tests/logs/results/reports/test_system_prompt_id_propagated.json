@@ -1,11 +1,11 @@
 {
   "test": "test_system_prompt_id_propagated",
   "passed": true,
-  "duration_s": 0.0008,
+  "duration_s": 0.0011,
   "steps": [
     {
       "step": "sys_names",
-      "elapsed_s": 0.0007,
+      "elapsed_s": 0.001,
       "output": [
         "sys_A",
         "sys_B"

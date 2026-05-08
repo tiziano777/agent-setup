@@ -5,7 +5,7 @@
   "steps": [
     {
       "step": "task_messages",
-      "elapsed_s": 0.0004,
+      "elapsed_s": 0.0005,
       "input": [
         {
           "role": "user",
@@ -26,7 +26,14 @@
         ],
         "temperature": 0.3,
         "max_tokens": 512,
-        "top_p": 0.95
+        "top_p": 0.95,
+        "n": 1,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0,
+        "logprobs": false,
+        "response_format": {
+          "type": "text"
+        }
       }
     }
   ]

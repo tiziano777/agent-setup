@@ -1,6 +1,6 @@
 {
-  "total": 30,
-  "passed": 30,
+  "total": 31,
+  "passed": 31,
   "failed": 0,
   "results": [
     {
@@ -100,6 +100,11 @@
     },
     {
       "test": "tests/test_pipeline.py::TestInferMock::test_payload_is_openai_format",
+      "passed": true,
+      "failed": false
+    },
+    {
+      "test": "tests/test_pipeline.py::TestInferMock::test_distribution_metadata_in_base_record",
       "passed": true,
       "failed": false
     },

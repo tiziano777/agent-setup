@@ -1,18 +1,18 @@
 {
   "test": "test_e2e_replica2_doubles_records",
   "passed": true,
-  "duration_s": 0.02,
+  "duration_s": 0.0182,
   "steps": [
     {
       "step": "setup",
-      "elapsed_s": 0.0021,
+      "elapsed_s": 0.0017,
       "input": {
         "n_calls_expected": 8
       }
     },
     {
       "step": "raw_records",
-      "elapsed_s": 0.0194,
+      "elapsed_s": 0.0177,
       "output": 8
     }
   ]

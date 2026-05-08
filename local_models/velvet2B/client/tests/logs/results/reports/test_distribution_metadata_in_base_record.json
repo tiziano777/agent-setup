@@ -1,0 +1,23 @@
+{
+  "test": "test_distribution_metadata_in_base_record",
+  "passed": true,
+  "duration_s": 0.0009,
+  "steps": [
+    {
+      "step": "task_dist_metadata",
+      "elapsed_s": 0.0004,
+      "input": {
+        "dist_id": "dist_12345",
+        "dist_uri": "s3://bucket/data.parquet"
+      }
+    },
+    {
+      "step": "record_metadata",
+      "elapsed_s": 0.0005,
+      "output": {
+        "_distribution_id": "dist_12345",
+        "_distribution_uri": "s3://bucket/data.parquet"
+      }
+    }
+  ]
+}

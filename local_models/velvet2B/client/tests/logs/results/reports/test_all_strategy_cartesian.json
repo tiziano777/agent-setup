@@ -1,7 +1,7 @@
 {
   "test": "test_all_strategy_cartesian",
   "passed": true,
-  "duration_s": 0.0002,
+  "duration_s": 0.0003,
   "steps": [
     {
       "step": "input",
@@ -16,7 +16,7 @@
     },
     {
       "step": "output",
-      "elapsed_s": 0.0001,
+      "elapsed_s": 0.0002,
       "output": [
         "sys_v1",
         "sys_v2"

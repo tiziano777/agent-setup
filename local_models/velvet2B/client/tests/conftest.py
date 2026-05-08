@@ -172,13 +172,6 @@ def recipe_entry_factory(tmp_path):
 # ── module-level patches applied to every test ───────────────────────────────
 
 @pytest.fixture(autouse=True)
-def _force_completions_api(monkeypatch):
-    """Force USE_CHAT_COMPLETIONS_API=True for every test in the suite."""
-    import async_client
-    monkeypatch.setattr(async_client, "USE_CHAT_COMPLETIONS_API", True)
-
-
-@pytest.fixture(autouse=True)
 def _slim_temperatures(monkeypatch):
     """Use only 2 temperatures to keep task counts small during tests."""
     import async_client

@@ -46,10 +46,28 @@ class DuckDBAggregator:
         con.execute(f"CREATE TABLE raw AS SELECT * FROM read_json_auto({files_expr})")
 
         # Stream results via cursor to avoid pulling the full table into memory
+        # Try to include optional _distribution_id and _distribution_uri if they exist
+        # Otherwise fallback to NULL values
+        try:
+            # First, check if the columns exist by querying the schema
+            schema_result = con.execute("DESCRIBE raw").fetchall()
+            columns = {row[0] for row in schema_result}
+            has_dist_id = "_distribution_id" in columns
+            has_dist_uri = "_distribution_uri" in columns
+        except Exception:
+            has_dist_id = False
+            has_dist_uri = False
+
+        # Build the SELECT list dynamically
+        dist_id_expr = "FIRST(_distribution_id)" if has_dist_id else "NULL"
+        dist_uri_expr = "FIRST(_distribution_uri)" if has_dist_uri else "NULL"
+
         cursor = con.execute(f"""
             SELECT
                 _id_hash,
                 _distribution_name,
+                {dist_id_expr} AS _distribution_id,
+                {dist_uri_expr} AS _distribution_uri,
                 list({self.mode}) AS {self.plural}
             FROM raw
             GROUP BY _id_hash, _distribution_name

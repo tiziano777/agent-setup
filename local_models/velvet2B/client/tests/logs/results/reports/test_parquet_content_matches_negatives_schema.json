@@ -1,11 +1,11 @@
 {
   "test": "test_parquet_content_matches_negatives_schema",
   "passed": true,
-  "duration_s": 0.0155,
+  "duration_s": 0.0154,
   "steps": [
     {
       "step": "negative_item",
-      "elapsed_s": 0.0152,
+      "elapsed_s": 0.0153,
       "output": {
         "content": "Risposta di test.",
         "context": null,

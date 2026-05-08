@@ -32,10 +32,15 @@ def make_base_record(
     dist_name: str,
     mode: InferenceMode,
     item: ResponseItem,
+    dist_id: str | None = None,
+    dist_uri: str | None = None,
 ) -> dict:
     """Serialize a single inferred sample into the BASE schema dict."""
-    return {
+    record = {
         "_id_hash": id_hash,
         "_distribution_name": dist_name,
+        "_distribution_id": dist_id,
+        "_distribution_uri": dist_uri,
         mode.value: item.model_dump(),
     }
+    return record

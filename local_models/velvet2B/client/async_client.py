@@ -1,10 +1,10 @@
-"""Async inference client for local model serving.
+"""Async inference client for local model serving via OpenAI-compatible endpoint.
 
 Workflow for each RecipeEntry:
   1. Load samples from dist_uri (parquet / jsonl.gz / jsonl).
   2. Expand into tasks: sample × replica × system_prompts × temperatures.
   3. Skip already-done tasks (checkpoint resume).
-  4. Run async inference against SGLang /generate or /v1/chat/completions.
+  4. Run async inference against SGLang /v1/chat/completions.
   5. Write BASE-schema records to rolling JSONL files (OUTPUT_BASE_DIR).
   6. Aggregate JSONL records by _id_hash → FINAL-schema rolling Parquet files
      (AGGREGATED_OUTPUT_DIR — always a separate directory from raw output).
@@ -54,7 +54,7 @@ def _load_yaml(path: Path) -> dict:
 _CFG_PATH = Path(__file__).parent / "inference_config.yml"
 _cfg: dict = _load_yaml(_CFG_PATH) if _CFG_PATH.exists() else {}
 
-API_URL: str = _cfg.get("API_URL", "http://localhost:30000/generate")
+API_URL: str = _cfg.get("API_URL", "http://localhost:30000/v1/chat/completions")
 RECIPE_PATH: str = _cfg.get("RECIPE_PATH", "recipe.yml")
 OUTPUT_BASE_DIR: str = _cfg.get("OUTPUT_BASE_DIR", "output/raw")
 AGGREGATED_BASE_DIR: str = _cfg.get("AGGREGATED_OUTPUT_DIR", "output/aggregated")
@@ -64,7 +64,6 @@ CONCURRENT_REQUESTS: int = int(_cfg.get("CONCURRENT_REQUESTS", 32))
 MODEL_ID: str = _cfg.get("MODEL_ID", "velvet-2b")
 MAX_NEW_TOKENS: int = int(_cfg.get("MAX_NEW_TOKENS", 512))
 TOP_P: float = float(_cfg.get("TOP_P", 0.95))
-TOP_K: int = int(_cfg.get("TOP_K", 20))
 MAX_RETRIES: int = int(_cfg.get("MAX_RETRIES", 3))
 BACKOFF_FACTOR: float = float(_cfg.get("BACKOFF_FACTOR", 0.5))
 SCHEMA_MODE: InferenceMode = InferenceMode(_cfg.get("SCHEMA_MODE", "positive"))
@@ -75,12 +74,21 @@ CHAT_TYPE_MAPPING_PATH: str = _cfg.get(
     "CHAT_TYPE_MAPPING_PATH",
     str(Path(__file__).parent / "modules/templates/dpo/chat_type_mapping.yml"),
 )
-# When True:  POST to /v1/chat/completions with {"messages": [...]} (OpenAI-compat).
-# When False: POST to /generate with {"text": "..."} (native SGLang, full sampling control).
-USE_CHAT_COMPLETIONS_API: bool = bool(_cfg.get("USE_CHAT_COMPLETIONS_API", False))
+
+# --- Sampling extras (all optional; None = omit from payload) ---
+# N: number of completions per request. n>1 → each choice becomes a separate record.
+N: int = int(_cfg.get("N", 1))
+STOP: list[str] | str | None = _cfg.get("STOP", None)
+PRESENCE_PENALTY: float = float(_cfg.get("PRESENCE_PENALTY", 0.0))
+FREQUENCY_PENALTY: float = float(_cfg.get("FREQUENCY_PENALTY", 0.0))
+SEED: int | None = _cfg.get("SEED", None)
+LOGPROBS: bool = bool(_cfg.get("LOGPROBS", False))
+TOP_LOGPROBS: int | None = _cfg.get("TOP_LOGPROBS", None)
+# response_format: "text" or "json_object"
+RESPONSE_FORMAT: str = _cfg.get("RESPONSE_FORMAT", "text")
 
 # Metadata keys injected by the client — never treated as a mode key
-_META_KEYS: frozenset[str] = frozenset({"_id_hash", "_distribution_name", "_replica_idx"})
+_META_KEYS: frozenset[str] = frozenset({"_id_hash", "_distribution_name", "_distribution_id", "_distribution_uri", "_replica_idx"})
 
 
 # ---------------------------------------------------------------------------
@@ -95,6 +103,8 @@ class InferenceTask:
     system_prompt_id: str | None
     dist_name: str
     mode: InferenceMode
+    dist_id: str | None = field(default=None)  # distribution unique identifier
+    dist_uri: str | None = field(default=None)  # distribution path or URI
     replica_idx: int = field(default=0)  # which replica pass (0-based)
 
 
@@ -166,6 +176,8 @@ def _build_tasks(
                             system_prompt_id=sys_name,
                             dist_name=entry.dist_name,
                             mode=mode,
+                            dist_id=entry.dist_id,
+                            dist_uri=entry.dist_uri,
                             replica_idx=rep,
                         )
                     )
@@ -177,65 +189,34 @@ def _build_tasks(
 # Async inference
 # ---------------------------------------------------------------------------
 
-def _messages_to_text(messages: list[dict]) -> str:
-    """Flatten a messages list to a single text prompt for the native /generate endpoint.
-
-    Handles plain `content` fields, `tool_calls` objects (assistant turns), and
-    `tool_call_id` result turns so that no conversation information is silently
-    dropped when the messages contain function-calling exchanges.
-    """
-    parts: list[str] = []
-    for m in messages:
-        role = (m.get("role") or "user").strip().upper()
-        content = m.get("content")
-        tool_calls = m.get("tool_calls")
-        tool_call_id = m.get("tool_call_id")
-
-        if tool_calls is not None:
-            # assistant turn with tool invocations — serialize the call list
-            tc_str = json.dumps(tool_calls, ensure_ascii=False)
-            if content:
-                parts.append(f"[{role}] {str(content).strip()}\n<tool_calls>{tc_str}</tool_calls>")
-            else:
-                parts.append(f"[{role}] <tool_calls>{tc_str}</tool_calls>")
-        elif tool_call_id is not None:
-            # tool result turn
-            parts.append(f"[TOOL id={tool_call_id}] {str(content or '').strip()}")
-        else:
-            parts.append(f"[{role}] {str(content or '').strip()}")
-
-    return "\n".join(parts)
-
-
 async def _infer(
     sem: asyncio.Semaphore,
     session: aiohttp.ClientSession,
     task: InferenceTask,
-) -> dict[str, Any] | None:
-    """Send one inference request; return a BASE-schema record or None on failure."""
+) -> list[dict[str, Any]] | None:
+    """Send one /v1/chat/completions request.
 
-    if USE_CHAT_COMPLETIONS_API:
-        # OpenAI-compatible /v1/chat/completions — messages passed as-is
-        payload: dict = {
-            "model": MODEL_ID,
-            "messages": task.messages,
-            "temperature": task.temperature,
-            "max_tokens": MAX_NEW_TOKENS,
-            "top_p": TOP_P,
-        }
-    else:
-        # Native SGLang /generate — full sampling_params control, messages → text
-        payload = {
-            "text": _messages_to_text(task.messages),
-            "sampling_params": {
-                "temperature": task.temperature,
-                "max_new_tokens": MAX_NEW_TOKENS,
-                "top_p": TOP_P,
-                "top_k": TOP_K,
-            },
-            "model": MODEL_ID,
-            "stream": False,
-        }
+    Returns a list of BASE-schema records (one per choice when N > 1),
+    or None on unrecoverable failure.
+    """
+    payload: dict = {
+        "model": MODEL_ID,
+        "messages": task.messages,
+        "temperature": task.temperature,
+        "max_tokens": MAX_NEW_TOKENS,
+        "top_p": TOP_P,
+        "n": N,
+        "presence_penalty": PRESENCE_PENALTY,
+        "frequency_penalty": FREQUENCY_PENALTY,
+        "logprobs": LOGPROBS,
+        "response_format": {"type": RESPONSE_FORMAT},
+    }
+    if STOP is not None:
+        payload["stop"] = STOP
+    if SEED is not None:
+        payload["seed"] = SEED
+    if LOGPROBS and TOP_LOGPROBS is not None:
+        payload["top_logprobs"] = TOP_LOGPROBS
 
     async with sem:
         attempt = 0
@@ -256,46 +237,51 @@ async def _infer(
 
                     result = await resp.json()
 
-                    # Robust parsing:
-                    #   native /generate → `text` or `outputs[0].text`
-                    #   OpenAI-compat   → `choices[0].message.content` or `choices[0].text`
-                    text_out: str | None = None
-                    if isinstance(result, dict):
-                        text_out = result.get("text")
-                        if not text_out and isinstance(result.get("outputs"), list):
-                            try:
-                                text_out = result["outputs"][0].get("text")
-                            except Exception:
-                                pass
-                        if not text_out and isinstance(result.get("choices"), list) and result["choices"]:
-                            choice0 = result["choices"][0]
-                            if isinstance(choice0, dict):
-                                msg = choice0.get("message") or {}
-                                text_out = msg.get("content") or choice0.get("text")
-
-                    if not text_out:
+                    if not (
+                        isinstance(result, dict)
+                        and isinstance(result.get("choices"), list)
+                        and result["choices"]
+                    ):
                         logger.error(
                             "Unable to parse model response for id_hash=%s: %s",
                             task.id_hash, result,
                         )
                         return None
 
-                    item = ResponseItem(
-                        content=str(text_out),
-                        score=0.0,
-                        think=None,
-                        context=None,
-                        inference_params=InferenceParams(
-                            model_id=MODEL_ID,
-                            temperature=task.temperature,
-                            top_p=TOP_P,
-                            top_k=TOP_K,
-                            system_prompt_id=task.system_prompt_id,
-                        ),
-                    )
-                    record = make_base_record(task.id_hash, task.dist_name, task.mode, item)
-                    record["_replica_idx"] = task.replica_idx
-                    return record
+                    records: list[dict] = []
+                    for choice_idx, choice in enumerate(result["choices"]):
+                        if not isinstance(choice, dict):
+                            continue
+                        text_out = (choice.get("message") or {}).get("content")
+                        if not text_out:
+                            logger.warning(
+                                "Empty content for id_hash=%s choice=%d — skipping.",
+                                task.id_hash, choice_idx,
+                            )
+                            continue
+                        item = ResponseItem(
+                            content=str(text_out),
+                            score=0.0,
+                            think=None,
+                            context=None,
+                            inference_params=InferenceParams(
+                                model_id=MODEL_ID,
+                                temperature=task.temperature,
+                                top_p=TOP_P,
+                                system_prompt_id=task.system_prompt_id,
+                            ),
+                        )
+                        record = make_base_record(
+                            task.id_hash, task.dist_name, task.mode, item,
+                            dist_id=task.dist_id, dist_uri=task.dist_uri
+                        )
+                        record["_replica_idx"] = task.replica_idx
+                        record["_choice_idx"] = choice_idx
+                        if LOGPROBS:
+                            record["_logprobs"] = choice.get("logprobs")
+                        records.append(record)
+
+                    return records if records else None
 
             except Exception as e:
                 logger.error(
@@ -352,9 +338,9 @@ async def _process_entry(
         async with aiohttp.ClientSession() as session:
             coros = [_infer(sem, session, t) for t in pending]
             for coro in tqdm(asyncio.as_completed(coros), total=len(coros), desc=entry.dist_name):
-                result = await coro
-                if result:
-                    writer.write(result)
+                records = await coro
+                for record in (records or []):
+                    writer.write(record)
 
         writer.close()
 
@@ -390,7 +376,7 @@ async def main() -> None:
     logger.info(
         "Loaded chat type registry: %s | endpoint=%s | mode=%s",
         registry.known_chat_types(),
-        "chat/completions" if USE_CHAT_COMPLETIONS_API else "generate",
+        API_URL,
         SCHEMA_MODE.value,
     )
 

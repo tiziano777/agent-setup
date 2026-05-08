@@ -1,7 +1,7 @@
 {
   "test": "test_successful_inference_base_schema",
   "passed": true,
-  "duration_s": 0.0006,
+  "duration_s": 0.0007,
   "steps": [
     {
       "step": "task",
@@ -17,6 +17,8 @@
       "output": {
         "_id_hash": "69778c843182f874e57f9901beb55bc42be8c0147ef5730b2f3f7f80f752613a",
         "_distribution_name": "test_dist",
+        "_distribution_id": null,
+        "_distribution_uri": null,
         "negative": {
           "content": "Roma \u00e8 la capitale d'Italia.",
           "score": 0.0,
@@ -26,11 +28,12 @@
             "model_id": "velvet-2b",
             "temperature": 0.5,
             "top_p": 0.95,
-            "top_k": 20.0,
+            "top_k": null,
             "system_prompt_id": "sys_v1"
           }
         },
-        "_replica_idx": 0
+        "_replica_idx": 0,
+        "_choice_idx": 0
       }
     }
   ]

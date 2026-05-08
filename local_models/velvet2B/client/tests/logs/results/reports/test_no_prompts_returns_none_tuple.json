@@ -1,7 +1,7 @@
 {
   "test": "test_no_prompts_returns_none_tuple",
   "passed": true,
-  "duration_s": 0.0001,
+  "duration_s": 0.0002,
   "steps": [
     {
       "step": "input",

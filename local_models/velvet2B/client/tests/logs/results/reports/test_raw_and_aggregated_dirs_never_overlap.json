@@ -1,7 +1,7 @@
 {
   "test": "test_raw_and_aggregated_dirs_never_overlap",
   "passed": true,
-  "duration_s": 0.0143,
+  "duration_s": 0.0138,
   "steps": [
     {
       "step": "dirs",
@@ -13,12 +13,12 @@
     },
     {
       "step": "raw_parquets",
-      "elapsed_s": 0.0139,
+      "elapsed_s": 0.0134,
       "output": []
     },
     {
       "step": "agg_parquets",
-      "elapsed_s": 0.0139,
+      "elapsed_s": 0.0134,
       "output": [
         "aggregated_part1.parquet"
       ]

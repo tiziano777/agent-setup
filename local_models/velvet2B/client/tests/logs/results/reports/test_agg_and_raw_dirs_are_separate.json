@@ -1,12 +1,12 @@
 {
   "test": "test_agg_and_raw_dirs_are_separate",
   "passed": true,
-  "duration_s": 0.0153,
+  "duration_s": 0.0131,
   "steps": [
     {
       "step": "parquet_dir",
-      "elapsed_s": 0.0149,
-      "output": "/private/var/folders/1j/ndgc87vs72q081r3w6lbf51r0000gn/T/pytest-of-T.Finizzi/pytest-0/test_agg_and_raw_dirs_are_sepa0/agg"
+      "elapsed_s": 0.0129,
+      "output": "/private/var/folders/1j/ndgc87vs72q081r3w6lbf51r0000gn/T/pytest-of-T.Finizzi/pytest-11/test_agg_and_raw_dirs_are_sepa0/agg"
     }
   ]
 }
