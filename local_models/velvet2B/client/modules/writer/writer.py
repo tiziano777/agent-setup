@@ -32,6 +32,7 @@ class RollingJsonlWriter:
 
     def write(self, data):
         line = json.dumps(data) + "\n"
+        
         # Se il file supera la soglia, passiamo al prossimo
         if os.path.exists(self.current_path) and os.path.getsize(self.current_path) > self.max_bytes:
             self._open_next_part()

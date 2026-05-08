@@ -1,8 +1,10 @@
 from __future__ import annotations
-
 import random
 from enum import Enum
 
+# Global fixed seed for reproducible RANDOM assignment. Set to None for non-deterministic behavior.
+# Default is 42 to make assignments reproducible by default.
+FIXED_SEED = 42
 
 class PromptAssignmentStrategy(str, Enum):
     ALL = "all"
@@ -48,7 +50,10 @@ class SystemPromptAssigner:
             return [(sample, prompts[i], prompt_names[i])]
 
         if self.strategy == PromptAssignmentStrategy.RANDOM:
-            i = random.randint(0, len(prompts) - 1)
+            # Use a dedicated RNG seeded from FIXED_SEED for reproducibility.
+            # If FIXED_SEED is None, fall back to module-level randomness.
+            rng = random.Random(FIXED_SEED) 
+            i = rng.randint(0, len(prompts) - 1)
             return [(sample, prompts[i], prompt_names[i])]
 
         raise ValueError(f"Unknown strategy: {self.strategy}")
