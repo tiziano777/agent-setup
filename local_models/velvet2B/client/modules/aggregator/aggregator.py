@@ -7,6 +7,8 @@ import duckdb
 import pyarrow as pa
 import pyarrow.parquet as pq
 
+from local_models.velvet2B.client.modules.aggregator.serializer import process_record_for_json
+
 logger = logging.getLogger(__name__)
 
 
@@ -87,7 +89,8 @@ class DuckDBAggregator:
         columns = [desc[0] for desc in cursor.description]
 
         for row in cursor.fetchall():
-            batch_rows.append(dict(zip(columns, row)))
+            raw_dict = dict(zip(columns, row))
+            batch_rows.append(process_record_for_json(raw_dict))
 
             # Estimate current batch size and flush when threshold is exceeded.
             # We flush eagerly: once the batch would likely exceed max_bytes we

@@ -22,6 +22,7 @@ from typing import Any
 
 import aiohttp
 from tqdm.asyncio import tqdm
+import random
 
 from modules.aggregator.aggregator import DuckDBAggregator
 from modules.loader.data_loader import DataLoader
@@ -222,75 +223,102 @@ async def _infer(
         attempt = 0
         while attempt <= MAX_RETRIES:
             try:
-                timeout = aiohttp.ClientTimeout(total=600)
+                # Use explicit connect/read timeouts to fail fast on connectivity issues
+                timeout = aiohttp.ClientTimeout(total=600, connect=10, sock_read=600)
+
                 async with session.post(API_URL, json=payload, timeout=timeout) as resp:
-                    if resp.status != 200:
+                    if resp.status == 200:
+                        result = await resp.json()
+
+                        if not (
+                            isinstance(result, dict)
+                            and isinstance(result.get("choices"), list)
+                            and result["choices"]
+                        ):
+                            logger.error(
+                                "Unable to parse model response for id_hash=%s: %s",
+                                task.id_hash, result,
+                            )
+                            return None
+
+                        records: list[dict] = []
+                        for choice_idx, choice in enumerate(result["choices"]):
+                            if not isinstance(choice, dict):
+                                continue
+                            text_out = (choice.get("message") or {}).get("content")
+                            if not text_out:
+                                logger.warning(
+                                    "Empty content for id_hash=%s choice=%d — skipping.",
+                                    task.id_hash, choice_idx,
+                                )
+                                continue
+                            item = ResponseItem(
+                                content=str(text_out),
+                                score=0.0,
+                                think=None,
+                                context=None,
+                                inference_params=InferenceParams(
+                                    model_id=MODEL_ID,
+                                    temperature=task.temperature,
+                                    top_p=TOP_P,
+                                    system_prompt_id=task.system_prompt_id,
+                                ),
+                            )
+                            record = make_base_record(
+                                task.id_hash, task.dist_name, task.mode, item,
+                                dist_id=task.dist_id, dist_uri=task.dist_uri
+                            )
+                            record["_replica_idx"] = task.replica_idx
+                            record["_choice_idx"] = choice_idx
+                            if LOGPROBS:
+                                record["_logprobs"] = choice.get("logprobs")
+                            records.append(record)
+
+                        return records if records else None
+
+                    # Retryable server-side statuses (rate limiting / busy)
+                    if resp.status in (429, 500, 502, 503, 504):
                         logger.warning(
-                            "HTTP %d for id_hash=%s temp=%s (attempt=%d)",
+                            "HTTP %d for id_hash=%s temp=%s (attempt=%d) — retrying",
                             resp.status, task.id_hash, task.temperature, attempt,
                         )
-                        if 500 <= resp.status < 600 and attempt < MAX_RETRIES:
+                        if attempt < MAX_RETRIES:
                             attempt += 1
-                            await asyncio.sleep(BACKOFF_FACTOR * (2 ** (attempt - 1)))
+                            jitter = 1 + random.random() * 0.1
+                            await asyncio.sleep(BACKOFF_FACTOR * (2 ** (attempt - 1)) * jitter)
                             continue
                         return None
 
-                    result = await resp.json()
+                    # Non-retryable status
+                    logger.warning(
+                        "HTTP %d for id_hash=%s temp=%s (non-retryable)",
+                        resp.status, task.id_hash, task.temperature,
+                    )
+                    return None
 
-                    if not (
-                        isinstance(result, dict)
-                        and isinstance(result.get("choices"), list)
-                        and result["choices"]
-                    ):
-                        logger.error(
-                            "Unable to parse model response for id_hash=%s: %s",
-                            task.id_hash, result,
-                        )
-                        return None
-
-                    records: list[dict] = []
-                    for choice_idx, choice in enumerate(result["choices"]):
-                        if not isinstance(choice, dict):
-                            continue
-                        text_out = (choice.get("message") or {}).get("content")
-                        if not text_out:
-                            logger.warning(
-                                "Empty content for id_hash=%s choice=%d — skipping.",
-                                task.id_hash, choice_idx,
-                            )
-                            continue
-                        item = ResponseItem(
-                            content=str(text_out),
-                            score=0.0,
-                            think=None,
-                            context=None,
-                            inference_params=InferenceParams(
-                                model_id=MODEL_ID,
-                                temperature=task.temperature,
-                                top_p=TOP_P,
-                                system_prompt_id=task.system_prompt_id,
-                            ),
-                        )
-                        record = make_base_record(
-                            task.id_hash, task.dist_name, task.mode, item,
-                            dist_id=task.dist_id, dist_uri=task.dist_uri
-                        )
-                        record["_replica_idx"] = task.replica_idx
-                        record["_choice_idx"] = choice_idx
-                        if LOGPROBS:
-                            record["_logprobs"] = choice.get("logprobs")
-                        records.append(record)
-
-                    return records if records else None
+            except (aiohttp.ServerDisconnectedError, aiohttp.ClientPayloadError,
+                aiohttp.ClientConnectorError, aiohttp.ClientConnectionError,
+                aiohttp.ClientOSError, asyncio.TimeoutError, ConnectionResetError) as e:
+                    logger.warning(
+                        "Request transient error for id_hash=%s (attempt=%d): %s — retrying",
+                        task.id_hash, attempt, type(e).__name__,
+                    )
+                    if attempt < MAX_RETRIES:
+                        attempt += 1
+                        jitter = 1 + random.random() * 0.1
+                        await asyncio.sleep(BACKOFF_FACTOR * (2 ** (attempt - 1)) * jitter)
+                        continue
+                    return None
 
             except Exception as e:
                 logger.error(
-                    "Request failed for id_hash=%s (attempt=%d): %s",
+                    "Unexpected error for id_hash=%s (attempt=%d): %s",
                     task.id_hash, attempt, e,
                 )
                 if attempt < MAX_RETRIES:
                     attempt += 1
-                    await asyncio.sleep(BACKOFF_FACTOR * (2 ** (attempt - 1)))
+                    jitter = 1 + random.random() * 0.1
+                    await asyncio.sleep(BACKOFF_FACTOR * (2 ** (attempt - 1)) * jitter)
                     continue
                 return None
 
@@ -347,9 +375,13 @@ async def _process_entry(
         )
 
         async with aiohttp.ClientSession(connector=connector) as session:
-            coros = [_infer(sem, session, t) for t in pending]
-            for coro in tqdm(asyncio.as_completed(coros), total=len(coros), desc=entry.dist_name):
-                records = await coro
+            tasks = [asyncio.create_task(_infer(sem, session, t)) for t in pending]
+            for coro in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc=entry.dist_name):
+                try:
+                    records = await coro
+                except RuntimeError as e:
+                    logger.error("Unexpected runtime error for entry %s: %s", entry.dist_name, e)
+                    records = None
                 for record in (records or []):
                     writer.write(record)
 
