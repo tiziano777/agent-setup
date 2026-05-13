@@ -1,3 +1,3 @@
 train_dpo:
-  template_fn: /Users/T.Finizzi/repo/agent-setup/local_models/velvet2B/client/modules/templates/dpo/template_functions/instruct_dpo_apply_chat_template.py
-  schema: /Users/T.Finizzi/repo/agent-setup/local_models/velvet2B/client/modules/templates/dpo/input_schema_templates/input_schema.json
+  template_fn: ./dpo/template_functions/instruct_dpo_apply_chat_template.py
+  schema: ./dpo/input_schema_templates/input_schema.json

@@ -4,24 +4,24 @@
 
 # --- Server ---
 # SGLang OpenAI-compatible chat completions endpoint.
-API_URL: "http://localhost:30000/v1/chat/completions"
+API_URL: "http://127.0.0.1:8001/v1/chat/completions"
 # MODEL_ID should match the model exposed by the SGLang server.
-MODEL_ID: "velvet-2b"
-MAX_NEW_TOKENS: 512
+MODEL_ID: "velvet-2b-1.5_ba34086_t0"
+MAX_NEW_TOKENS: 3072
 TOP_P: 0.95
 # Maximum times to retry a failing request (5xx or network errors)
-MAX_RETRIES: 3
+MAX_RETRIES: 10
 # Exponential backoff base in seconds (sleep = BACKOFF_FACTOR * 2**attempt)
 BACKOFF_FACTOR: 0.5
 
 # --- Input ---
-RECIPE_PATH: "r2_recipe.yaml"
+RECIPE_PATH: "recipe.yaml"
 
 # --- Output ---
 # Raw JSONL inference records (per-entry subdirectory created automatically)
-OUTPUT_BASE_DIR: "output/raw"
+OUTPUT_BASE_DIR: "/nfs/data-download/dpo-inference/raw"
 # Aggregated Parquet output — always a SEPARATE directory from raw JSONL
-AGGREGATED_OUTPUT_DIR: "output/aggregated"
+AGGREGATED_OUTPUT_DIR: "/nfs/data-download/dpo-inference/aggregated"
 MAX_FILE_SIZE_MB: 100
 
 # --- Inference ---
@@ -43,7 +43,7 @@ LOGPROBS: false
 RESPONSE_FORMAT: "text"
 # Lower default concurrency for safer local testing; increase if your server
 # and GPU can handle it.
-CONCURRENT_REQUESTS: 32
+CONCURRENT_REQUESTS: 128
 
 # --- Schema mode: one of positive | negative | candidate ---
 SCHEMA_MODE: "negative"
@@ -52,4 +52,4 @@ SCHEMA_MODE: "negative"
 PROMPT_STRATEGY: "random"
 
 # --- Chat type mapping (default: modules/templates/chat_type_mapping.yml) ---
-CHAT_TYPE_MAPPING_PATH: /Users/T.Finizzi/repo/agent-setup/local_models/velvet2B/client/modules/templates/chat_type_mapping.yml
+CHAT_TYPE_MAPPING_PATH: ./modules/templates/chat_type_mapping.yml

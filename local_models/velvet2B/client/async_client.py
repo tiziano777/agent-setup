@@ -335,7 +335,18 @@ async def _process_entry(
         writer = RollingJsonlWriter(str(raw_dir), "inference", MAX_FILE_SIZE_MB)
         sem = asyncio.Semaphore(CONCURRENT_REQUESTS)
 
-        async with aiohttp.ClientSession() as session:
+        # Use a TCPConnector with explicit limits and keepalive to reduce
+        # transient "Server disconnected" errors under high load.
+        # limit: total concurrent connections; limit_per_host: per-host cap.
+        limit_per_host = max(1, CONCURRENT_REQUESTS // 4)
+        connector = aiohttp.TCPConnector(
+            limit=CONCURRENT_REQUESTS,
+            limit_per_host=limit_per_host,
+            keepalive_timeout=75,
+            enable_cleanup_closed=True,
+        )
+
+        async with aiohttp.ClientSession(connector=connector) as session:
             coros = [_infer(sem, session, t) for t in pending]
             for coro in tqdm(asyncio.as_completed(coros), total=len(coros), desc=entry.dist_name):
                 records = await coro

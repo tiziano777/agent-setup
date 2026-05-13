@@ -58,7 +58,12 @@ class ChatTypeRegistry:
         if not entry:
             return None
         schema = entry.get("schema")
-        return Path(schema) if schema else None
+        if not schema:
+            return None
+        schema_path = Path(schema)
+        if not schema_path.is_absolute():
+            schema_path = self._mapping_path.parent / schema_path
+        return schema_path
 
     def known_chat_types(self) -> list[str]:
         return list(self._raw.keys())
@@ -86,6 +91,8 @@ class ChatTypeRegistry:
             )
 
         fn_path = Path(entry.get("template_fn", ""))
+        if not fn_path.is_absolute():
+            fn_path = self._mapping_path.parent / fn_path
         if not fn_path.exists():
             raise FileNotFoundError(
                 f"Template function file not found for chat_type '{chat_type}': {fn_path}"

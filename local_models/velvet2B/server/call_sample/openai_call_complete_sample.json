@@ -1,8 +1,12 @@
 {
+  "model": "model_id",
   "messages": [
     {"role": "system", "content": "You are an helpfull assistant,..."},
     {"role": "user", "content": "Che tempo fa a Roma?"},
     {"role": "assistant", "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "get_weather", "arguments": "{\"location\": \"Rome\"}"}}]},
     {"role": "tool", "tool_call_id": "call_123", "content": "Soleggiato, 25°C"}
-  ]
+  ],
+  "temperature": 0,
+  "max_tokens": 32
+  
 }
