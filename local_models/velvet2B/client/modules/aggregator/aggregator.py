@@ -7,7 +7,7 @@ import duckdb
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from local_models.velvet2B.client.modules.aggregator.serializer import process_record_for_json
+from ..utils.serializer import process_record_for_json
 
 logger = logging.getLogger(__name__)
 

@@ -6,7 +6,7 @@
 # SGLang OpenAI-compatible chat completions endpoint.
 API_URL: "http://127.0.0.1:8001/v1/chat/completions"
 # MODEL_ID should match the model exposed by the SGLang server.
-MODEL_ID: "velvet-2b-1.5_ba34086_t0"
+MODEL_ID: "qwen3-32b"
 MAX_NEW_TOKENS: 3072
 TOP_P: 0.95
 # Maximum times to retry a failing request (5xx or network errors)
@@ -25,7 +25,7 @@ AGGREGATED_OUTPUT_DIR: "/nfs/data-download/dpo-inference/aggregated"
 MAX_FILE_SIZE_MB: 100
 
 # --- Inference ---
-TEMPERATURE_RANGE: [0.0, 0.2, 0.3, 0.4, 0.5]
+TEMPERATURE_RANGE: [0.0, 0.2, 0.3, 0.5, 0.7]
 # Number of completions per request. n>1 → each choice stored as a separate record.
 N: 1
 # Stop sequences: string or list of up to 4 strings (null = disabled).
@@ -43,13 +43,13 @@ LOGPROBS: false
 RESPONSE_FORMAT: "text"
 # Lower default concurrency for safer local testing; increase if your server
 # and GPU can handle it.
-CONCURRENT_REQUESTS: 128
+CONCURRENT_REQUESTS: 32
 
 # --- Schema mode: one of positive | negative | candidate ---
-SCHEMA_MODE: "negative"
+SCHEMA_MODE: "positive"
 
 # --- Prompt assignment strategy: all | round_robin | random ---
-PROMPT_STRATEGY: "random"
+PROMPT_STRATEGY: "all"
 
 # --- Chat type mapping (default: modules/templates/chat_type_mapping.yml) ---
 CHAT_TYPE_MAPPING_PATH: ./modules/templates/chat_type_mapping.yml

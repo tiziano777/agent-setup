@@ -18,10 +18,10 @@ tags:
 - english
 derived_from: null
 entries:
-  /nfs/mapped-data/rag-marconi/rag_marconi_it_negatives:
+  /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/rag-marconi/rag_marconi_it_negatives:
     dist_id: dfb0a9a7-8661-44df-9c18-bcdc30967d03
     dist_name: mapped__query__rag_marconi_it_negatives__query__rag-marconi__it
-    dist_uri: /nfs/mapped-data/rag-marconi/rag_marconi_it_negatives
+    dist_uri: /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/rag-marconi/rag_marconi_it_negatives
     chat_type: context_train_dpo
     system_prompt:
     - "You are a helpful assistant. You will receive a question and some context passages.\n\
@@ -184,10 +184,10 @@ entries:
     tokens: 33281
     words: 23032
     validation_error: null
-  /nfs/mapped-data/negatives_expertQA_2B/correctness_negatives_expertQA_2b:
+  /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/negatives_expertQA_2B/correctness_negatives_expertQA_2b:
     dist_id: f97c2525-d5ff-4db4-b39c-d7d081ab5df6
     dist_name: mapped__query__correctness_negatives_expertQA_2b__query__negatives_expertQA_2B__en
-    dist_uri: /nfs/mapped-data/negatives_expertQA_2B/correctness_negatives_expertQA_2b
+    dist_uri: /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/negatives_expertQA_2B/correctness_negatives_expertQA_2b
     chat_type: train_dpo
     system_prompt:
     - "## Role\nYou are an expert assistant with deep knowledge across science, history,\
@@ -362,10 +362,10 @@ entries:
     tokens: 33289
     words: 24053
     validation_error: null
-  /nfs/mapped-data/negatives_expertQA_2B/relevancy_negatives_expertQA_2b:
+  /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/negatives_expertQA_2B/relevancy_negatives_expertQA_2b:
     dist_id: b4bd997a-49b2-41b2-83a0-23cf5441fde0
     dist_name: mapped__query__relevancy_negatives_expertQA_2b__query__negatives_expertQA_2B__en
-    dist_uri: /nfs/mapped-data/negatives_expertQA_2B/relevancy_negatives_expertQA_2b
+    dist_uri: /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/negatives_expertQA_2B/relevancy_negatives_expertQA_2b
     chat_type: train_dpo
     system_prompt:
     - "You are a helpful assistant. When a user asks you a question, provide a thorough\

@@ -1,0 +1,33 @@
+id: 34f6ced1-303b-49ba-b387-25c27c1f2b2b
+name: negative_inference_orca_it
+description: dataset per inferenza di negativi con un small LLM.
+scope: sft
+tasks:
+- question_answering
+tags:
+- inference
+- italian
+- negatives
+derived_from: null
+entries:
+  /nfs/mapped-data/raicrits/orca_it_longest_content/downsampled__0.5__it:
+    dist_id: 5a19aa09-8e2e-4401-99c3-ba0ef76ece3b
+    dist_name: Downsampled__0.50__mapped__query__orca_it_longest_content__it
+    dist_uri: /nfs/mapped-data/raicrits/orca_it_longest_content/downsampled__0.5__it
+    chat_type: train_dpo
+    replica: 1
+    system_prompt:
+    - Rispondi alla seguente domanda in modo chiaro e preciso.
+    - "Sei un assistente utile. Il tuo compito \xE8 leggere la domanda e fornire una\
+      \ risposta corretta e concisa."
+    - Rispondimi in modo diretto e senza giri di parole alla domanda che segue.
+    - Leggi attentamente la domanda e fornisci una risposta accurata, basandoti sulle
+      informazioni disponibili.
+    system_prompt_name:
+    - short_it_instruct_prompt
+    - short_it_instruct_prompt_2
+    - short_it_instruct_prompt_2_2
+    - short_it_instruct_prompt_3
+    samples: 50000
+    tokens: 26023340
+    words: 18009232

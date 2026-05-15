@@ -1,3 +1,6 @@
 train_dpo:
   template_fn: ./dpo/template_functions/instruct_dpo_apply_chat_template.py
   schema: ./dpo/input_schema_templates/input_schema.json
+context_train_dpo:
+  template_fn: ./dpo/template_functions/context_dpo_apply_chat_template.py
+  schema: ./dpo/input_schema_templates/input_schema.json
