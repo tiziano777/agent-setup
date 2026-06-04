@@ -164,8 +164,8 @@ def _build_tasks(
                     messages = template_fn(sample, sys_content)
                 except Exception as e:
                     logger.error(
-                        "[%s] Template error id_hash=%s sys_prompt=%s rep=%d: %s — skipping.",
-                        entry.dist_name, id_hash, sys_name, rep, e,
+                        "[%s] Template error id_hash=%s sys_prompt=%s rep=%d: %s — skipping. Stack trace: ",
+                        entry.dist_name, id_hash, sys_name, rep, e, exc_info=True
                     )
                     continue
                 for temp in temperatures:

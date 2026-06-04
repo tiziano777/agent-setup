@@ -1,4 +1,5 @@
 # Python
+local_models/velvet2B/.sglang-env
 __pycache__/
 *.egg-info/
 local_models/velvet2B/.inference_venv/
