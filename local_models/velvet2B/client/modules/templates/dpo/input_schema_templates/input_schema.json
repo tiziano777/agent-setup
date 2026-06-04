@@ -39,141 +39,22 @@
           ],
           "properties": {
             "role": {
-              "enum": [
-                "USER",
-                "ASSISTANT"
-              ]
+              "const": "ASSISTANT"
             },
             "negatives": {
               "type": "array",
               "items": {
-                "type": "object",
-                "required": [
-                  "content",
-                  "score",
-                  "inference_params"
-                ],
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "maximum": 1,
-                    "minimum": 0
-                  },
-                  "think": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "content": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "context": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "inference_params": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
-                    "properties": {
-                      "top_k": {
-                        "type": "number"
-                      },
-                      "top_p": {
-                        "type": "number"
-                      },
-                      "model_id": {
-                        "type": "string"
-                      },
-                      "temperature": {
-                        "type": "number"
-                      },
-                      "system_prompt_id": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      }
-                    },
-                    "additionalProperties": false
-                  }
-                },
-                "additionalProperties": false
+                "$ref": "#/definitions/inference_item"
               }
             },
             "positives": {
               "type": "array",
               "items": {
-                "type": "object",
-                "required": [
-                  "content",
-                  "score",
-                  "inference_params"
-                ],
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "maximum": 1,
-                    "minimum": 0
-                  },
-                  "think": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "content": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "context": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "inference_params": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
-                    "properties": {
-                      "top_k": {
-                        "type": "number"
-                      },
-                      "top_p": {
-                        "type": "number"
-                      },
-                      "model_id": {
-                        "type": "string"
-                      },
-                      "temperature": {
-                        "type": "number"
-                      },
-                      "system_prompt_id": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      }
-                    },
-                    "additionalProperties": false
-                  }
-                },
-                "additionalProperties": false
+                "$ref": "#/definitions/inference_item"
               }
             }
           },
-          "additionalProperties": false
+          "additionalProperties": true
         },
         "then": {
           "required": [
@@ -181,10 +62,7 @@
           ],
           "properties": {
             "role": {
-              "enum": [
-                "USER",
-                "ASSISTANT"
-              ]
+              "const": "USER"
             },
             "content": {
               "type": "string",
@@ -197,7 +75,7 @@
               ]
             }
           },
-          "additionalProperties": false
+          "additionalProperties": true
         },
         "type": "object",
         "required": [
@@ -222,6 +100,64 @@
     },
     "_dataset_path": {
       "type": "string"
+    }
+  },
+  "definitions": {
+    "inference_item": {
+      "type": "object",
+      "properties": {
+        "score": {
+          "type": "number",
+          "maximum": 1,
+          "minimum": 0
+        },
+        "think": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "content": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "context": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "inference_params": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "top_k": {
+              "type": "number"
+            },
+            "top_p": {
+              "type": "number"
+            },
+            "model_id": {
+              "type": "string"
+            },
+            "temperature": {
+              "type": "number"
+            },
+            "system_prompt_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

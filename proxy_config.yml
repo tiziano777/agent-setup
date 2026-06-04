@@ -41,11 +41,11 @@ model_list:
   # --- Cerebras ---
   - model_name: llm
     litellm_params:
-      model: cerebras/qwen-3-235b-a22b-instruct-2507
+      model: deepseek-ai/DeepSeek-V3.2
       api_key: "os.environ/CEREBRAS_API_KEY"
       order: 2
     model_info:
-      id: cerebras/qwen-3-235b-a22b-instruct-2507
+      id: deepseek-ai/DeepSeek-V3.2
       name: qwen-3-235b-a22b-instruct-2507
       provider: cerebras
 
@@ -200,6 +200,10 @@ router_settings:
   allowed_fails: 2                  # Fallimenti prima di escludere temporaneamente un provider
   cooldown_time: 120                 # Cooldown dopo i fallimenti (secondi)
   set_verbose: True
+  retry_policy:
+    NotFoundError: 3             # Retry 404 (model not available on provider) with fallback
+    RateLimitError: 5
+    ContentPolicyViolationError: 0
 
 # Impostazioni generali del proxy
 general_settings:
