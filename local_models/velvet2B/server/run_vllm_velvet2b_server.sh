@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # 1. CONFIGURAZIONE VARIABILI (Senza spazi prima e dopo =)
-ckpt="ba34086"
-ckpt_path="/nfs/training-output/velvet-cycle2/Velvet-2B-1.5/ckpt_2B_v2/huggingface/ba34086"
-name="velvet-2b-1.5_${ckpt}_t0"
+recipe="001_s_09_5"
+ckpt="ba53454"
+ckpt_path="/nfs/training-output/velvet-cycle2/Velvet-2B-1.5/l06_f5/$recipe/$ckpt"
+name="Velvet-2B-1.5_ba53454_t0" 
 
 echo "----------------------------------------------------------------"
 echo "Avvio vLLM Docker Server..."
