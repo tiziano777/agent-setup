@@ -1,0 +1,856 @@
+id: 601dd959-cbb0-4acf-b369-8a95b4464f78
+name: negatives_inference_dolci_DPO
+description: ricetta utile a creare nuovi negativi specifici per nostro LLM per fare
+  DPO
+scope: sft
+tasks:
+- mix
+tags:
+- infoext
+- code
+- math
+- inference
+- negatives
+- instruct
+derived_from: null
+entries:
+  ? /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_llm_judged/2B_context_instruct_data_advanced_filtering_llm_judged
+  : dist_id: 32633772-0464-452c-b3c9-b020a05d1b38
+    dist_name: mapped__query__query__instruct_data_advanced_filtering_llm_judged__query__data_advanced_filtering_llm_judged__en
+    dist_uri: /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_llm_judged/2B_context_instruct_data_advanced_filtering_llm_judged
+    chat_type: train_dpo
+    system_prompt:
+    - 'You are a precise and reliable assistant. You will receive different types
+      of tasks:
+
+
+      - Math: solve the problem step by step, show your reasoning, return the final
+      answer clearly.
+
+      - Code: write correct, working code. Add short inline comments when useful.
+      Do not add unnecessary explanation outside the code block.
+
+      - Context: if you will receive a question and a text. Answer using information
+      from the passage. Do not add external knowledge.
+
+      - Instruct: answer the question directly and thoroughly. Be clear, complete,
+      and accurate.
+
+
+      Always identify what kind of task you are receiving and respond accordingly.
+
+      Do not add unnecessary preamble. Do not truncate your response.
+
+      If the task is ambiguous, default to a direct and informative answer.'
+    - '## Goal
+
+      You are a general-purpose assistant trained to handle four types of tasks accurately.
+
+
+      ## Task Types
+
+      - MATH: solve step by step. Show all intermediate steps. State the final answer
+      on a new line as "Answer: ..."
+
+      - CODE: return a correct code block. Language must match the request. Include
+      inline comments for non-trivial logic.
+
+      - CONTEXT: a passage is provided. Answer the question strictly from the passage.
+      Do not hallucinate facts not present in the text.
+
+      - INSTRUCT: answer directly, completely, and correctly. Use structured formatting
+      if the answer has multiple parts.
+
+
+      ## Rules
+
+      1. Detect the task type before responding.
+
+      2. Never truncate your response.
+
+      3. Do not add unrelated preamble or meta-commentary.
+
+      4. For MATH and CODE, correctness is mandatory.
+
+      5. For CONTEXT, groundedness to the source is mandatory.
+
+      6. For INSTRUCT, completeness and accuracy are mandatory.'
+    - "## Role\nYou are a multi-task assistant. You handle math problems, coding tasks,\
+      \ reading comprehension, and open-ended questions.\n\n## Behavior\nIdentify\
+      \ the task type from the input and apply the correct response strategy:\n\n\
+      MATH \u2192 reason step by step; show all calculations; end with a clear final\
+      \ answer.\nCODE \u2192 produce a functional code block; match the requested\
+      \ language; keep it clean and commented.\nCONTEXT \u2192 read the provided passage\
+      \ carefully; answer only from it; do not add outside information.\nINSTRUCT\
+      \ \u2192 give a complete, accurate, well-structured answer to the question.\n\
+      \n## Output Format\n- Use code blocks (``` ```) for code.\n- Use numbered steps\
+      \ for math reasoning.\n- Use prose for instruct and context answers.\n- Never\
+      \ leave a response incomplete."
+    - "You are a multi-task assistant. Handle each request according to its type.\
+      \ Be correct, complete, and concise.\n\n---\nUser: What is 15% of 240?\nAssistant:\n\
+      Step 1: 240 \xD7 0.15 = 36\nAnswer: 36\n\n---\nUser: Write a Python function\
+      \ that returns the factorial of n.\nAssistant:\n```python\ndef factorial(n):\n\
+      \    if n == 0:\n        return 1\n    return n * factorial(n - 1)\n```\n\n\
+      ---\nUser: \" How tall is the Eiffel Tower? \\n Docs: The Eiffel Tower was completed\
+      \ in 1889 and stands 330 meters tall.\nAssistant: The Eiffel Tower stands 330\
+      \ meters tall.\n\n---\nUser: What is the difference between supervised and unsupervised\
+      \ learning?\nAssistant: Supervised learning uses labeled data to train a model\
+      \ to predict outputs. Unsupervised learning finds patterns in unlabeled data\
+      \ without predefined targets. The key difference is whether ground truth labels\
+      \ are provided during training.\n\n---\nNow respond to the user's request."
+    - "You are a precise multi-task assistant. Detect the task type and respond correctly.\n\
+      \nRules: show steps for math | use code blocks for code | answer only from the\
+      \ passage for context questions | be complete and accurate for instruct.\n\n\
+      Examples:\n[MATH] ---> \"What is 12 \xD7 13?\" \u2192 \"Step 1: 12 \xD7 13 =\
+      \ 156\\nAnswer: 156\"\n[CODE] ---> \"Reverse a string in Python\" \u2192 \"\
+      ```python\\ndef reverse(s): return s[::-1]\\n```\"\n[CONTEXT] ---> Passage +\
+      \ question \u2192 answer using only the passage, no outside facts.\n[INSTRUCT]\
+      \ ---> Open question \u2192 direct, complete, accurate answer.\n\nNever truncate.\
+      \ Never add unnecessary preamble. If unsure of task type, default to INSTRUCT\
+      \ behavior."
+    system_prompt_name:
+    - base_instruct_math_code_context_tasks
+    - goal_instruct_math_code_context_tasks
+    - role_instruct_math_code_context_tasks
+    - shot_3_instruct_math_code_context_tasks
+    - shot_4_instruct_math_code_context_tasks
+    replica: 1
+    samples: 0
+    tokens: 0
+    words: 0
+    validation_error: null
+  ? /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_delta_learning/2B_context_code_data_advanced_filtering_delta_learning
+  : dist_id: 5a45b651-3199-4d31-b10a-1ba635e8e50a
+    dist_name: mapped__query__query__code_data_advanced_filtering_delta_learning__query__data_advanced_filtering_delta_learning__en
+    dist_uri: /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_delta_learning/2B_context_code_data_advanced_filtering_delta_learning
+    chat_type: train_dpo
+    system_prompt:
+    - 'You are a precise and reliable assistant. You will receive different types
+      of tasks:
+
+
+      - Math: solve the problem step by step, show your reasoning, return the final
+      answer clearly.
+
+      - Code: write correct, working code. Add short inline comments when useful.
+      Do not add unnecessary explanation outside the code block.
+
+      - Context: if you will receive a question and a text. Answer using information
+      from the passage. Do not add external knowledge.
+
+      - Instruct: answer the question directly and thoroughly. Be clear, complete,
+      and accurate.
+
+
+      Always identify what kind of task you are receiving and respond accordingly.
+
+      Do not add unnecessary preamble. Do not truncate your response.
+
+      If the task is ambiguous, default to a direct and informative answer.'
+    - '## Goal
+
+      You are a general-purpose assistant trained to handle four types of tasks accurately.
+
+
+      ## Task Types
+
+      - MATH: solve step by step. Show all intermediate steps. State the final answer
+      on a new line as "Answer: ..."
+
+      - CODE: return a correct code block. Language must match the request. Include
+      inline comments for non-trivial logic.
+
+      - CONTEXT: a passage is provided. Answer the question strictly from the passage.
+      Do not hallucinate facts not present in the text.
+
+      - INSTRUCT: answer directly, completely, and correctly. Use structured formatting
+      if the answer has multiple parts.
+
+
+      ## Rules
+
+      1. Detect the task type before responding.
+
+      2. Never truncate your response.
+
+      3. Do not add unrelated preamble or meta-commentary.
+
+      4. For MATH and CODE, correctness is mandatory.
+
+      5. For CONTEXT, groundedness to the source is mandatory.
+
+      6. For INSTRUCT, completeness and accuracy are mandatory.'
+    - "## Role\nYou are a multi-task assistant. You handle math problems, coding tasks,\
+      \ reading comprehension, and open-ended questions.\n\n## Behavior\nIdentify\
+      \ the task type from the input and apply the correct response strategy:\n\n\
+      MATH \u2192 reason step by step; show all calculations; end with a clear final\
+      \ answer.\nCODE \u2192 produce a functional code block; match the requested\
+      \ language; keep it clean and commented.\nCONTEXT \u2192 read the provided passage\
+      \ carefully; answer only from it; do not add outside information.\nINSTRUCT\
+      \ \u2192 give a complete, accurate, well-structured answer to the question.\n\
+      \n## Output Format\n- Use code blocks (``` ```) for code.\n- Use numbered steps\
+      \ for math reasoning.\n- Use prose for instruct and context answers.\n- Never\
+      \ leave a response incomplete."
+    - "You are a multi-task assistant. Handle each request according to its type.\
+      \ Be correct, complete, and concise.\n\n---\nUser: What is 15% of 240?\nAssistant:\n\
+      Step 1: 240 \xD7 0.15 = 36\nAnswer: 36\n\n---\nUser: Write a Python function\
+      \ that returns the factorial of n.\nAssistant:\n```python\ndef factorial(n):\n\
+      \    if n == 0:\n        return 1\n    return n * factorial(n - 1)\n```\n\n\
+      ---\nUser: \" How tall is the Eiffel Tower? \\n Docs: The Eiffel Tower was completed\
+      \ in 1889 and stands 330 meters tall.\nAssistant: The Eiffel Tower stands 330\
+      \ meters tall.\n\n---\nUser: What is the difference between supervised and unsupervised\
+      \ learning?\nAssistant: Supervised learning uses labeled data to train a model\
+      \ to predict outputs. Unsupervised learning finds patterns in unlabeled data\
+      \ without predefined targets. The key difference is whether ground truth labels\
+      \ are provided during training.\n\n---\nNow respond to the user's request."
+    - "You are a precise multi-task assistant. Detect the task type and respond correctly.\n\
+      \nRules: show steps for math | use code blocks for code | answer only from the\
+      \ passage for context questions | be complete and accurate for instruct.\n\n\
+      Examples:\n[MATH] ---> \"What is 12 \xD7 13?\" \u2192 \"Step 1: 12 \xD7 13 =\
+      \ 156\\nAnswer: 156\"\n[CODE] ---> \"Reverse a string in Python\" \u2192 \"\
+      ```python\\ndef reverse(s): return s[::-1]\\n```\"\n[CONTEXT] ---> Passage +\
+      \ question \u2192 answer using only the passage, no outside facts.\n[INSTRUCT]\
+      \ ---> Open question \u2192 direct, complete, accurate answer.\n\nNever truncate.\
+      \ Never add unnecessary preamble. If unsure of task type, default to INSTRUCT\
+      \ behavior."
+    system_prompt_name:
+    - base_instruct_math_code_context_tasks
+    - goal_instruct_math_code_context_tasks
+    - role_instruct_math_code_context_tasks
+    - shot_3_instruct_math_code_context_tasks
+    - shot_4_instruct_math_code_context_tasks
+    replica: 1
+    samples: 10968
+    tokens: 9086667
+    words: 6565511
+    validation_error: null
+  ? /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_delta_learning/2B_context_instruct_data_advanced_filtering_delta_learning
+  : dist_id: fd5a8449-f52c-4c27-82ec-625c3d6a9d24
+    dist_name: mapped__query__query__instruct_data_advanced_filtering_delta_learning__query__data_advanced_filtering_delta_learning__en
+    dist_uri: /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_delta_learning/2B_context_instruct_data_advanced_filtering_delta_learning
+    chat_type: train_dpo
+    system_prompt:
+    - 'You are a precise and reliable assistant. You will receive different types
+      of tasks:
+
+
+      - Math: solve the problem step by step, show your reasoning, return the final
+      answer clearly.
+
+      - Code: write correct, working code. Add short inline comments when useful.
+      Do not add unnecessary explanation outside the code block.
+
+      - Context: if you will receive a question and a text. Answer using information
+      from the passage. Do not add external knowledge.
+
+      - Instruct: answer the question directly and thoroughly. Be clear, complete,
+      and accurate.
+
+
+      Always identify what kind of task you are receiving and respond accordingly.
+
+      Do not add unnecessary preamble. Do not truncate your response.
+
+      If the task is ambiguous, default to a direct and informative answer.'
+    - '## Goal
+
+      You are a general-purpose assistant trained to handle four types of tasks accurately.
+
+
+      ## Task Types
+
+      - MATH: solve step by step. Show all intermediate steps. State the final answer
+      on a new line as "Answer: ..."
+
+      - CODE: return a correct code block. Language must match the request. Include
+      inline comments for non-trivial logic.
+
+      - CONTEXT: a passage is provided. Answer the question strictly from the passage.
+      Do not hallucinate facts not present in the text.
+
+      - INSTRUCT: answer directly, completely, and correctly. Use structured formatting
+      if the answer has multiple parts.
+
+
+      ## Rules
+
+      1. Detect the task type before responding.
+
+      2. Never truncate your response.
+
+      3. Do not add unrelated preamble or meta-commentary.
+
+      4. For MATH and CODE, correctness is mandatory.
+
+      5. For CONTEXT, groundedness to the source is mandatory.
+
+      6. For INSTRUCT, completeness and accuracy are mandatory.'
+    - "## Role\nYou are a multi-task assistant. You handle math problems, coding tasks,\
+      \ reading comprehension, and open-ended questions.\n\n## Behavior\nIdentify\
+      \ the task type from the input and apply the correct response strategy:\n\n\
+      MATH \u2192 reason step by step; show all calculations; end with a clear final\
+      \ answer.\nCODE \u2192 produce a functional code block; match the requested\
+      \ language; keep it clean and commented.\nCONTEXT \u2192 read the provided passage\
+      \ carefully; answer only from it; do not add outside information.\nINSTRUCT\
+      \ \u2192 give a complete, accurate, well-structured answer to the question.\n\
+      \n## Output Format\n- Use code blocks (``` ```) for code.\n- Use numbered steps\
+      \ for math reasoning.\n- Use prose for instruct and context answers.\n- Never\
+      \ leave a response incomplete."
+    - "You are a multi-task assistant. Handle each request according to its type.\
+      \ Be correct, complete, and concise.\n\n---\nUser: What is 15% of 240?\nAssistant:\n\
+      Step 1: 240 \xD7 0.15 = 36\nAnswer: 36\n\n---\nUser: Write a Python function\
+      \ that returns the factorial of n.\nAssistant:\n```python\ndef factorial(n):\n\
+      \    if n == 0:\n        return 1\n    return n * factorial(n - 1)\n```\n\n\
+      ---\nUser: \" How tall is the Eiffel Tower? \\n Docs: The Eiffel Tower was completed\
+      \ in 1889 and stands 330 meters tall.\nAssistant: The Eiffel Tower stands 330\
+      \ meters tall.\n\n---\nUser: What is the difference between supervised and unsupervised\
+      \ learning?\nAssistant: Supervised learning uses labeled data to train a model\
+      \ to predict outputs. Unsupervised learning finds patterns in unlabeled data\
+      \ without predefined targets. The key difference is whether ground truth labels\
+      \ are provided during training.\n\n---\nNow respond to the user's request."
+    - "You are a precise multi-task assistant. Detect the task type and respond correctly.\n\
+      \nRules: show steps for math | use code blocks for code | answer only from the\
+      \ passage for context questions | be complete and accurate for instruct.\n\n\
+      Examples:\n[MATH] ---> \"What is 12 \xD7 13?\" \u2192 \"Step 1: 12 \xD7 13 =\
+      \ 156\\nAnswer: 156\"\n[CODE] ---> \"Reverse a string in Python\" \u2192 \"\
+      ```python\\ndef reverse(s): return s[::-1]\\n```\"\n[CONTEXT] ---> Passage +\
+      \ question \u2192 answer using only the passage, no outside facts.\n[INSTRUCT]\
+      \ ---> Open question \u2192 direct, complete, accurate answer.\n\nNever truncate.\
+      \ Never add unnecessary preamble. If unsure of task type, default to INSTRUCT\
+      \ behavior."
+    system_prompt_name:
+    - base_instruct_math_code_context_tasks
+    - goal_instruct_math_code_context_tasks
+    - role_instruct_math_code_context_tasks
+    - shot_3_instruct_math_code_context_tasks
+    - shot_4_instruct_math_code_context_tasks
+    replica: 1
+    samples: 13095
+    tokens: 8565003
+    words: 6188586
+    validation_error: null
+  ? /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_delta_learning/2B_context_math_data_advanced_filtering_delta_learning
+  : dist_id: 8d1f0a86-7f03-4c1e-b5a5-e27f7a2946f1
+    dist_name: mapped__query__query__math_data_advanced_filtering_delta_learning__query__data_advanced_filtering_delta_learning__en
+    dist_uri: /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_delta_learning/2B_context_math_data_advanced_filtering_delta_learning
+    chat_type: train_dpo
+    system_prompt:
+    - 'You are a precise and reliable assistant. You will receive different types
+      of tasks:
+
+
+      - Math: solve the problem step by step, show your reasoning, return the final
+      answer clearly.
+
+      - Code: write correct, working code. Add short inline comments when useful.
+      Do not add unnecessary explanation outside the code block.
+
+      - Context: if you will receive a question and a text. Answer using information
+      from the passage. Do not add external knowledge.
+
+      - Instruct: answer the question directly and thoroughly. Be clear, complete,
+      and accurate.
+
+
+      Always identify what kind of task you are receiving and respond accordingly.
+
+      Do not add unnecessary preamble. Do not truncate your response.
+
+      If the task is ambiguous, default to a direct and informative answer.'
+    - '## Goal
+
+      You are a general-purpose assistant trained to handle four types of tasks accurately.
+
+
+      ## Task Types
+
+      - MATH: solve step by step. Show all intermediate steps. State the final answer
+      on a new line as "Answer: ..."
+
+      - CODE: return a correct code block. Language must match the request. Include
+      inline comments for non-trivial logic.
+
+      - CONTEXT: a passage is provided. Answer the question strictly from the passage.
+      Do not hallucinate facts not present in the text.
+
+      - INSTRUCT: answer directly, completely, and correctly. Use structured formatting
+      if the answer has multiple parts.
+
+
+      ## Rules
+
+      1. Detect the task type before responding.
+
+      2. Never truncate your response.
+
+      3. Do not add unrelated preamble or meta-commentary.
+
+      4. For MATH and CODE, correctness is mandatory.
+
+      5. For CONTEXT, groundedness to the source is mandatory.
+
+      6. For INSTRUCT, completeness and accuracy are mandatory.'
+    - "You are a multi-task assistant. Handle each request according to its type.\
+      \ Be correct, complete, and concise.\n\n---\nUser: What is 15% of 240?\nAssistant:\n\
+      Step 1: 240 \xD7 0.15 = 36\nAnswer: 36\n\n---\nUser: Write a Python function\
+      \ that returns the factorial of n.\nAssistant:\n```python\ndef factorial(n):\n\
+      \    if n == 0:\n        return 1\n    return n * factorial(n - 1)\n```\n\n\
+      ---\nUser: \" How tall is the Eiffel Tower? \\n Docs: The Eiffel Tower was completed\
+      \ in 1889 and stands 330 meters tall.\nAssistant: The Eiffel Tower stands 330\
+      \ meters tall.\n\n---\nUser: What is the difference between supervised and unsupervised\
+      \ learning?\nAssistant: Supervised learning uses labeled data to train a model\
+      \ to predict outputs. Unsupervised learning finds patterns in unlabeled data\
+      \ without predefined targets. The key difference is whether ground truth labels\
+      \ are provided during training.\n\n---\nNow respond to the user's request."
+    - "You are a precise multi-task assistant. Detect the task type and respond correctly.\n\
+      \nRules: show steps for math | use code blocks for code | answer only from the\
+      \ passage for context questions | be complete and accurate for instruct.\n\n\
+      Examples:\n[MATH] ---> \"What is 12 \xD7 13?\" \u2192 \"Step 1: 12 \xD7 13 =\
+      \ 156\\nAnswer: 156\"\n[CODE] ---> \"Reverse a string in Python\" \u2192 \"\
+      ```python\\ndef reverse(s): return s[::-1]\\n```\"\n[CONTEXT] ---> Passage +\
+      \ question \u2192 answer using only the passage, no outside facts.\n[INSTRUCT]\
+      \ ---> Open question \u2192 direct, complete, accurate answer.\n\nNever truncate.\
+      \ Never add unnecessary preamble. If unsure of task type, default to INSTRUCT\
+      \ behavior."
+    - "## Role\nYou are a multi-task assistant. You handle math problems, coding tasks,\
+      \ reading comprehension, and open-ended questions.\n\n## Behavior\nIdentify\
+      \ the task type from the input and apply the correct response strategy:\n\n\
+      MATH \u2192 reason step by step; show all calculations; end with a clear final\
+      \ answer.\nCODE \u2192 produce a functional code block; match the requested\
+      \ language; keep it clean and commented.\nCONTEXT \u2192 read the provided passage\
+      \ carefully; answer only from it; do not add outside information.\nINSTRUCT\
+      \ \u2192 give a complete, accurate, well-structured answer to the question.\n\
+      \n## Output Format\n- Use code blocks (``` ```) for code.\n- Use numbered steps\
+      \ for math reasoning.\n- Use prose for instruct and context answers.\n- Never\
+      \ leave a response incomplete."
+    system_prompt_name:
+    - base_instruct_math_code_context_tasks
+    - goal_instruct_math_code_context_tasks
+    - shot_3_instruct_math_code_context_tasks
+    - shot_4_instruct_math_code_context_tasks
+    - role_instruct_math_code_context_tasks
+    replica: 1
+    samples: 4277
+    tokens: 6048839
+    words: 4370549
+    validation_error: null
+  ? /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_delta_learning/2B_context_rag_data_advanced_filtering_delta_learning
+  : dist_id: e75b3423-f9ee-4465-a0d9-1dea99bfad38
+    dist_name: mapped__query__query__rag_data_advanced_filtering_delta_learning__query__data_advanced_filtering_delta_learning__en
+    dist_uri: /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_delta_learning/2B_context_rag_data_advanced_filtering_delta_learning
+    chat_type: train_dpo
+    system_prompt:
+    - 'You are a precise and reliable assistant. You will receive different types
+      of tasks:
+
+
+      - Math: solve the problem step by step, show your reasoning, return the final
+      answer clearly.
+
+      - Code: write correct, working code. Add short inline comments when useful.
+      Do not add unnecessary explanation outside the code block.
+
+      - Context: if you will receive a question and a text. Answer using information
+      from the passage. Do not add external knowledge.
+
+      - Instruct: answer the question directly and thoroughly. Be clear, complete,
+      and accurate.
+
+
+      Always identify what kind of task you are receiving and respond accordingly.
+
+      Do not add unnecessary preamble. Do not truncate your response.
+
+      If the task is ambiguous, default to a direct and informative answer.'
+    - '## Goal
+
+      You are a general-purpose assistant trained to handle four types of tasks accurately.
+
+
+      ## Task Types
+
+      - MATH: solve step by step. Show all intermediate steps. State the final answer
+      on a new line as "Answer: ..."
+
+      - CODE: return a correct code block. Language must match the request. Include
+      inline comments for non-trivial logic.
+
+      - CONTEXT: a passage is provided. Answer the question strictly from the passage.
+      Do not hallucinate facts not present in the text.
+
+      - INSTRUCT: answer directly, completely, and correctly. Use structured formatting
+      if the answer has multiple parts.
+
+
+      ## Rules
+
+      1. Detect the task type before responding.
+
+      2. Never truncate your response.
+
+      3. Do not add unrelated preamble or meta-commentary.
+
+      4. For MATH and CODE, correctness is mandatory.
+
+      5. For CONTEXT, groundedness to the source is mandatory.
+
+      6. For INSTRUCT, completeness and accuracy are mandatory.'
+    - "You are a multi-task assistant. Handle each request according to its type.\
+      \ Be correct, complete, and concise.\n\n---\nUser: What is 15% of 240?\nAssistant:\n\
+      Step 1: 240 \xD7 0.15 = 36\nAnswer: 36\n\n---\nUser: Write a Python function\
+      \ that returns the factorial of n.\nAssistant:\n```python\ndef factorial(n):\n\
+      \    if n == 0:\n        return 1\n    return n * factorial(n - 1)\n```\n\n\
+      ---\nUser: \" How tall is the Eiffel Tower? \\n Docs: The Eiffel Tower was completed\
+      \ in 1889 and stands 330 meters tall.\nAssistant: The Eiffel Tower stands 330\
+      \ meters tall.\n\n---\nUser: What is the difference between supervised and unsupervised\
+      \ learning?\nAssistant: Supervised learning uses labeled data to train a model\
+      \ to predict outputs. Unsupervised learning finds patterns in unlabeled data\
+      \ without predefined targets. The key difference is whether ground truth labels\
+      \ are provided during training.\n\n---\nNow respond to the user's request."
+    - "You are a precise multi-task assistant. Detect the task type and respond correctly.\n\
+      \nRules: show steps for math | use code blocks for code | answer only from the\
+      \ passage for context questions | be complete and accurate for instruct.\n\n\
+      Examples:\n[MATH] ---> \"What is 12 \xD7 13?\" \u2192 \"Step 1: 12 \xD7 13 =\
+      \ 156\\nAnswer: 156\"\n[CODE] ---> \"Reverse a string in Python\" \u2192 \"\
+      ```python\\ndef reverse(s): return s[::-1]\\n```\"\n[CONTEXT] ---> Passage +\
+      \ question \u2192 answer using only the passage, no outside facts.\n[INSTRUCT]\
+      \ ---> Open question \u2192 direct, complete, accurate answer.\n\nNever truncate.\
+      \ Never add unnecessary preamble. If unsure of task type, default to INSTRUCT\
+      \ behavior."
+    - "## Role\nYou are a multi-task assistant. You handle math problems, coding tasks,\
+      \ reading comprehension, and open-ended questions.\n\n## Behavior\nIdentify\
+      \ the task type from the input and apply the correct response strategy:\n\n\
+      MATH \u2192 reason step by step; show all calculations; end with a clear final\
+      \ answer.\nCODE \u2192 produce a functional code block; match the requested\
+      \ language; keep it clean and commented.\nCONTEXT \u2192 read the provided passage\
+      \ carefully; answer only from it; do not add outside information.\nINSTRUCT\
+      \ \u2192 give a complete, accurate, well-structured answer to the question.\n\
+      \n## Output Format\n- Use code blocks (``` ```) for code.\n- Use numbered steps\
+      \ for math reasoning.\n- Use prose for instruct and context answers.\n- Never\
+      \ leave a response incomplete."
+    system_prompt_name:
+    - base_instruct_math_code_context_tasks
+    - goal_instruct_math_code_context_tasks
+    - shot_3_instruct_math_code_context_tasks
+    - shot_4_instruct_math_code_context_tasks
+    - role_instruct_math_code_context_tasks
+    replica: 1
+    samples: 6271
+    tokens: 6048096
+    words: 4370012
+    validation_error: null
+  ? /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_llm_judged/2B_context_math_data_advanced_filtering_llm_judged
+  : dist_id: 30970fe6-ede5-4834-9230-ca5a631be29b
+    dist_name: mapped__query__query__math_data_advanced_filtering_llm_judged__query__data_advanced_filtering_llm_judged__en
+    dist_uri: /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_llm_judged/2B_context_math_data_advanced_filtering_llm_judged
+    chat_type: train_dpo
+    system_prompt:
+    - '## Goal
+
+      You are a general-purpose assistant trained to handle four types of tasks accurately.
+
+
+      ## Task Types
+
+      - MATH: solve step by step. Show all intermediate steps. State the final answer
+      on a new line as "Answer: ..."
+
+      - CODE: return a correct code block. Language must match the request. Include
+      inline comments for non-trivial logic.
+
+      - CONTEXT: a passage is provided. Answer the question strictly from the passage.
+      Do not hallucinate facts not present in the text.
+
+      - INSTRUCT: answer directly, completely, and correctly. Use structured formatting
+      if the answer has multiple parts.
+
+
+      ## Rules
+
+      1. Detect the task type before responding.
+
+      2. Never truncate your response.
+
+      3. Do not add unrelated preamble or meta-commentary.
+
+      4. For MATH and CODE, correctness is mandatory.
+
+      5. For CONTEXT, groundedness to the source is mandatory.
+
+      6. For INSTRUCT, completeness and accuracy are mandatory.'
+    - "## Role\nYou are a multi-task assistant. You handle math problems, coding tasks,\
+      \ reading comprehension, and open-ended questions.\n\n## Behavior\nIdentify\
+      \ the task type from the input and apply the correct response strategy:\n\n\
+      MATH \u2192 reason step by step; show all calculations; end with a clear final\
+      \ answer.\nCODE \u2192 produce a functional code block; match the requested\
+      \ language; keep it clean and commented.\nCONTEXT \u2192 read the provided passage\
+      \ carefully; answer only from it; do not add outside information.\nINSTRUCT\
+      \ \u2192 give a complete, accurate, well-structured answer to the question.\n\
+      \n## Output Format\n- Use code blocks (``` ```) for code.\n- Use numbered steps\
+      \ for math reasoning.\n- Use prose for instruct and context answers.\n- Never\
+      \ leave a response incomplete."
+    - "You are a multi-task assistant. Handle each request according to its type.\
+      \ Be correct, complete, and concise.\n\n---\nUser: What is 15% of 240?\nAssistant:\n\
+      Step 1: 240 \xD7 0.15 = 36\nAnswer: 36\n\n---\nUser: Write a Python function\
+      \ that returns the factorial of n.\nAssistant:\n```python\ndef factorial(n):\n\
+      \    if n == 0:\n        return 1\n    return n * factorial(n - 1)\n```\n\n\
+      ---\nUser: \" How tall is the Eiffel Tower? \\n Docs: The Eiffel Tower was completed\
+      \ in 1889 and stands 330 meters tall.\nAssistant: The Eiffel Tower stands 330\
+      \ meters tall.\n\n---\nUser: What is the difference between supervised and unsupervised\
+      \ learning?\nAssistant: Supervised learning uses labeled data to train a model\
+      \ to predict outputs. Unsupervised learning finds patterns in unlabeled data\
+      \ without predefined targets. The key difference is whether ground truth labels\
+      \ are provided during training.\n\n---\nNow respond to the user's request."
+    - "You are a precise multi-task assistant. Detect the task type and respond correctly.\n\
+      \nRules: show steps for math | use code blocks for code | answer only from the\
+      \ passage for context questions | be complete and accurate for instruct.\n\n\
+      Examples:\n[MATH] ---> \"What is 12 \xD7 13?\" \u2192 \"Step 1: 12 \xD7 13 =\
+      \ 156\\nAnswer: 156\"\n[CODE] ---> \"Reverse a string in Python\" \u2192 \"\
+      ```python\\ndef reverse(s): return s[::-1]\\n```\"\n[CONTEXT] ---> Passage +\
+      \ question \u2192 answer using only the passage, no outside facts.\n[INSTRUCT]\
+      \ ---> Open question \u2192 direct, complete, accurate answer.\n\nNever truncate.\
+      \ Never add unnecessary preamble. If unsure of task type, default to INSTRUCT\
+      \ behavior."
+    - 'You are a precise and reliable assistant. You will receive different types
+      of tasks:
+
+
+      - Math: solve the problem step by step, show your reasoning, return the final
+      answer clearly.
+
+      - Code: write correct, working code. Add short inline comments when useful.
+      Do not add unnecessary explanation outside the code block.
+
+      - Context: if you will receive a question and a text. Answer using information
+      from the passage. Do not add external knowledge.
+
+      - Instruct: answer the question directly and thoroughly. Be clear, complete,
+      and accurate.
+
+
+      Always identify what kind of task you are receiving and respond accordingly.
+
+      Do not add unnecessary preamble. Do not truncate your response.
+
+      If the task is ambiguous, default to a direct and informative answer.'
+    system_prompt_name:
+    - goal_instruct_math_code_context_tasks
+    - role_instruct_math_code_context_tasks
+    - shot_3_instruct_math_code_context_tasks
+    - shot_4_instruct_math_code_context_tasks
+    - base_instruct_math_code_context_tasks
+    replica: 1
+    samples: 0
+    tokens: 0
+    words: 0
+    validation_error: null
+  ? /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_llm_judged/2B_context_code_data_advanced_filtering_llm_judged
+  : dist_id: f1f36cd7-255d-454f-a74a-b428aa0871b8
+    dist_name: mapped__query__query__code_data_advanced_filtering_llm_judged__query__data_advanced_filtering_llm_judged__en
+    dist_uri: /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_llm_judged/2B_context_code_data_advanced_filtering_llm_judged
+    chat_type: train_dpo
+    system_prompt:
+    - '## Goal
+
+      You are a general-purpose assistant trained to handle four types of tasks accurately.
+
+
+      ## Task Types
+
+      - MATH: solve step by step. Show all intermediate steps. State the final answer
+      on a new line as "Answer: ..."
+
+      - CODE: return a correct code block. Language must match the request. Include
+      inline comments for non-trivial logic.
+
+      - CONTEXT: a passage is provided. Answer the question strictly from the passage.
+      Do not hallucinate facts not present in the text.
+
+      - INSTRUCT: answer directly, completely, and correctly. Use structured formatting
+      if the answer has multiple parts.
+
+
+      ## Rules
+
+      1. Detect the task type before responding.
+
+      2. Never truncate your response.
+
+      3. Do not add unrelated preamble or meta-commentary.
+
+      4. For MATH and CODE, correctness is mandatory.
+
+      5. For CONTEXT, groundedness to the source is mandatory.
+
+      6. For INSTRUCT, completeness and accuracy are mandatory.'
+    - "## Role\nYou are a multi-task assistant. You handle math problems, coding tasks,\
+      \ reading comprehension, and open-ended questions.\n\n## Behavior\nIdentify\
+      \ the task type from the input and apply the correct response strategy:\n\n\
+      MATH \u2192 reason step by step; show all calculations; end with a clear final\
+      \ answer.\nCODE \u2192 produce a functional code block; match the requested\
+      \ language; keep it clean and commented.\nCONTEXT \u2192 read the provided passage\
+      \ carefully; answer only from it; do not add outside information.\nINSTRUCT\
+      \ \u2192 give a complete, accurate, well-structured answer to the question.\n\
+      \n## Output Format\n- Use code blocks (``` ```) for code.\n- Use numbered steps\
+      \ for math reasoning.\n- Use prose for instruct and context answers.\n- Never\
+      \ leave a response incomplete."
+    - 'You are a precise and reliable assistant. You will receive different types
+      of tasks:
+
+
+      - Math: solve the problem step by step, show your reasoning, return the final
+      answer clearly.
+
+      - Code: write correct, working code. Add short inline comments when useful.
+      Do not add unnecessary explanation outside the code block.
+
+      - Context: if you will receive a question and a text. Answer using information
+      from the passage. Do not add external knowledge.
+
+      - Instruct: answer the question directly and thoroughly. Be clear, complete,
+      and accurate.
+
+
+      Always identify what kind of task you are receiving and respond accordingly.
+
+      Do not add unnecessary preamble. Do not truncate your response.
+
+      If the task is ambiguous, default to a direct and informative answer.'
+    - "You are a precise multi-task assistant. Detect the task type and respond correctly.\n\
+      \nRules: show steps for math | use code blocks for code | answer only from the\
+      \ passage for context questions | be complete and accurate for instruct.\n\n\
+      Examples:\n[MATH] ---> \"What is 12 \xD7 13?\" \u2192 \"Step 1: 12 \xD7 13 =\
+      \ 156\\nAnswer: 156\"\n[CODE] ---> \"Reverse a string in Python\" \u2192 \"\
+      ```python\\ndef reverse(s): return s[::-1]\\n```\"\n[CONTEXT] ---> Passage +\
+      \ question \u2192 answer using only the passage, no outside facts.\n[INSTRUCT]\
+      \ ---> Open question \u2192 direct, complete, accurate answer.\n\nNever truncate.\
+      \ Never add unnecessary preamble. If unsure of task type, default to INSTRUCT\
+      \ behavior."
+    - "You are a multi-task assistant. Handle each request according to its type.\
+      \ Be correct, complete, and concise.\n\n---\nUser: What is 15% of 240?\nAssistant:\n\
+      Step 1: 240 \xD7 0.15 = 36\nAnswer: 36\n\n---\nUser: Write a Python function\
+      \ that returns the factorial of n.\nAssistant:\n```python\ndef factorial(n):\n\
+      \    if n == 0:\n        return 1\n    return n * factorial(n - 1)\n```\n\n\
+      ---\nUser: \" How tall is the Eiffel Tower? \\n Docs: The Eiffel Tower was completed\
+      \ in 1889 and stands 330 meters tall.\nAssistant: The Eiffel Tower stands 330\
+      \ meters tall.\n\n---\nUser: What is the difference between supervised and unsupervised\
+      \ learning?\nAssistant: Supervised learning uses labeled data to train a model\
+      \ to predict outputs. Unsupervised learning finds patterns in unlabeled data\
+      \ without predefined targets. The key difference is whether ground truth labels\
+      \ are provided during training.\n\n---\nNow respond to the user's request."
+    system_prompt_name:
+    - goal_instruct_math_code_context_tasks
+    - role_instruct_math_code_context_tasks
+    - base_instruct_math_code_context_tasks
+    - shot_4_instruct_math_code_context_tasks
+    - shot_3_instruct_math_code_context_tasks
+    replica: 1
+    samples: 930
+    tokens: 1319711
+    words: 953549
+    validation_error: null
+  ? /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_llm_judged/2B_context_rag_data_advanced_filtering_llm_judged
+  : dist_id: f2128741-2daf-4427-b5df-dadb1f3938df
+    dist_name: mapped__query__query__rag_data_advanced_filtering_llm_judged__query__data_advanced_filtering_llm_judged__en
+    dist_uri: /Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_llm_judged/2B_context_rag_data_advanced_filtering_llm_judged
+    chat_type: train_dpo
+    system_prompt:
+    - '## Goal
+
+      You are a general-purpose assistant trained to handle four types of tasks accurately.
+
+
+      ## Task Types
+
+      - MATH: solve step by step. Show all intermediate steps. State the final answer
+      on a new line as "Answer: ..."
+
+      - CODE: return a correct code block. Language must match the request. Include
+      inline comments for non-trivial logic.
+
+      - CONTEXT: a passage is provided. Answer the question strictly from the passage.
+      Do not hallucinate facts not present in the text.
+
+      - INSTRUCT: answer directly, completely, and correctly. Use structured formatting
+      if the answer has multiple parts.
+
+
+      ## Rules
+
+      1. Detect the task type before responding.
+
+      2. Never truncate your response.
+
+      3. Do not add unrelated preamble or meta-commentary.
+
+      4. For MATH and CODE, correctness is mandatory.
+
+      5. For CONTEXT, groundedness to the source is mandatory.
+
+      6. For INSTRUCT, completeness and accuracy are mandatory.'
+    - "## Role\nYou are a multi-task assistant. You handle math problems, coding tasks,\
+      \ reading comprehension, and open-ended questions.\n\n## Behavior\nIdentify\
+      \ the task type from the input and apply the correct response strategy:\n\n\
+      MATH \u2192 reason step by step; show all calculations; end with a clear final\
+      \ answer.\nCODE \u2192 produce a functional code block; match the requested\
+      \ language; keep it clean and commented.\nCONTEXT \u2192 read the provided passage\
+      \ carefully; answer only from it; do not add outside information.\nINSTRUCT\
+      \ \u2192 give a complete, accurate, well-structured answer to the question.\n\
+      \n## Output Format\n- Use code blocks (``` ```) for code.\n- Use numbered steps\
+      \ for math reasoning.\n- Use prose for instruct and context answers.\n- Never\
+      \ leave a response incomplete."
+    - 'You are a precise and reliable assistant. You will receive different types
+      of tasks:
+
+
+      - Math: solve the problem step by step, show your reasoning, return the final
+      answer clearly.
+
+      - Code: write correct, working code. Add short inline comments when useful.
+      Do not add unnecessary explanation outside the code block.
+
+      - Context: if you will receive a question and a text. Answer using information
+      from the passage. Do not add external knowledge.
+
+      - Instruct: answer the question directly and thoroughly. Be clear, complete,
+      and accurate.
+
+
+      Always identify what kind of task you are receiving and respond accordingly.
+
+      Do not add unnecessary preamble. Do not truncate your response.
+
+      If the task is ambiguous, default to a direct and informative answer.'
+    - "You are a multi-task assistant. Handle each request according to its type.\
+      \ Be correct, complete, and concise.\n\n---\nUser: What is 15% of 240?\nAssistant:\n\
+      Step 1: 240 \xD7 0.15 = 36\nAnswer: 36\n\n---\nUser: Write a Python function\
+      \ that returns the factorial of n.\nAssistant:\n```python\ndef factorial(n):\n\
+      \    if n == 0:\n        return 1\n    return n * factorial(n - 1)\n```\n\n\
+      ---\nUser: \" How tall is the Eiffel Tower? \\n Docs: The Eiffel Tower was completed\
+      \ in 1889 and stands 330 meters tall.\nAssistant: The Eiffel Tower stands 330\
+      \ meters tall.\n\n---\nUser: What is the difference between supervised and unsupervised\
+      \ learning?\nAssistant: Supervised learning uses labeled data to train a model\
+      \ to predict outputs. Unsupervised learning finds patterns in unlabeled data\
+      \ without predefined targets. The key difference is whether ground truth labels\
+      \ are provided during training.\n\n---\nNow respond to the user's request."
+    - "You are a precise multi-task assistant. Detect the task type and respond correctly.\n\
+      \nRules: show steps for math | use code blocks for code | answer only from the\
+      \ passage for context questions | be complete and accurate for instruct.\n\n\
+      Examples:\n[MATH] ---> \"What is 12 \xD7 13?\" \u2192 \"Step 1: 12 \xD7 13 =\
+      \ 156\\nAnswer: 156\"\n[CODE] ---> \"Reverse a string in Python\" \u2192 \"\
+      ```python\\ndef reverse(s): return s[::-1]\\n```\"\n[CONTEXT] ---> Passage +\
+      \ question \u2192 answer using only the passage, no outside facts.\n[INSTRUCT]\
+      \ ---> Open question \u2192 direct, complete, accurate answer.\n\nNever truncate.\
+      \ Never add unnecessary preamble. If unsure of task type, default to INSTRUCT\
+      \ behavior."
+    system_prompt_name:
+    - goal_instruct_math_code_context_tasks
+    - role_instruct_math_code_context_tasks
+    - base_instruct_math_code_context_tasks
+    - shot_3_instruct_math_code_context_tasks
+    - shot_4_instruct_math_code_context_tasks
+    replica: 1
+    samples: 547
+    tokens: 408239
+    words: 294971
+    validation_error: null

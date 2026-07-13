@@ -1,107 +1,100 @@
-from __future__ import annotations 
-
 """Chat template function for chat_type: context_train_dpo.
 
-Extends the instruct DPO template by appending context documents to the
-user content. Each element in the sample's context list is appended as:
+Variante di apply_chat_template che inietta i documenti recuperati e la query
+dell'utente all'interno di un template di system_prompt (placeholder
+{retrieved_docs} e {query}), applicato a OGNI turno USER della conversazione
+(non solo all'ultimo), per supportare correttamente il caso multi-turn.
 
-    \nDocuments:\n<doc_1>\n\nDocuments:\n<doc_2>\n...
+Il contesto documentale si trova in messages[0]["context"] ed è condiviso
+per tutti i turni USER del sample.
 
-This injects retrieval context directly into the user turn so the model
-learns to ground its answers on provided documents.
-
-Expected input schema: input_schema.json (same as train_dpo)
-  - messages[].context may be:
-    - A string (single doc or JSON-serialized list like "[\"str1\",\"str2\"]")
-    - A list of strings
-    - None (no context)
+Il resto della logica (selezione chosen/rejected per temperatura, hard
+negative filtering) rimane invariato rispetto alla funzione originale.
 """
- 
-import logging
 
-logger = logging.getLogger(__name__)
+from __future__ import annotations
 
-import re
+from modules.filters.hard_negative_filtering import HardNegativeFilter
 
-def _build_context_suffix(context) -> str:
-    """Format context documents as a suffix string for user content.
 
-    Args:
-        context: Single document string (including JSON-serialized lists),
-                 a list of document strings, or None.
+def _select_by_temperature(items: list[dict], temperature: float) -> dict:
+    """Pick the inference_item whose inference_params.temperature matches."""
+    for item in items:
+        params = item.get("inference_params") or {}
+        if params.get("temperature") == temperature:
+            return item
+    # Fallback: first item
+    return items[0] if items else {}
 
-    Returns:
-        Formatted suffix string, empty if no context provided.
-    """
-    if not context:
-        return ""
 
-    # Caso 1: L'input è una lista
-    if isinstance(context, list):
-        res = "Documents:\n"
-        for i, doc in enumerate(context):
-            res += str(doc)
-            # Aggiungiamo il newline solo se non è l'ultimo elemento
-            if i < len(context) - 1:
-                res += "\n"
-        return res
-
-    # Caso 2: L'input è una stringa
-    if isinstance(context, str):
-        context = context.strip()
-        
-        # Verifica se la stringa è una lista serializzata (inizia con [ e finisce con ])
-        if context.startswith("[") and context.endswith("]"):
-            # Rimuoviamo le parentesi quadre esterne
-            content = context[1:-1]
-            
-            # Sostituiamo la prima parte con il template richiesto
-            # Usiamo regex per trovare la virgola tra doppi apici: "," 
-            # Il pattern cerca: " seguito da , seguito da "
-            formatted_content = re.sub(r'","', '\n', content)
-            
-            # Rimuoviamo eventuali doppi apici rimasti all'inizio e alla fine del contenuto
-            if formatted_content.startswith('"') and formatted_content.endswith('"'):
-                formatted_content = formatted_content[1:-1]
-            
-            return f"Documents:\n{formatted_content}"
-        
-        # Se è una stringa semplice ma non una lista serializzata
-        return f"Documents:\n{context}"
-
-    return ""
+def _extract_content(item: dict) -> str:
+    """Get displayable content from an inference_item."""
+    return item.get("content") or ""
 
 
 def apply_chat_template(
     sample: dict,
-    system_prompt: str | None
-    ) -> list[dict]:
-    """Extract messages from a DPO sample, appending context to user content.
+    system_prompt: str | None,
+    temperature: float = 0.3,
+    hn_filter: HardNegativeFilter | None = None
+) -> dict | None:
+    """Convert a raw RAG-DPO sample into DPOTrainer-compatible format.
+
+    A differenza della versione base, il system_prompt viene trattato come
+    template contenente i placeholder {retrieved_docs} e {query}. Il testo
+    risultante dal `.format()` sostituisce il contenuto di OGNI turno USER
+    della conversazione (retrieved_docs è condiviso, query è il contenuto
+    originale di quel singolo turno). Non viene aggiunto alcun messaggio
+    "system" separato.
 
     Args:
         sample:        Raw sample dict following input_schema.json.
-        system_prompt: System prompt content from the recipe. Injected as
-                       the first system message if provided.
+                        messages[0] deve contenere il campo "context" con i
+                        documenti recuperati (retrieved_docs).
+        system_prompt: Template con placeholder {retrieved_docs} e {query}.
+        temperature:   Select positive/negative by this temperature value.
+        hn_filter:     Optional HardNegativeFilter for NLP-based rejected selection.
 
     Returns:
-        List of {"role": ..., "content": ...} dicts ready for the chat
-        completions API. User content includes appended context documents.
+        {"prompt": [...], "chosen": [...], "rejected": [...]}
+        Each is a list of {"role": str, "content": str} message dicts.
+        Returns None if the sample should be dropped (hard negative filter decision).
 
     Raises:
-        ValueError: if messages are missing, malformed, or the last usable
-                    turn is not a user turn.
+        ValueError: on missing/malformed data.
     """
     id_hash: str = sample.get("_id_hash", "<unknown>")
-    raw_messages: list[dict] = sample.get("messages", [])
+    raw_messages = sample.get("messages", [])
+    metadata: dict = {k: sample[k] for k in sample if k.startswith("_")}
 
-    if not raw_messages:
-        raise ValueError(f"Sample {id_hash}: 'messages' field is missing or empty.")
+    # Be explicit about emptiness checks: samples may contain numpy arrays or
+    # pandas Series where truthiness raises ValueError. Use len() when available.
+    if raw_messages is None:
+        raise ValueError(f"Sample {id_hash}: 'messages' is missing or empty.")
+    if hasattr(raw_messages, "__len__"):
+        if len(raw_messages) == 0:
+            raise ValueError(f"Sample {id_hash}: 'messages' is missing or empty.")
+    else:
+        # Non-iterable / unexpected type
+        raise ValueError(f"Sample {id_hash}: 'messages' is not an iterable of messages.")
 
-    result: list[dict] = []
+    # retrieved_docs vive in messages[0].context
+    retrieved_docs = raw_messages[0].get("context") if hasattr(raw_messages[0], "get") else None
+    if not retrieved_docs:
+        raise ValueError(f"Sample {id_hash}: 'messages[0].context' is missing or empty.")
 
-    # Inject system prompt as the first message if provided
-    if system_prompt:
-        result.append({"role": "system", "content": system_prompt})
+    if not system_prompt or "{retrieved_docs}" not in system_prompt or "{query}" not in system_prompt:
+        raise ValueError(
+            f"Sample {id_hash}: system_prompt must be a template containing "
+            "'{retrieved_docs}' and '{query}' placeholders."
+        )
+
+    prompt_messages: list[dict] = []
+
+    chosen_content: str | None = None
+    rejected_content: str | None = None
+    chosen_item: dict = {}
+    rejected_item: dict = {}
 
     for msg in raw_messages:
         role: str = (msg.get("role") or "").upper()
@@ -109,36 +102,54 @@ def apply_chat_template(
         if role == "USER":
             content = msg.get("content", "")
             if not content:
-                raise ValueError(
-                    f"Sample {id_hash}: USER message has empty 'content'."
-                )
-            # Append context documents to user content
-            context = msg.get("context")
-            content += _build_context_suffix(context)
-            result.append({"role": "user", "content": content})
+                raise ValueError(f"Sample {id_hash}: USER message has empty 'content'.")
+            templated_content = system_prompt.format(retrieved_docs=retrieved_docs, query=content)
+            prompt_messages.append({"role": "user", "content": templated_content})
 
         elif role == "ASSISTANT":
-            content = msg.get("content")
-            if content:
-                # Completed ASSISTANT turn — include as context (multi-turn)
-                result.append({"role": "assistant", "content": content})
-            # No content → generation target turn, intentionally excluded
+            # Generation target turn — extract chosen/rejected
+            positives = msg.get("positives", [])
+            negatives = msg.get("negatives", [])
 
+            if not positives:
+                raise ValueError(f"Sample {id_hash}: generation turn has no positives.")
+            if not negatives:
+                raise ValueError(f"Sample {id_hash}: generation turn has no negatives.")
+
+            chosen_item = _select_by_temperature(positives, temperature)
+            chosen_content = _extract_content(chosen_item)
+
+            # Hard negative selection: NLP-based or temperature fallback
+            if hn_filter:
+                rejected_item = hn_filter.select(
+                    negatives,
+                    gold_content=chosen_content,
+                    temperature=temperature,
+                    sample_metadata=metadata
+                )
+                if rejected_item is None:
+                    return None  # signal drop to caller
+            else:
+                rejected_item = _select_by_temperature(negatives, temperature)
+
+            rejected_content = _extract_content(rejected_item)
         else:
-            raise ValueError(
-                f"Sample {id_hash}: unexpected role '{role}'. "
-                f"Expected USER or ASSISTANT."
-            )
+            raise ValueError(f"Sample {id_hash}: unexpected role '{role}'.")
 
-    # The last non-system message must be a user turn for generation to make sense
-    non_system = [m for m in result if m["role"] != "system"]
-    if not non_system:
-        raise ValueError(f"Sample {id_hash}: no user/assistant turns found.")
-    if non_system[-1]["role"] != "user":
-        raise ValueError(
-            f"Sample {id_hash}: last message must be a user turn. "
-            f"Got: '{non_system[-1]['role']}'."
-        )
+    if chosen_content is None or rejected_content is None:
+        raise ValueError(f"Sample {id_hash}: no generation turn with positives/negatives found.")
 
-    return result
+    # L'ultimo messaggio del prompt deve essere un turno user
+    if not prompt_messages or prompt_messages[-1]["role"] != "user":
+        raise ValueError(f"Sample {id_hash}: last prompt message must be a user turn.")
 
+    return {
+        "prompt": prompt_messages,
+        "chosen": [{"role": "assistant", "content": chosen_content}],
+        "rejected": [{"role": "assistant", "content": rejected_content}],
+        "_eval": {
+            "gold": chosen_content,
+            "chosen_inference_params": chosen_item.get("inference_params") if chosen_item else None,
+            "rejected_inference_params": rejected_item.get("inference_params") if rejected_item else None,
+        },
+    }

@@ -1,0 +1,121 @@
+# SkyPilot Task Template con Profiling GPU
+name: __TASK_NAME__
+
+resources:
+  infra: ssh/azure-gpu-cluster
+  accelerators: __SKY_ACCELERATORS__
+  cpus: __SKY_CPUS__
+  memory: __SKY_MEMORY__
+  disk_size: 200
+
+workdir: __REPO_ROOT__
+
+envs:
+  CONFIG_PATH: "__CONFIG_PATH__"
+  # Variabili per profiling
+  NSYS_REPORT_DIR: "/nfs/training-output/profiling"
+  NSYS_REPORT_NAME: "dpo_training_profile"
+
+# Binding R/W dei path NFS sull'host
+config:
+  ssh:
+    pod_config:
+      spec:
+        containers:
+          - volumeMounts:
+              - mountPath: /nfs/training-output
+                name: nfs-training-output
+              - mountPath: /nfs/data-download
+                name: nfs-data-download
+        volumes:
+          - name: nfs-training-output
+            hostPath:
+              path: /nfs/training-output
+              type: Directory
+          - name: nfs-data-download
+            hostPath:
+              path: /nfs/data-download
+              type: Directory
+
+setup: |
+  echo "=== SETUP DI RUNTIME CON PROFILING ==="
+  set -e
+
+  python3 -m venv .venv
+  source .venv/bin/activate
+  echo "INFO: ambiente virtuale creato e attivato"
+
+  pip install --upgrade pip
+
+  # Rileva CUDA
+  cuda_version=$(nvcc --version | grep "release" | awk '{print $6}' | cut -c 2-)
+  echo "INFO: CUDA version rilevata: $cuda_version"
+
+  # Installa dipendenze
+  pip install -r job_requirements.txt
+  
+  # Verifica che nsys sia disponibile
+  if ! command -v nsys &> /dev/null; then
+      echo "❌ nsys non trovato! Installazione necessaria."
+      exit 1
+  fi
+  echo "✅ nsys version: $(nsys --version)"
+
+  # Crea directory per report NFS
+  mkdir -p /nfs/training-output/profiling
+  echo "INFO: dipendenze installate"
+
+run: |
+  echo "=== AVVIO TRAINING DPO CON PROFILING ==="
+  source .venv/bin/activate
+
+  python3 -c "from unsloth import FastLanguageModel; print('✅ unsloth OK nel run')"
+
+  # Verifica accesso NFS
+  echo "INFO: verifica accesso NFS..."
+  ls /nfs/data-download || { echo "❌ /nfs/data-download non accessibile"; exit 1; }
+  ls /nfs/training-output || { echo "❌ /nfs/training-output non accessibile"; exit 1; }
+  echo "✅ NFS accessibile"
+
+  # Crea directory report con timestamp
+  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+  REPORT_DIR="/nfs/training-output/profiling/${TIMESTAMP}"
+  mkdir -p "$REPORT_DIR"
+  echo "📁 Report profiling in: $REPORT_DIR"
+
+  if [ -f "./$CONFIG_PATH" ]; then
+    echo "📦 Configurazione: ./$CONFIG_PATH"
+    echo "🔬 Avvio profiling con nsys..."
+    
+    # PROFILING CON NSYS (salva su NFS)
+    nsys profile \
+      --trace=cuda,nvtx,osrt \
+      --cuda-memory-usage=true \
+      --stats=true \
+      --output="$REPORT_DIR/${NSYS_REPORT_NAME}" \
+      --force-overwrite \
+      python3 train.py "./$CONFIG_PATH"
+    
+    # Genera report statistico in formato leggibile
+    echo "📊 Generazione report statistico..."
+    if [ -f "$REPORT_DIR/${NSYS_REPORT_NAME}.sqlite" ]; then
+      nsys stats -r cuda_api_sum "$REPORT_DIR/${NSYS_REPORT_NAME}.sqlite" > "$REPORT_DIR/cuda_api_stats.txt"
+      nsys stats -r cuda_gpu_mem_time_sum "$REPORT_DIR/${NSYS_REPORT_NAME}.sqlite" > "$REPORT_DIR/memory_stats.txt"
+      nsys stats -r cuda_gpu_mem_size_sum "$REPORT_DIR/${NSYS_REPORT_NAME}.sqlite" >> "$REPORT_DIR/memory_stats.txt"
+      echo "✅ Report generati in: $REPORT_DIR"
+    else
+      echo "⚠️ File .sqlite non trovato, salto generazione stats"
+    fi
+    
+    # Copia anche il trace in formato JSON per visualizzazione web
+    echo "📋 Copia file di profiling in NFS..."
+    cp -v "$REPORT_DIR"/*.nsys-rep "$REPORT_DIR"/*.sqlite "$REPORT_DIR"/*.txt /nfs/training-output/profiling/ 2>/dev/null || true
+    
+    echo "✅ Profiling completato!"
+    echo "📁 Report salvati in: /nfs/training-output/profiling/"
+    ls -la /nfs/training-output/profiling/
+    
+  else
+    echo "❌ ERRORE: File non trovato: ./$CONFIG_PATH"
+    exit 1
+  fi

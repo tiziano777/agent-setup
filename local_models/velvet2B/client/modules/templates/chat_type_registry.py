@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib.util
 import logging
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Union, List, Dict, Optional
 
 import yaml
 
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 # Signature: (sample, system_prompt_content) -> messages list
 # Returns a list of {"role": str, "content": str} dicts for the chat completions API.
-TemplateFn = Callable[[dict, str | None, str | None], list[dict]]
+TemplateFn = Callable[..., Union[dict, List[dict]]]
 
 
 class ChatTypeRegistry:
@@ -37,10 +37,10 @@ class ChatTypeRegistry:
         AttributeError:    if the template module lacks apply_chat_template.
     """
 
-    def __init__(self, mapping_path: str | Path) -> None:
+    def __init__(self, mapping_path: Union[str, Path]) -> None:
         self._mapping_path = Path(mapping_path)
-        self._raw: dict = self._load_mapping()
-        self._fn_cache: dict[str, TemplateFn] = {}
+        self._raw: Dict = self._load_mapping()
+        self._fn_cache: Dict[str, TemplateFn] = {}
 
     # ------------------------------------------------------------------
     # Public API
@@ -52,7 +52,7 @@ class ChatTypeRegistry:
             self._fn_cache[chat_type] = self._import_fn(chat_type)
         return self._fn_cache[chat_type]
 
-    def get_schema_path(self, chat_type: str) -> Path | None:
+    def get_schema_path(self, chat_type: str) -> Optional[Path]:
         """Return the input schema path for chat_type, or None if not defined."""
         entry = self._raw.get(chat_type)
         if not entry:
@@ -65,14 +65,14 @@ class ChatTypeRegistry:
             schema_path = self._mapping_path.parent / schema_path
         return schema_path
 
-    def known_chat_types(self) -> list[str]:
+    def known_chat_types(self) -> List[str]:
         return list(self._raw.keys())
 
     # ------------------------------------------------------------------
     # Internals
     # ------------------------------------------------------------------
 
-    def _load_mapping(self) -> dict:
+    def _load_mapping(self) -> Dict:
         if not self._mapping_path.exists():
             raise FileNotFoundError(
                 f"Chat type mapping file not found: {self._mapping_path}"

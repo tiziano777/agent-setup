@@ -149,23 +149,22 @@ def _build_tasks(
     registry: ChatTypeRegistry,
 ) -> list[InferenceTask]:
     """Expand samples into (sample × replica × prompts × temperatures) task list."""
-    prompts: list[str] = entry.system_prompt or []
-    prompt_names: list[str] = entry.system_prompt_name or []
+    prompts: list[str] = list(entry.system_prompt.values()) if entry.system_prompt else []
     template_fn = registry.get_template_fn(entry.chat_type)
     tasks: list[InferenceTask] = []
 
     for rep in range(entry.replica):
         for row_idx, sample in enumerate(samples):
             id_hash: str = sample["_id_hash"]
-            assigned = assigner.assign(sample, prompts, prompt_names, row_idx=row_idx)
+            assigned = assigner.assign(sample, prompts, row_idx=row_idx)
 
-            for _, sys_content, sys_name in assigned:
+            for _, sys_content in assigned:
                 try:
                     messages = template_fn(sample, sys_content)
                 except Exception as e:
                     logger.error(
                         "[%s] Template error id_hash=%s sys_prompt=%s rep=%d: %s — skipping. Stack trace: ",
-                        entry.dist_name, id_hash, sys_name, rep, e, exc_info=True
+                        entry.dist_name, id_hash, sys_content, rep, e, exc_info=True
                     )
                     continue
                 for temp in temperatures:
@@ -174,7 +173,7 @@ def _build_tasks(
                             id_hash=id_hash,
                             messages=messages,
                             temperature=temp,
-                            system_prompt_id=sys_name,
+                            system_prompt_id=sys_content,
                             dist_name=entry.dist_name,
                             mode=mode,
                             dist_id=entry.dist_id,
@@ -291,8 +290,8 @@ async def _infer(
 
                     # Non-retryable status
                     logger.warning(
-                        "HTTP %d for id_hash=%s temp=%s (non-retryable)",
-                        resp.status, task.id_hash, task.temperature,
+                        "HTTP %d for id_hash=%s temp=%s (non-retryable), response: %s",
+                        resp.status, task.id_hash, task.temperature, await resp.text()
                     )
                     return None
 
@@ -410,7 +409,7 @@ async def _process_entry(
 
 async def main() -> None:
     recipe = RecipeLoader.load(RECIPE_PATH)
-    logger.info("Recipe: %s (%d entries)", recipe.recipe_name, len(recipe.entries))
+    logger.info("Recipe: %s (%d entries)", recipe.name, len(recipe.entries))
 
     output_base = Path(OUTPUT_BASE_DIR)
     agg_base = Path(AGGREGATED_BASE_DIR)
@@ -423,7 +422,7 @@ async def main() -> None:
         SCHEMA_MODE.value,
     )
 
-    for uri, entry in recipe.entries.items():
+    for entry in recipe.entries:
         logger.info(
             "=== Processing entry: %s (chat_type=%s) ===", entry.dist_name, entry.chat_type
         )

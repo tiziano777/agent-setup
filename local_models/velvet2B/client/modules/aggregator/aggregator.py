@@ -6,8 +6,7 @@ from pathlib import Path
 import duckdb
 import pyarrow as pa
 import pyarrow.parquet as pq
-
-from ..utils.serializer import process_record_for_json
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -44,14 +43,30 @@ class DuckDBAggregator:
         output_dir.mkdir(parents=True, exist_ok=True)
         con = duckdb.connect()
 
-        files_expr = "[" + ", ".join(f"'{f}'" for f in existing) + "]"
-        con.execute(f"CREATE TABLE raw AS SELECT * FROM read_json_auto({files_expr})")
+        # ------------------------------------------------------------------
+        # Read JSONL directly with Python → PyArrow → DuckDB.
+        # This avoids DuckDB read_json_auto schema-inference bugs where it
+        # collapses JSONL into a single 'json' blob column.
+        # ------------------------------------------------------------------
+        records: list[dict] = []
+        for fpath in existing:
+            with open(fpath, "r") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if line:
+                        records.append(json.loads(line))
 
-        # Stream results via cursor to avoid pulling the full table into memory
-        # Try to include optional _distribution_id and _distribution_uri if they exist
-        # Otherwise fallback to NULL values
+        if not records:
+            logger.warning("No records found in JSONL files for %s", output_dir)
+            con.close()
+            return []
+
+        # PyArrow infers schema from list-of-dicts (missing keys → nulls)
+        arrow_table = pa.Table.from_pylist(records)
+        con.register("raw", arrow_table)
+
+        # Check for optional _distribution_id and _distribution_uri columns
         try:
-            # First, check if the columns exist by querying the schema
             schema_result = con.execute("DESCRIBE raw").fetchall()
             columns = {row[0] for row in schema_result}
             has_dist_id = "_distribution_id" in columns
@@ -89,13 +104,9 @@ class DuckDBAggregator:
         columns = [desc[0] for desc in cursor.description]
 
         for row in cursor.fetchall():
-            raw_dict = dict(zip(columns, row))
-            batch_rows.append(process_record_for_json(raw_dict))
+            batch_rows.append(dict(zip(columns, row)))
 
             # Estimate current batch size and flush when threshold is exceeded.
-            # We flush eagerly: once the batch would likely exceed max_bytes we
-            # write and start fresh. A rough heuristic of ~512 bytes per row is
-            # used to avoid building a full Arrow table just for a size check.
             if len(batch_rows) * 512 >= self.max_bytes:
                 written.append(_flush(batch_rows, part))
                 part += 1

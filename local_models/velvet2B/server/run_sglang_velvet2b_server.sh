@@ -1,47 +1,47 @@
 #!/bin/bash
 
-# ==============================================================================
-# SCRIPT DI AVVIO SERVER SGLANG - MODELLO VELVET-2B
-# ==============================================================================
-
-# 1. CONFIGURAZIONE VARIABILI (Senza spazi prima e dopo =)
-recipe="001_s_09_5"
-ckpt="ba53454"
-ckpt_path="/nfs/training-output/velvet-cycle2/Velvet-2B-1.5/l06_f5/$recipe/$ckpt"
+# 1. CONFIGURAZIONE VARIABILI
+HOST_CKPT_PATH="/nfs/training-output/velvet-cycle2/Velvet-2B-1.5/l06_f5/001_s_09_6/ba35217"
+CONTAINER_CKPT_PATH="/model/velvet-2b"
 name="Velvet-2B-1.5_ba53454_t0" 
-PORT=8002  # Cambia porta se vuoi far girare vLLM e SGLang contemporaneamente
-
+PORT=8002  
 MEM_FRACTION=0.85
+CONTEXT_LEN=8096
 
-# Lunghezza massima della sequenza (Prompt 2000 + Generazione 2000)
-CONTEXT_LEN=4096
+# Image
+#DOCKER_IMAGE="lmsysorg/sglang:latest" 
+DOCKER_IMAGE="lmsysorg/sglang:latest-cu129"
 
 echo "----------------------------------------------------------------"
-echo "Avvio Server SGLang..."
-echo "CKP Modello: $ckpt_path"
-echo "Porta: $PORT"
-echo "GPU Memory Fraction: $MEM_FRACTION"
-echo "Suggested MODEL_ID for clients: $name (sync this with inference_config.yml MODEL_ID)"
+echo "Avvio Server SGLang in CONTAINER DOCKER..."
+echo "Host Path Modello: $HOST_CKPT_PATH"
+echo "Container Path Modello: $CONTAINER_CKPT_PATH"
+echo "Porta Esposta: $PORT"
+echo "Suggested MODEL_ID for clients: $name"
 echo "----------------------------------------------------------------"
 
-# 3. LANCIO DEL SERVER
-# Spiegazione flag:
-# --kv-cache-dtype fp8: Fondamentale per raddoppiare la densità della cache.
-# --enable-prefix-caching: Abilita il Radix Tree per saltare il prefill su prompt duplicati.
-# --mem-fraction-static: Forza SGLang a prendersi quasi tutta la memoria subito.
+# 2. LANCIO DEL CONTAINER DOCKER
+# --gpus all: passa le GPU al container
+# --shm-size=16gb: fondamentale per PyTorch/vLLM/SGLang per la memoria condivisa ed evitare crash di Triton
+# -v ... : monta la cartella NFS dell'host dentro il container in sola lettura (:ro)
+# --ipc=host: ulteriore protezione per la gestione della memoria inter-processo
 
-#sglang serve alternativa come comando diretto (senza python):
-# python3 -m sglang.launch_server \
-sudo docker run \
-    --runtime nvidia \
+# Rimuove eventuali container omonimi rimasti appesi
+sudo docker rm -f sglang-velvet-2b 2>/dev/null
+
+# 2. LANCIO DEL CONTAINER DOCKER 
+sudo docker run -d \
+    --name sglang-velvet-2b \
     --gpus all \
-    -v "$ckpt_path":"$ckpt_path" \
-    -p $PORT:$PORT \
+    --shm-size=16gb \
     --ipc=host \
-    --shm-size 16g \
-    lmsysorg/sglang:latest \
-    sglang serve \
-        --model-path "$ckpt_path" \
+    --net=host \
+    --ulimit memlock=-1 \
+    --ulimit stack=67108864 \
+    -v "$HOST_CKPT_PATH":"$CONTAINER_CKPT_PATH":ro \
+    $DOCKER_IMAGE \
+    python3 -m sglang.launch_server \
+        --model-path "$CONTAINER_CKPT_PATH" \
         --served-model-name "$name" \
         --host 0.0.0.0 \
         --port $PORT \
@@ -49,8 +49,20 @@ sudo docker run \
         --context-length $CONTEXT_LEN \
         --kv-cache-dtype fp8_e4m3 \
         --log-level info \
-        --trust-remote-code
+        --trust-remote-code \
+        --schedule-policy lpm \
+        --chunked-prefill-size 512
 
-
-# NOTA: Se riscontri errori di memoria CUDA Graphs all'avvio, 
-# aggiungi il flag --enforce-eager alla fine del comando sopra.
+# ==============================================================================
+# NOTE DI OTTIMIZZAZIONE PER IL SERVING MASSIVO:
+# ==============================================================================
+# 1. `--schedule-policy lpm`: Forza l'algoritmo di cache a cercare il prefisso comune più lungo.
+#    Se i K prompt hanno istruzioni o contesti identici all'inizio, le prestazioni esplodono.
+# 2. `--chunked-prefill-size 512`: Divide il calcolo dei token iniziali in blocchi da 512.
+#    Evita l'effetto "collo di bottiglia" quando arrivano contemporaneamente prompt molto lunghi e molto corti.
+# 3. `--net=host`: Utilizzato nel comando docker per eliminare l'overhead di rete del bridge di Docker,
+#    garantendo la massima velocità di risposta sulle chiamate HTTP/gRPC.
+#
+# IN CASO DI ERRORI CON I CUDA GRAPHS:
+# Se il modello da 2B dovesse fallire l'inizializzazione dei CUDA Graphs a causa delle ottimizzazioni interne,
+# aggiungi in coda al comando: --disable-cuda-graph

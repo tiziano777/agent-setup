@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # 1. CONFIGURAZIONE VARIABILI (Senza spazi prima e dopo =)
-recipe="001_s_09_5"
-ckpt="ba53454"
-ckpt_path="/nfs/training-output/velvet-cycle2/Velvet-2B-1.5/l06_f5/$recipe/$ckpt"
+ckpt_path="/nfs/training-output/velvet-cycle2/Velvet-2B-1.5/l06_f5/001_s_09_6/ba35217"
 name="Velvet-2B-1.5_ba53454_t0" 
 
 echo "----------------------------------------------------------------"

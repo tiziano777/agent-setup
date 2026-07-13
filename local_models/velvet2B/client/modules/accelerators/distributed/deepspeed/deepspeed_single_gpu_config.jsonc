@@ -1,0 +1,50 @@
+{
+  // FP16 alloca memoria per lo scaling dei gradienti per evitare l'underflow. Viene disabilitato
+  // perché l'architettura della GPU gestisce più efficientemente i formati a range dinamico nativo.
+  "fp16": { "enabled": false },
+
+  // Mantiene stesso range dinamico del FP32 (Float standard), azzerando i crash da sbiadimento 
+  // del gradiente senza richiedere passaggi matematici aggiuntivi (loss scaling) sulle unità di calcolo.
+  "bf16": { "enabled": true },
+  
+  "zero_optimization": {
+    // Abilita il partizionamento degli stati dell'ottimizzatore e dei gradienti (ZeRO-Stage 2). 
+    // Riduce l'impronta di memoria fissa sulla GPU distruggendo la ridondanza dei tensori di stato 
+    // e agisce come layer di orchestrazione per instradare i flussi di calcolo verso la CPU.
+    "stage": 2,
+    
+    "offload_optimizer": {
+      // Rimuove l'intera struttura dati dell'ottimizzatore (FP32 master weights, momentum e variance) 
+      // dalla VRAM e la mappa sulla RAM di sistema (CPU). Questo libera circa 16 byte di memoria 
+      // hardware per ogni parametro del modello, massimizzando lo spazio contiguo sulla GPU per 
+      // allocare le gigantesche matrici di attivazione e i logits generati dal contesto a 8192 token.
+      "device": "cpu",
+      
+      // Blocca le pagine della RAM di sistema (Page-Locked/Pinned Memory) impedendone lo swap su disco. 
+      // Permette al controller della GPU di accedere direttamente alla memoria della CPU tramite DMA 
+      // (Direct Memory Access) sul bus PCIe, saturando la banda di trasferimento e riducendo al minimo 
+      // la latenza durante la sincronizzazione dei pesi nel passo di ottimizzazione.
+      "pin_memory": true
+    }
+  },
+  
+  // Sincronizza dinamicamente l'intervallo dei passaggi di backward prima dell'aggiornamento dei pesi. 
+  // Configura i buffer interni di DeepSpeed per accumulare i gradienti in base al valore dello YAML, 
+  // evitando la saturazione della memoria causata da passi di calcolo troppo frequenti.
+  "gradient_accumulation_steps": "auto",
+  
+  // Delega il controllo della norma del gradiente. Se i gradienti calcolati nel contesto lungo 
+  // superano la soglia stabilita dallo YAML, vengono riscalati matematicamente per prevenire 
+  // l'esplosione dei gradienti (gradient explosion) e la conseguente corruzione dei pesi del modello.
+  "gradient_clipping": "auto",
+  
+  // Calcola e alloca dinamicamente la dimensione totale del macro-batch globale in memoria. 
+  // Sincronizza i calcoli definendo la quantità esatta di token che l'algoritmo elabora 
+  // complessivamente prima di eseguire l'aggiornamento dei parametri.
+  "train_batch_size": "auto",
+  
+  // Configura la dimensione del sotto-batch di input caricato direttamente nei registri della GPU 
+  // per ogni singolo passata in avanti (forward pass). Impostato in automatico a 1 per ridurre al minimo 
+  // assoluto il consumo istantaneo di memoria durante la generazione dei grafi di computazione.
+  "train_micro_batch_size_per_gpu": "auto"
+}

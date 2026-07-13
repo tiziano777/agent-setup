@@ -1,0 +1,10 @@
+experiment:
+  id: 77dae76f-28f8-4e25-8985-275beed79368
+  previous_experiment_id: null
+  base_experiment_id: 4801db1b-0160-4655-9d66-b96f68b1e3af
+  base: false
+
+model:
+  training:
+    learning_rate: 2e-07
+    beta: 0.3

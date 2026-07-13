@@ -1,0 +1,15 @@
+# modules/accelerators/orchestrator/skypilot/.sky/ssh_node_pools.yaml
+azure-gpu-cluster:
+  user: velvet
+  identity_file: ~/.ssh/lab_ssh # Ricorda di dare i permessi a questo file 
+  hosts:
+    - 127.0.0.1 # Oppure l'IP pubblico/privato della tua macchina Azure
+  # Opzionale: se ti colleghi alla macchina con un utente specifico o chiave SSH
+  # user: velvet
+  # ssh_private_key: ~/.ssh/id_rsa
+
+# inizializza il Node Pool per fare in modo che SkyPilot verifichi la connessione SSH, installi le sue componenti interne e metta in sicurezza l'ambiente:
+## sky ssh up
+# Verifica che sia attivo:
+# Esegui sky check. Sotto la voce SSH, dovresti vedere il tuo cluster abilitato. Da questo momento, il comando presente nel tuo script:
+## sky launch -c azure-gpu-cluster task.yaml --detac

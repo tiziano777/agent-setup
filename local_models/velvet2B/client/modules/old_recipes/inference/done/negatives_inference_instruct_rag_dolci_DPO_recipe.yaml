@@ -1,0 +1,84 @@
+id: 9caea437-2753-4992-b91a-5cd267889f00
+name: negatives_inference_instruct_rag_dolci_DPO
+description: ricetta utile a creare nuovi negativi specifici per nostro LLM per fare
+  DPO
+scope: sft
+tasks:
+- mix
+tags:
+- infoext
+- code
+- math
+- inference
+- negatives
+- instruct
+derived_from: null
+entries:
+  ? file:///Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_llm_judged/2B_context_rag_data_advanced_filtering_llm_judged
+  : dist_id: f2128741-2daf-4427-b5df-dadb1f3938df
+    dist_name: mapped__query__query__rag_data_advanced_filtering_llm_judged__query__data_advanced_filtering_llm_judged__en
+    dist_uri: file:///Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_llm_judged/2B_context_rag_data_advanced_filtering_llm_judged
+    tokenized_uri: null
+    chat_type: train_dpo
+    replica: 5
+    system_prompt: []
+    system_prompt_name:
+    - goal_instruct_math_code_context_tasks
+    - role_instruct_math_code_context_tasks
+    - base_instruct_math_code_context_tasks
+    - shot_3_instruct_math_code_context_tasks
+    - shot_4_instruct_math_code_context_tasks
+    samples: null
+    tokens: null
+    words: null
+  ? file:///Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_llm_judged/2B_context_instruct_data_advanced_filtering_llm_judged
+  : dist_id: 32633772-0464-452c-b3c9-b020a05d1b38
+    dist_name: mapped__query__query__instruct_data_advanced_filtering_llm_judged__query__data_advanced_filtering_llm_judged__en
+    dist_uri: file:///Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_llm_judged/2B_context_instruct_data_advanced_filtering_llm_judged
+    tokenized_uri: null
+    chat_type: train_dpo
+    replica: 5
+    system_prompt: []
+    system_prompt_name:
+    - base_instruct_math_code_context_tasks
+    - goal_instruct_math_code_context_tasks
+    - role_instruct_math_code_context_tasks
+    - shot_3_instruct_math_code_context_tasks
+    - shot_4_instruct_math_code_context_tasks
+    samples: null
+    tokens: null
+    words: null
+  ? file:///Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_delta_learning/2B_context_instruct_data_advanced_filtering_delta_learning
+  : dist_id: fd5a8449-f52c-4c27-82ec-625c3d6a9d24
+    dist_name: mapped__query__query__instruct_data_advanced_filtering_delta_learning__query__data_advanced_filtering_delta_learning__en
+    dist_uri: file:///Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_delta_learning/2B_context_instruct_data_advanced_filtering_delta_learning
+    tokenized_uri: null
+    chat_type: train_dpo
+    replica: 1
+    system_prompt: []
+    system_prompt_name:
+    - base_instruct_math_code_context_tasks
+    - goal_instruct_math_code_context_tasks
+    - role_instruct_math_code_context_tasks
+    - shot_3_instruct_math_code_context_tasks
+    - shot_4_instruct_math_code_context_tasks
+    samples: null
+    tokens: null
+    words: null
+  ? file:///Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_delta_learning/2B_context_rag_data_advanced_filtering_delta_learning
+  : dist_id: e75b3423-f9ee-4465-a0d9-1dea99bfad38
+    dist_name: mapped__query__query__rag_data_advanced_filtering_delta_learning__query__data_advanced_filtering_delta_learning__en
+    dist_uri: file:///Users/T.Finizzi/repo/SFT-data-Forge/nfs/mapped-data/allenai/Dolci-Instruct-DPO/data_advanced_filtering_delta_learning/2B_context_rag_data_advanced_filtering_delta_learning
+    tokenized_uri: null
+    chat_type: train_dpo
+    replica: 1
+    system_prompt: []
+    system_prompt_name:
+    - base_instruct_math_code_context_tasks
+    - goal_instruct_math_code_context_tasks
+    - shot_3_instruct_math_code_context_tasks
+    - shot_4_instruct_math_code_context_tasks
+    - role_instruct_math_code_context_tasks
+    samples: null
+    tokens: null
+    words: null
