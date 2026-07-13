@@ -158,7 +158,7 @@ def _build_tasks(
             id_hash: str = sample["_id_hash"]
             assigned = assigner.assign(sample, prompts, row_idx=row_idx)
 
-            for _, sys_content in assigned:
+            for sys_id, sys_content in assigned:
                 try:
                     messages = template_fn(sample, sys_content)
                 except Exception as e:
@@ -173,7 +173,7 @@ def _build_tasks(
                             id_hash=id_hash,
                             messages=messages,
                             temperature=temp,
-                            system_prompt_id=sys_content,
+                            system_prompt_id=sys_id,
                             dist_name=entry.dist_name,
                             mode=mode,
                             dist_id=entry.dist_id,

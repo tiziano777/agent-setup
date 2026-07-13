@@ -30,8 +30,6 @@ def apply_chat_template(
         sample:           Raw sample dict following input_schema.json.
         system_prompt:    System prompt content from the recipe. Injected as
                           the first system message if provided.
-        system_prompt_id: Unused here — the client attaches it to the record
-                          after inference as part of inference_params metadata.
 
     Returns:
         List of {"role": ..., "content": ...} dicts ready for the chat
