@@ -1,0 +1,3 @@
+interface:
+  display_name: "Tiziano Observability"
+  short_description: "Error handling, logging, metriche, tracing e telemetria lifecycle-aware"

@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  omniroute:
+    image: diegosouzapw/omniroute:latest
+    container_name: omniroute
+    restart: unless-stopped
+    ports:
+      - "20128:20128"
+    volumes:
+      - omniroute_data:/app/data
+    environment:
+      - PORT=20128
+    networks:
+      - agent-net
+
+volumes:
+  omniroute_data:
+
+networks:
+  agent-net:
+    driver: bridge

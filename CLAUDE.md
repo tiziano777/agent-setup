@@ -1,6 +1,4 @@
 
-
-<!-- GSD:project-start source:PROJECT.md -->
 ## Project
 
 **Agent Setup**
@@ -16,9 +14,7 @@
 - **PostgreSQL for production** — Dev uses in-memory, tests use isolated schemas
 - **Async-first agents** — Use ainvoke() in production; invoke() for synchronous testing
 - **Cloud-agnostic LLM setup** — LiteLLM proxy abstracts provider details; no OpenAI SDK direct calls
-<!-- GSD:project-end -->
 
-<!-- GSD:stack-start source:codebase/STACK.md -->
 ## Technology Stack
 
 ## Languages
@@ -106,9 +102,7 @@
 - ~2GB disk for vector embeddings (depends on collection size)
 - 2+ CPU cores, 4GB RAM minimum
 ## Installation & Project Setup
-<!-- GSD:stack-end -->
 
-<!-- GSD:conventions-start source:CONVENTIONS.md -->
 ## Conventions
 
 ## Code Style
@@ -197,9 +191,7 @@
 - Log at `error` level for exceptions (with full traceback if needed)
 - All logs are auto-instrumented to Phoenix (OpenTelemetry) when tracing enabled
 ## Spans & Tracing
-<!-- GSD:conventions-end -->
 
-<!-- GSD:architecture-start source:ARCHITECTURE.md -->
 ## Architecture
 
 ## Pattern Overview
@@ -315,32 +307,10 @@
 - Tool-level: `_execute_tool_call()` catches exceptions, returns JSON `{"error": "..."}`
 - LLM-level: Tool binding retries up to `max_iterations` (default 3)
 - API-level: FastAPI raises HTTPException(500, detail=str(e))
-<!-- GSD:architecture-end -->
 
-<!-- GSD:skills-start source:skills/ -->
 ## Project Skills
 
 | Skill | Description | Path |
 |-------|-------------|------|
 | skypilot | "Use when launching cloud VMs, Kubernetes pods, or Slurm jobs for GPU/TPU/CPU workloads, training or fine-tuning models on cloud GPUs, deploying inference servers (vllm, TGI, etc.) with autoscaling, writing or debugging SkyPilot task YAML files, using spot/preemptible instances for cost savings, comparing GPU prices across clouds, managing compute across 25+ clouds, Kubernetes, Slurm, and on-prem clusters with failover between them, troubleshooting resource availability or SkyPilot errors, or optimizing cost and GPU availability." | `.claude/skills/skypilot/SKILL.md` |
-<!-- GSD:skills-end -->
 
-<!-- GSD:workflow-start source:GSD defaults -->
-## GSD Workflow Enforcement
-
-Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
-
-Use these entry points:
-- `/gsd-quick` for small fixes, doc updates, and ad-hoc tasks
-- `/gsd-debug` for investigation and bug fixing
-- `/gsd-execute-phase` for planned phase work
-
-Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
-<!-- GSD:workflow-end -->
-
-<!-- GSD:profile-start -->
-## Developer Profile
-
-> Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.
-> This section is managed by `generate-claude-profile` -- do not edit manually.
-<!-- GSD:profile-end -->

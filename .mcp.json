@@ -7,10 +7,6 @@
         "serve"
       ],
       "type": "stdio"
-    },
-    "memory": {
-      "command": "docker",
-      "args": ["run", "-i", "-v", "claude-memory:/app/dist", "--rm", "mcp/memory"]
     }
   }
 }
